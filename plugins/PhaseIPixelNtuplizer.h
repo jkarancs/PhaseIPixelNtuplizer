@@ -9,6 +9,7 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "../interface/common_actors.h"
 
 #include <iostream>
 

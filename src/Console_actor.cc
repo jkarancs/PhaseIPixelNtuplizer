@@ -1,4 +1,4 @@
-#include "Console_actor.h"
+#include "../interface/Console_actor.h"
 
 Console_actor::Console_actor(std::string name_p, Console_color::Modifier modifier_p) : name(name_p), c_modifier(modifier_p)
 {

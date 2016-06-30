@@ -2,50 +2,55 @@
 
 #define DEBUGNTUPLIZER_ALL
 
+void test_prompts_and_colors();
+
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(const edm::ParameterSet&)
 {
-
+	test_prompts_and_colors();
+	#ifdef DEBUGNTUPLIZER_ALL
+		std::cerr << debug_prompt << "PhaseIPixelNtuplizer() constructor called." << std::endl;
+	#endif
 }
 
 PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer()
 {
 	#ifdef DEBUGNTUPLIZER_ALL
-		std::cerr << "Debug: ~PhaseIPixelNtuplizer()" << std::endl;
+		std::cerr << debug_prompt << "~PhaseIPixelNtuplizer()" << std::endl;
 	#endif
 }
 
 void PhaseIPixelNtuplizer::beginJob()
 {
 	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << "Executing PhaseIPixelNtuplizer::beginJob()..." << std::endl;
+	std::cerr << debug_prompt << "Executing PhaseIPixelNtuplizer::beginJob()..." << std::endl;
 	#endif
 }
 
 void PhaseIPixelNtuplizer::endJob()
 {
 	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << "Executing PhaseIPixelNtuplizer::endJob()..." << std::endl;
+	std::cerr << debug_prompt << "Executing PhaseIPixelNtuplizer::endJob()..." << std::endl;
 	#endif
 }
 
 void PhaseIPixelNtuplizer::analyze(const edm::Event&, const edm::EventSetup&)
 {
 	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << "Executing PhaseIPixelNtuplizer::analyze()..." << std::endl;
+	std::cerr << debug_prompt << "Executing PhaseIPixelNtuplizer::analyze()..." << std::endl;
 	#endif
 }
 
 void PhaseIPixelNtuplizer::beginRun(edm::Run const&, edm::EventSetup const&)
 {
 	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << "Executing PhaseIPixelNtuplizer::beginRun()..." << std::endl;
+	std::cerr << debug_prompt << "Executing PhaseIPixelNtuplizer::beginRun()..." << std::endl;
 	#endif
 }
 
 void PhaseIPixelNtuplizer::endRun(edm::Run const&, edm::EventSetup const&)
 {
 	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << "Executing PhaseIPixelNtuplizer::endRun()..." << std::endl;
+	std::cerr << debug_prompt << "Executing PhaseIPixelNtuplizer::endRun()..." << std::endl;
 	#endif
 }
 
