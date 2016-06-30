@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-TimingStudy = cms.EDFilter("TimingStudy",
+PhaseIPixelNtuplizer = cms.EDFilter("PhaseIPixelNtuplizer",
     trajectoryInput = cms.string('TrackRefitter'),
     OutputFile = cms.string('TTreeFile.root') 
 )

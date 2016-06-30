@@ -40,7 +40,7 @@
   <use   name="TrackingTools/MeasurementDet"/>
   <use   name="FWCore/Utilities"/>
   <use   name="DataFormats/Luminosity"/>
-  <library   file="*.cc" name="DPGAnalysisPixelTimingStudyPlugin">
+  <library   file="*.cc" name="DPGAnalysisPhaseIPixelNtuplizerPlugin">
     <flags   EDM_PLUGIN="1"/>
   </library>
 </environment>

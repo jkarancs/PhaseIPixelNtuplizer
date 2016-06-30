@@ -1,0 +1,1 @@
+../Pixel_Inefficiency_Analyzer/jegyzet.txt
