@@ -24,8 +24,8 @@ References/*
 
 # Notes
 *.todo
-Jegyzet.txt
-Jegyzet.md
+jegyzet.txt
+jegyzet.md
 
 # Sublime text files
 *.sublime-*
