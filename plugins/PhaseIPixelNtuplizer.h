@@ -15,7 +15,15 @@
 // Other //
 ///////////
 
-#include "../interface/common_actors.h"
+//////////////////////
+// Tree definitions //
+//////////////////////
+
+#include "../interface/Tree_structures/Event_tree_structure.hh"
+#include "../interface/Tree_structures/Luminosity_tree_structure.hh"
+#include "../interface/Tree_structures/Run_structure.hh"
+#include "../interface/Tree_structures/Cluster.hh"
+#include "../interface/Tree_structures/Traj_measurement.hh"
 
 ////////////////////////////
 // Message logger service //
@@ -59,8 +67,6 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		// Tree system //
 		/////////////////
 
-		// Tree definitions are in the interface directory
-
 		TTree* event_tree;
 		TTree* lumi_tree;
 		TTree* run_tree;
@@ -68,6 +74,14 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		TTree* clust_tree;
 		TTree* traj_tree;
 		TTree* digi_tree;
+
+		// Tree field definitions are in the interface directory
+
+		EventData event_field;
+		LumiData lumi_field;
+		std::vector<TrackData> track_list_field;
+		std::vector<Cluster> clust_list_field;
+		std::vector<std::vector<TrajMeasurement>> traj_measurement_list_field;
 
 	public:
 		PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);
