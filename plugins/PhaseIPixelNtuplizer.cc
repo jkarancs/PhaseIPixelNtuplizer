@@ -1,71 +1,60 @@
 #include "PhaseIPixelNtuplizer.h"
 
-#define DEBUGNTUPLIZER_ALL
+#define EDM_ML_LOGDEBUG
+#define ML_DEBUG
 
-void test_prompts_and_colors();
 
-PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(const edm::ParameterSet&)
+PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig)
 {
-	test_prompts_and_colors();
-	#ifdef DEBUGNTUPLIZER_ALL
-		std::cerr << debug_prompt << "PhaseIPixelNtuplizer() constructor called." << std::endl;
-	#endif
+	this -> iConfig = iConfig;
+
+	edm::LogError("category")    << "error    PhaseIPixelNtuplizer() constructor called." << std::endl;
+	edm::LogProblem("category")  << "problem  PhaseIPixelNtuplizer() constructor called." << std::endl;
+	edm::LogWarning ("category") << "warning  PhaseIPixelNtuplizer() constructor called." << std::endl;
+	edm::LogPrint("category")    << "print    PhaseIPixelNtuplizer() constructor called." << std::endl;
+	edm::LogInfo("category")     << "infor    PhaseIPixelNtuplizer() constructor called." << std::endl;
+	edm::LogVerbatim("category") << "verbatim PhaseIPixelNtuplizer() constructor called." << std::endl;
+	LogDebug("step") << "PhaseIPixelNtuplizer() constructor called." << std::endl;
 }
 
 PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer()
 {
-	#ifdef DEBUGNTUPLIZER_ALL
-		std::cerr << debug_prompt << "~PhaseIPixelNtuplizer()" << std::endl;
-	#endif
+	LogDebug("step") << "~PhaseIPixelNtuplizer()" << std::endl;
 }
 
 void PhaseIPixelNtuplizer::beginJob()
 {
-	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << debug_prompt << "Executing PhaseIPixelNtuplizer::beginJob()..." << std::endl;
-	#endif
+	LogDebug("step") << "Executing PhaseIPixelNtuplizer::beginJob()..." << std::endl;
 }
 
 void PhaseIPixelNtuplizer::endJob()
 {
-	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << debug_prompt << "Executing PhaseIPixelNtuplizer::endJob()..." << std::endl;
-	#endif
+	LogDebug("step") << "Executing PhaseIPixelNtuplizer::endJob()..." << std::endl;
 }
 
 void PhaseIPixelNtuplizer::analyze(const edm::Event&, const edm::EventSetup&)
 {
-	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << debug_prompt << "Executing PhaseIPixelNtuplizer::analyze()..." << std::endl;
-	#endif
+	LogDebug("step") << "Executing PhaseIPixelNtuplizer::analyze()..." << std::endl;
 }
 
 void PhaseIPixelNtuplizer::beginRun(edm::Run const&, edm::EventSetup const&)
 {
-	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << debug_prompt << "Executing PhaseIPixelNtuplizer::beginRun()..." << std::endl;
-	#endif
+	LogDebug("step") << "Executing PhaseIPixelNtuplizer::beginRun()..." << std::endl;
 }
 
 void PhaseIPixelNtuplizer::endRun(edm::Run const&, edm::EventSetup const&)
 {
-	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << debug_prompt << "Executing PhaseIPixelNtuplizer::endRun()..." << std::endl;
-	#endif
+	LogDebug("step") << "Executing PhaseIPixelNtuplizer::endRun()..." << std::endl;
 }
 
 void PhaseIPixelNtuplizer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
-	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << "Executing PhaseIPixelNtuplizer::beginLuminosityBlock()..." << std::endl;
-	#endif
+	LogDebug("step") << "Executing PhaseIPixelNtuplizer::beginLuminosityBlock()..." << std::endl;
 }
 
 void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
-	#ifdef DEBUGNTUPLIZER_ALL
-	std::cerr << "Executing PhaseIPixelNtuplizer::endLuminosityBlock()..." << std::endl;
-	#endif
+	LogDebug("step") << "Executing PhaseIPixelNtuplizer::endLuminosityBlock()..." << std::endl;
 }
 
 DEFINE_FWK_MODULE(PhaseIPixelNtuplizer);

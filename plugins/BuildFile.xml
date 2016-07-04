@@ -41,6 +41,7 @@
   <use   name="FWCore/Utilities"/>
   <use   name="DataFormats/Luminosity"/>
   <library   file="*.cc ../src/*.cc" name="DPGAnalysisPhaseIPixelNtuplizerPlugin">
-    <flags   EDM_PLUGIN="1"/>
+    <flags CXXFLAGS="-g -D=EDM_ML_DEBUG"/>
+    <flags EDM_PLUGIN="1"/>
   </library>
 </environment>
