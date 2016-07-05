@@ -60,7 +60,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 
 		// Default: "Ntuple.root"
 
-		std::string ntuple_output_filename;
+		std::string ntuple_output_filename = "Ntuple.root";
 		TFile*      ntuple_output_file;
 
 		/////////////////

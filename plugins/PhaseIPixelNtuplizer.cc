@@ -6,30 +6,57 @@
 
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig)
 {
-	this -> iConfig = iConfig;
-
-	edm::LogError("category")    << "error    PhaseIPixelNtuplizer() constructor called." << std::endl;
-	edm::LogProblem("category")  << "problem  PhaseIPixelNtuplizer() constructor called." << std::endl;
-	edm::LogWarning ("category") << "warning  PhaseIPixelNtuplizer() constructor called." << std::endl;
-	edm::LogPrint("category")    << "print    PhaseIPixelNtuplizer() constructor called." << std::endl;
-	edm::LogInfo("category")     << "infor    PhaseIPixelNtuplizer() constructor called." << std::endl;
-	edm::LogVerbatim("category") << "verbatim PhaseIPixelNtuplizer() constructor called." << std::endl;
 	LogDebug("step") << "PhaseIPixelNtuplizer() constructor called." << std::endl;
+	// edm::LogError("category")    << "error    PhaseIPixelNtuplizer() constructor called." << std::endl;
+	// edm::LogProblem("category")  << "problem  PhaseIPixelNtuplizer() constructor called." << std::endl;
+	// edm::LogWarning ("category") << "warning  PhaseIPixelNtuplizer() constructor called." << std::endl;
+	// edm::LogPrint("category")    << "print    PhaseIPixelNtuplizer() constructor called." << std::endl;
+	// edm::LogInfo("category")     << "infor    PhaseIPixelNtuplizer() constructor called." << std::endl;
+	// edm::LogVerbatim("category") << "verbatim PhaseIPixelNtuplizer() constructor called." << std::endl;
 }
 
 PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer()
 {
 	LogDebug("step") << "~PhaseIPixelNtuplizer()" << std::endl;
+
 }
 
 void PhaseIPixelNtuplizer::beginJob()
 {
 	LogDebug("step") << "Executing PhaseIPixelNtuplizer::beginJob()..." << std::endl;
+	this -> iConfig = iConfig;
+
+	if(iConfig.exists("fileName"))
+	{
+		ntuple_output_filename = iConfig.getParameter<std::string>("filename");
+	}
+
+	////////////////////////
+	// Create output file //
+	////////////////////////
+
+	ntuple_output_file = new TFile(ntuple_output_filename.c_str(), "RECREATE");
+	
+	if(!(ntuple_output_file -> IsOpen()))
+	{
+		edm::LogError("file_operations") << "Failed to open output file: " << ntuple_output_filename << std::endl; 
+		exit(-1);
+	}
+
+	LogDebug("file_operations") << "Output file: \"" << ntuple_output_filename << "\" created." << std::endl;
+
+
 }
 
 void PhaseIPixelNtuplizer::endJob()
 {
 	LogDebug("step") << "Executing PhaseIPixelNtuplizer::endJob()..." << std::endl;
+
+	LogDebug("file_operations") << "Writing plots to file: \"" << ntuple_output_filename << "\"." << std::endl;
+	ntuple_output_file -> Write();
+	LogDebug("file_operations") << "Closing file: \"" << ntuple_output_filename << "\"." << std::endl;
+	ntuple_output_file -> Close();
+	LogDebug("file_operations") << "File succesfully closed: \"" << ntuple_output_filename << "\"." << std::endl;
 }
 
 void PhaseIPixelNtuplizer::analyze(const edm::Event&, const edm::EventSetup&)
