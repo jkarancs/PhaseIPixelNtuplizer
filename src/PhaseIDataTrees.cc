@@ -71,7 +71,6 @@ void PhaseIDataTrees::set_cluster_tree_data_fields(TTree*& cluster_tree, EventDa
 	LogDebug("tree_branching") << "Setting branch addresses for cluster tree..." << std::endl;
 	cluster_tree -> SetBranchAddress("event",        &event_field);
 	cluster_tree -> SetBranchAddress("module_on",    &cluster_field.mod_on);
-
 	// cluster_tree -> SetBranchAddress("clust",        &cluster_field);
 	// cluster_tree -> SetBranchAddress("clust_pix",    &cluster_field.pix)
 	// cluster_tree -> SetBranchAddress("module",       &cluster_field.mod)

@@ -19,8 +19,9 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig)
 	//////////////////////////////////////
 
 	// FIXME: add reco for PhaseI vertices
-	primary_vertices_token = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
-	clusters_token = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
+	primary_vertices_token      = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+	clusters_token              = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
+	traj_track_collection_token = consumes<TrajTrackAssociationCollection>(edm::InputTag("trajectoryInput"));
 }
 
 PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer()
@@ -63,7 +64,7 @@ void PhaseIPixelNtuplizer::beginJob()
 	PhaseIDataTrees::define_cluster_tree_branches(cluster_tree, event_field, cluster_field);
 	// Traj tree branches
 	traj_tree = new TTree("trajTree", "Trajectory measurements in the Pixel");
-	// PhaseIDataTrees::define_traj_tree_branches(traj_tree, event_field, traj_field);
+	PhaseIDataTrees::define_traj_tree_branches(traj_tree, event_field, traj_field);
 }
 
 void PhaseIPixelNtuplizer::endJob()
@@ -182,14 +183,45 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	}
 	else
 	{
-		handle_default_error("data_access", "Failed to fetch clusters.");
+		handle_default_error("data_access", "Failed to fetch the clusters.");
 	}
 
 	///////////////
 	// Traj tree //
 	///////////////
 
+	PhaseIDataTrees::set_traj_tree_data_fields(traj_tree, event_field, traj_field);
+	// Fetching the tracks by token
+	edm::Handle<TrajTrackAssociationCollection> traj_track_collection_handle;
+	iEvent.getByToken(traj_track_collection_token, traj_track_collection_handle);
 
+	if(traj_track_collection_handle.isValid())
+	{
+		// TODO: move this before filling the event tree
+		event_field.ntracks = traj_track_collection_handle -> size();
+		// Reset track counters
+		event_field.ntrackFPix[0]      = 0;
+		event_field.ntrackFPix[1]      = 0;
+		event_field.ntrackBPix[0]      = 0;
+		event_field.ntrackBPix[1]      = 0;
+		event_field.ntrackBPix[2]      = 0;
+		event_field.ntrackFPixvalid[0] = 0;
+		event_field.ntrackFPixvalid[1] = 0;
+		event_field.ntrackBPixvalid[0] = 0;
+		event_field.ntrackBPixvalid[1] = 0;
+		event_field.ntrackBPixvalid[2] = 0;
+
+		// for(const auto& current_track_keypair: traj_track_collection_handle)
+		// {
+		// 	const Trajectory& traj = *(current_track_keypair.key);
+		// 	const Track& track     = *(current_track_keypair.val);
+		// 	std::cerr << "Alma!!!!!!!!!!!!!" << std::endl;
+		// }
+	}
+	else
+	{
+		handle_default_error("data_access", "Failed to fetch the tracks.");
+	}
 
 	/////////////////////////
 	// For testing purpose //

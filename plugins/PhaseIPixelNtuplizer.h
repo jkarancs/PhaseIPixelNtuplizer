@@ -23,6 +23,10 @@
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
+// To get token for tracks
+// #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
+#include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
+
 //////////////////////
 // Tree definitions //
 //////////////////////
@@ -110,8 +114,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 
 		edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
 		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > clusters_token;
-
-		// ...
+		edm::EDGetTokenT<TrajTrackAssociationCollection> traj_track_collection_token;
 
 		/////////////////
 		// For testing //
