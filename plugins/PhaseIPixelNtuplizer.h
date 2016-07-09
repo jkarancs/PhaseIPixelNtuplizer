@@ -15,6 +15,14 @@
 // Other //
 ///////////
 
+// Vertex collection handling
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+
+// To get tokens for pixeldigis, rawdataerrors and clusters 
+#include "DataFormats/Common/interface/DetSetVectorNew.h"
+#include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+
 //////////////////////
 // Tree definitions //
 //////////////////////
@@ -40,6 +48,7 @@
 #include <TTree.h>
 // #include <TH1F.h>
 // #include <TH2F.h>
+#include <TRandom3.h>
 
 ////////////////
 // C++ system //
@@ -54,12 +63,17 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 	private:
 		edm::ParameterSet iConfig;
 
+		/////////////
+		// Options //
+		/////////////
+
+		int cluster_save_downlscaling;
+
 		/////////////////
 		// Output file //
 		/////////////////
 
 		// Default: "Ntuple.root"
-
 		std::string ntuple_output_filename = "Ntuple.root";
 		TFile*      ntuple_output_file;
 
@@ -71,28 +85,71 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		TTree* lumi_tree;
 		TTree* run_tree;
 		TTree* track_tree;
-		TTree* clust_tree;
+		TTree* cluster_tree;
 		TTree* traj_tree;
 		TTree* digi_tree;
 
 		// Tree field definitions are in the interface directory
+		EventData       event_field;
+		LumiData        lumi_field;
+		TrajMeasurement traj_field;
+		Cluster         cluster_field;
 
-		EventData event_field;
-		LumiData lumi_field;
-		std::vector<TrackData> track_list_field;
-		std::vector<Cluster> clust_list_field;
-		std::vector<std::vector<TrajMeasurement>> traj_measurement_list_field;
+		// For handling data collections
+		std::vector<TrackData>                    complete_track_collection;                        // Track collection
+		std::vector<Cluster>                      complete_cluster_collection;                        // Cluster collection
+		std::vector<std::vector<TrajMeasurement>> complete_traj_meas_collection; // Trajectory meaurement collection
+
+		///////////////////////////////////
+		// Tokens for accessing the data //
+		///////////////////////////////////
+
+		edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
+		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > clusters_token;
+
+		// ...
+
+		/////////////////
+		// For testing //
+		/////////////////
+
+		TRandom3 random;
 
 	public:
 		PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);
 		virtual ~PhaseIPixelNtuplizer();
 		virtual void beginJob();
 		virtual void endJob();
-		virtual void analyze(const edm::Event&, const edm::EventSetup&);
+		virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
 		virtual void beginRun(edm::Run const&, edm::EventSetup const&);
 		virtual void endRun(edm::Run const&, edm::EventSetup const&);
 		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+
+		/////////////////////////////
+		// Event tree field values //
+		/////////////////////////////
+
+		void get_nvtx_and_vtx_data(const edm::Event& iEvent); // FIXME: add reco for phase_I
+
+		///////////////////////////////
+		// Cluster tree field values //
+		///////////////////////////////
+
+
+		////////////////////
+		// Error handling //
+		////////////////////
+
+		void handle_default_error(const std::string& stream_type, std::string msg);
+		void handle_default_error(const std::string& stream_type, std::vector<std::string> msg);
+		void print_evt_info(const std::string& stream_type);
+
+		//////////
+		// Test //
+		//////////
+
+		virtual void produce_fake_events(const int& num_events);
 };
 
 #endif
