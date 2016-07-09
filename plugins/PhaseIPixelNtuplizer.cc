@@ -51,36 +51,19 @@ void PhaseIPixelNtuplizer::beginJob()
 
 	LogDebug("file_operations") << "Output file: \"" << ntuple_output_filename << "\" created." << std::endl;
 
-	/////////////////////////
-	// Event tree branches //
-	/////////////////////////
+	////////////////////////
+	// Branch definitions //
+	////////////////////////
 
+	// Event tree branches
 	event_tree = new TTree("eventTree", "The event");
-	event_tree -> Branch("event", &event_field, event_field.list.c_str());
-
-	///////////////////////////
-	// Cluster tree branches //
-	///////////////////////////
-
+	PhaseIDataTrees::define_event_tree_branches(event_tree, event_field);
+	// Cluster tree branches
 	cluster_tree = new TTree("clustTree", "Pixel clusters");
-
-	cluster_tree -> Branch("event",        &event_field, event_field.list.c_str());
-	cluster_tree -> Branch("module_on",    &cluster_field.mod_on, cluster_field.mod_on.list.c_str());
-	// Serial number of cluster in the given module
-	cluster_tree -> Branch("clust_i",      &cluster_field.i,      "i/I");
-	// // Set if there is a valid hits
-	cluster_tree -> Branch("clust_edge",   &cluster_field.edge,   "edge/I");
-	cluster_tree -> Branch("clust_badpix", &cluster_field.badpix, "badpix/I");
-	cluster_tree -> Branch("clust_tworoc", &cluster_field.tworoc, "tworoc/I");
-	// Position and size
-	cluster_tree -> Branch("clust_xy",     &cluster_field.x,      "x/F:y");
-	cluster_tree -> Branch("clust_size",   &cluster_field.size,   "size/I");
-	cluster_tree -> Branch("clust_sizeXY", &cluster_field.sizeX,  "sizeX/I:sizeY");
-	// Charge
-	cluster_tree -> Branch("clust_charge", &cluster_field.charge, "charge/F");
-	// Misc.
-	cluster_tree -> Branch("clust_adc",    &cluster_field.adc,    "adc[size]/F");
-	cluster_tree -> Branch("clust_pix",    &cluster_field.pix,    "pix[size][2]/F");
+	PhaseIDataTrees::define_cluster_tree_branches(cluster_tree, event_field, cluster_field);
+	// Traj tree branches
+	traj_tree = new TTree("trajTree", "Trajectory measurements in the Pixel");
+	// PhaseIDataTrees::define_traj_tree_branches(traj_tree, event_field, traj_field);
 }
 
 void PhaseIPixelNtuplizer::endJob()
@@ -98,18 +81,13 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 {
 	LogDebug("step") << "Executing PhaseIPixelNtuplizer::analyze()..." << std::endl;
 
-	/////////////
-	// Aliases //
-	/////////////
-
 	////////////////
 	// Event tree //
 	////////////////
 
 	// Set data holder object
-	event_tree -> SetBranchAddress("event", &event_field);
-
-	event_field.fill         = static_cast<int>(0);
+	PhaseIDataTrees::set_event_tree_data_fields(event_tree, event_field);
+	event_field.fill         = static_cast<int>(0); // FIXME
 	event_field.run          = static_cast<int>(iEvent.id().run());
 	event_field.ls           = static_cast<int>(iEvent.luminosityBlock());
 	event_field.orb          = static_cast<int>(iEvent.orbitNumber());
@@ -143,7 +121,6 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 		// event_field.nclu[i] = get_nclu(); // [0: fpix, i: layer i]
 		// event_field.npix[i] = get_npix(); // [0: fpix, i: layer i]
 	}
-
 	// Fill the tree
 	event_tree -> Fill();
 
@@ -151,29 +128,8 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// Cluster tree //
 	//////////////////
 
-	// Set data holder objects
-	cluster_tree -> SetBranchAddress("event",        &event_field);
-	cluster_tree -> SetBranchAddress("module_on",    &cluster_field.mod_on);
-	// cluster_tree -> SetBranchAddress("clust",        &cluster_field);
-	// cluster_tree -> SetBranchAddress("clust_pix",    &cluster_field.pix)
-	// cluster_tree -> SetBranchAddress("module",       &cluster_field.mod)
-
-	// Serial number of cluster in the given module
-	cluster_tree -> SetBranchAddress("clust_i",      &cluster_field.i);
-	// // Set if there is a valid hits
-	cluster_tree -> SetBranchAddress("clust_edge",   &cluster_field.edge);
-	cluster_tree -> SetBranchAddress("clust_badpix", &cluster_field.badpix);
-	cluster_tree -> SetBranchAddress("clust_tworoc", &cluster_field.tworoc);
-	// Position and size
-	cluster_tree -> SetBranchAddress("clust_xy",     &cluster_field.x);
-	cluster_tree -> SetBranchAddress("clust_size",   &cluster_field.size);
-	cluster_tree -> SetBranchAddress("clust_sizeXY", &cluster_field.sizeX);
-	// Charge
-	cluster_tree -> SetBranchAddress("clust_charge", &cluster_field.charge);
-	// Misc.
-	cluster_tree -> SetBranchAddress("clust_adc",    &cluster_field.adc);
-	cluster_tree -> SetBranchAddress("clust_pix",    &cluster_field.pix);
-
+	// // Set data holder objects
+	PhaseIDataTrees::set_cluster_tree_data_fields(cluster_tree, event_field, cluster_field);
 	// Fetching the clusters by token
 	edm::Handle<edmNew::DetSetVector<SiPixelCluster> > cluster_collection_handle;
 	iEvent.getByToken(clusters_token, cluster_collection_handle);
@@ -215,6 +171,7 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 					cluster_field.pix[i][1] = current_pixels[i].y;
 				}
 				complete_cluster_collection.push_back(cluster_field);
+				// The number of saved clusters can be downscaled to save space
 				if(cluster_counter++ % cluster_save_downlscaling != 0)
 				{
 					continue;
@@ -227,17 +184,6 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	{
 		handle_default_error("data_access", "Failed to fetch clusters.");
 	}
-
-	// Save every nth cluster
-	// int i = 0;
-	// for(const auto& current_cluster: complete_cluster_collection)
-	// {
-	// 	if((i++) % cluster_save_downlscaling != 0)
-	// 	{
-	// 		continue;
-	// 	}
-	// 	cluster_tree -> Fill();
-	// }
 
 	///////////////
 	// Traj tree //

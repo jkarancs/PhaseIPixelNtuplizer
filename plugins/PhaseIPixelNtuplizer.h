@@ -27,6 +27,10 @@
 // Tree definitions //
 //////////////////////
 
+// Branch definitions are hidden in PhaseIDataTrees.h
+#include "../interface/PhaseIDataTrees.h"
+
+// Branch structures are hidden in the Tree_structures directory
 #include "../interface/Tree_structures/Event_tree_structure.hh"
 #include "../interface/Tree_structures/Luminosity_tree_structure.hh"
 #include "../interface/Tree_structures/Run_structure.hh"
