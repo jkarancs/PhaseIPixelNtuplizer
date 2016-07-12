@@ -14,14 +14,14 @@ void PhaseIDataTrees::define_event_tree_branches(TTree*& event_tree, EventData& 
 void PhaseIDataTrees::define_cluster_tree_branches(TTree*& cluster_tree, EventData& event_field, Cluster& cluster_field)
 {
 	LogDebug("tree_branching") << "Defining cluster tree branches..." << std::endl;
-	cluster_tree -> Branch("event",        &event_field,          event_field.list.c_str());
-	cluster_tree -> Branch("module_on",    &cluster_field.mod_on, cluster_field.mod_on.list.c_str());
+	// cluster_tree -> Branch("event",        &event_field,          event_field.list.c_str());
+	// cluster_tree -> Branch("module_on",    &cluster_field.mod_on, cluster_field.mod_on.list.c_str());
 	// Serial number of cluster in the given module
 	cluster_tree -> Branch("clust_i",      &cluster_field.i,      "i/I");
 	// // Set if there is a valid hits
-	cluster_tree -> Branch("clust_edge",   &cluster_field.edge,   "edge/I");
-	cluster_tree -> Branch("clust_badpix", &cluster_field.badpix, "badpix/I");
-	cluster_tree -> Branch("clust_tworoc", &cluster_field.tworoc, "tworoc/I");
+	// cluster_tree -> Branch("clust_edge",   &cluster_field.edge,   "edge/I");
+	// cluster_tree -> Branch("clust_badpix", &cluster_field.badpix, "badpix/I");
+	// cluster_tree -> Branch("clust_tworoc", &cluster_field.tworoc, "tworoc/I");
 	// Position and size
 	cluster_tree -> Branch("clust_xy",     &cluster_field.x,      "x/F:y");
 	cluster_tree -> Branch("clust_size",   &cluster_field.size,   "size/I");
@@ -69,17 +69,14 @@ void PhaseIDataTrees::set_event_tree_data_fields(TTree*& event_tree, EventData& 
 void PhaseIDataTrees::set_cluster_tree_data_fields(TTree*& cluster_tree, EventData& event_field, Cluster& cluster_field)
 {
 	LogDebug("tree_branching") << "Setting branch addresses for cluster tree..." << std::endl;
-	cluster_tree -> SetBranchAddress("event",        &event_field);
-	cluster_tree -> SetBranchAddress("module_on",    &cluster_field.mod_on);
-	// cluster_tree -> SetBranchAddress("clust",        &cluster_field);
-	// cluster_tree -> SetBranchAddress("clust_pix",    &cluster_field.pix)
-	// cluster_tree -> SetBranchAddress("module",       &cluster_field.mod)
+	// cluster_tree -> SetBranchAddress("event",        &event_field);
+	// cluster_tree -> SetBranchAddress("module_on",    &cluster_field.mod_on);
 	// Serial number of cluster in the given module
 	cluster_tree -> SetBranchAddress("clust_i",      &cluster_field.i);
 	// // Set if there is a valid hits
-	cluster_tree -> SetBranchAddress("clust_edge",   &cluster_field.edge);
-	cluster_tree -> SetBranchAddress("clust_badpix", &cluster_field.badpix);
-	cluster_tree -> SetBranchAddress("clust_tworoc", &cluster_field.tworoc);
+	// cluster_tree -> SetBranchAddress("clust_edge",   &cluster_field.edge);
+	// cluster_tree -> SetBranchAddress("clust_badpix", &cluster_field.badpix);
+	// cluster_tree -> SetBranchAddress("clust_tworoc", &cluster_field.tworoc);
 	// Position and size
 	cluster_tree -> SetBranchAddress("clust_xy",     &cluster_field.x);
 	cluster_tree -> SetBranchAddress("clust_size",   &cluster_field.size);

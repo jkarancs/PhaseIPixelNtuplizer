@@ -10,6 +10,20 @@
 // #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Framework/interface/ESHandle.h"
+
+///////////
+// Tools //
+///////////
+
+// Trajectory measurements
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
+#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 
 ///////////
 // Other //
@@ -24,7 +38,6 @@
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 
 // To get token for tracks
-// #include "TrackingTools/TrackAssociator/interface/TrackAssociatorParameters.h"
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 
 //////////////////////
@@ -46,6 +59,8 @@
 ////////////////////////////
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+// Adding some colors :)
+#include "../interface/Console_colors.hh"
 
 ////////////////////
 // Root libraries //
@@ -95,7 +110,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		TTree* track_tree;
 		TTree* cluster_tree;
 		TTree* traj_tree;
-		TTree* digi_tree;
+		// TTree* digi_tree;
 
 		// Tree field definitions are in the interface directory
 		EventData       event_field;
@@ -114,7 +129,8 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 
 		edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
 		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > clusters_token;
-		edm::EDGetTokenT<TrajTrackAssociationCollection> traj_track_collection_token;
+		// edm::EDGetTokenT<TrajTrackAssociationCollection> traj_track_collection_token;
+		edm::EDGetTokenT<TrajTrackAssociationCollection> trackAssociationToken_;
 
 		/////////////////
 		// For testing //
@@ -148,8 +164,8 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		// Error handling //
 		////////////////////
 
-		void handle_default_error(const std::string& stream_type, std::string msg);
-		void handle_default_error(const std::string& stream_type, std::vector<std::string> msg);
+		void handle_default_error(const std::string& exception_type, const std::string& stream_type, std::string msg);
+		void handle_default_error(const std::string& exception_type, const std::string& stream_type, std::vector<std::string> msg);
 		void print_evt_info(const std::string& stream_type);
 
 		//////////
