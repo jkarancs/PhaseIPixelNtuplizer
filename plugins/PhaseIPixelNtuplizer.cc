@@ -228,8 +228,8 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 			if(!is_pixel_hit) continue;
 
 			// Looking for valid and missing hits
-			bool is_hit_valid   = hit -> getType() == TrackingRecHit::valid;
-			bool is_hit_missing = hit -> getType() == TrackingRecHit::missing;
+			traj_field.validhit = hit -> getType() == TrackingRecHit::valid;
+			traj_field.missing  = hit -> getType() == TrackingRecHit::missing;
 			// Fetch the hit
 			const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(hit -> hit());
 			int row = 0;
@@ -237,11 +237,6 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 			// Check hit qualty
 			if(pixhit)
 			{
-				// double clusterProbability= pixhit -> clusterProbability(0);
-				// if (clusterProbability > 0)
-				// {
-					// histo[CLUSTER_PROB].fill(log10(clusterProbability), id, &iEvent);
-				// } 
 				const PixelGeomDetUnit* geomdetunit = dynamic_cast<const PixelGeomDetUnit*>(tracker -> idToDet(det_id));
 				const PixelTopology&    topol       = geomdetunit -> specificTopology();
 				LocalPoint const&       lp          = pixhit -> localPositionFast();
@@ -249,28 +244,25 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 				row = static_cast<int>(mp.x());
 				col = static_cast<int>(mp.y());
 			}
-			traj_field.validhit = 0;
-			traj_field.missing = 0;
-			if(is_hit_valid)
-				traj_field.validhit = 1;
-			if(is_hit_missing)
-				traj_field.missing = 1;
+			// Temporarily saving row and col
 			traj_field.row = row;
 			traj_field.col = col;
+			// Position measurements
+			TrajectoryStateCombiner trajStateComb;
+			TrajectoryStateOnSurface predTrajState = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
+			traj_field.glx    = predTrajState.globalPosition().x();
+			traj_field.gly    = predTrajState.globalPosition().y();
+			traj_field.glz    = predTrajState.globalPosition().z();
+			traj_field.lx     = predTrajState.localPosition().x();
+			traj_field.ly     = predTrajState.localPosition().y();
+			traj_field.lz     = predTrajState.localPosition().z();
+			traj_field.lx_err = predTrajState.localError().positionError().xx();
+			traj_field.ly_err = predTrajState.localError().positionError().yy();
+
+			// Filling the tree
 			traj_tree -> Fill();
 		}
 	}
-
-	// // FIXME: traj_track_collection_handle is never valid
-	// if(traj_track_collection_handle.isValid())
-	// {
-	// 	edm::LogInfo("unexpected_event") << c_blue << "Actually found some tracks..." << std::endl;
-	// else
-	// {
-	// 	edm::LogDebug("tracks") << c_red << "No tracks available..." << std::endl;
-	// 	// handle_default_error("data_access", "data_access", "Failed to fetch the tracks.");
-	// }
-
 
 	/////////////////////////
 	// For testing purpose //

@@ -40,7 +40,7 @@ void PhaseIDataTrees::define_traj_tree_branches(TTree*& traj_tree, EventData& ev
 	// traj_tree -> Branch("event",            &event_field,            event_field.list.data());
 	// traj_tree -> Branch("module_on",        &traj_field.mod_on,      traj_field.mod_on.list.data());
 	// traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:pass_effcuts");
-	traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing/I:row/I:col/I");
+	traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing/I:row/I:col/I:lx/F:ly/F");
 	// traj_tree -> Branch("traj_occup",       &traj_field.nclu_mod,    "nclu_mod/I:nclu_roc:npix_mod:npix_roc");
 	// traj_tree -> Branch("traj_alphabeta",   &traj_field.alpha,       "alpha/F:beta");
 	// traj_tree -> Branch("traj_dxy_cl",      &traj_field.dx_cl,       "dx_cl[2]/F:dy_cl[2]");

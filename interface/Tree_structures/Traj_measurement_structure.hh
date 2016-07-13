@@ -18,8 +18,8 @@ class TrajMeasData
 		int missing;
 		int col;
 		int row;
-		// float lx;
-		// float ly;
+		float lx;
+		float ly;
 		// float res_dx;
 		// float res_dz;
 		// float lev;
@@ -71,8 +71,8 @@ class TrajMeasData
 			missing=NOVAL_I;
 			row=NOVAL_I;
 			col=NOVAL_I;
-			// lx=NOVAL_F;
-			// ly=NOVAL_F;
+			lx=NOVAL_F;
+			ly=NOVAL_F;
 			// res_dx=NOVAL_F;
 			// res_dz=NOVAL_F;
 			// lev=NOVAL_F;

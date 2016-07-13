@@ -24,6 +24,9 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
+// Position
+#include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
+
 
 ///////////
 // Other //
