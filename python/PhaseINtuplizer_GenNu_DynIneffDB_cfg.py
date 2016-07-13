@@ -98,8 +98,8 @@ process.digitisation_step = cms.Path(process.pdigi)
 process.L1simulation_step = cms.Path(process.SimL1Emulator)
 process.digi2raw_step = cms.Path(process.DigiToRaw)
 process.raw2digi_step = cms.Path(process.RawToDigi)
-# process.reconstruction_step = cms.Path(process.reconstruction)
-process.reconstruction_step = cms.Path(process.pixeltrackerlocalreco)
+process.reconstruction_step = cms.Path(process.reconstruction)
+# process.reconstruction_step = cms.Path(process.pixeltrackerlocalreco)
 process.genfiltersummary_step = cms.EndPath(process.genFilterSummary)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
@@ -119,20 +119,18 @@ for path in process.paths:
 #---------------------------
 runOnGrid = False
 
-# process.mix.input.nbPileupEvents = cms.PSet(
-# 	probFunctionVariable = cms.vint32(1,2,3,4,5,6,7,8,9,10),
-# 	probValue = cms.vdouble(0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
-# 	# histoFileName = cms.untracked.string('histProbFunction.root'),
-# )
+# Flat pileup modification: 1-20 uniform
+process.mix.input.nbPileupEvents.probFunctionVariable = cms.vint32(range(0, 21))
+process.mix.input.nbPileupEvents.probValue = cms.vdouble([0.0] + [0.05] * 20)
 
 if runOnGrid:
 	from DPGAnalysis.PhaseIPixelNtuplizer.PoolSource_13TeV_RunII_pre17_GS import RunII_GS_Phase_I_2017_pileup_file_paths
 	process.mix.input.fileNames = RunII_GS_Phase_I_2017_pileup_file_paths
 else:
 	process.mix.input.fileNames = cms.untracked.vstring(
-		# 'file:/data/hunyadi/CMSSW/PhaseI_SIM/Tracker_material/CMSSW_8_1_0_pre8/src/Test/Stepenkent/out_step_1.root',
+		'file:/data/hunyadi/CMSSW/PhaseI_SIM/Tracker_material/CMSSW_8_1_0_pre8/src/Test/Stepenkent/out_step_1.root',
 		# '/store/user/ahunyadi/GEN_SIM/PhaseI_CMSSW81X/PhaseI_81X_mcRun2_GEN_SIM_evt100000/160708_091624/0000/GEN_SIM_81x_PHASEI_104.root',
-		"file:/data/store/user/ahunyadi/GEN_SIM/PhaseI_CMSSW81X/PhaseI_81X_mcRun2_GEN_SIM_evt100000/160708_091624/0000/GEN_SIM_81x_PHASEI_104.root",
+		# "file:/data/store/user/ahunyadi/GEN_SIM/PhaseI_CMSSW81X/PhaseI_81X_mcRun2_GEN_SIM_evt100000/160708_091624/0000/GEN_SIM_81x_PHASEI_104.root",
 	)
 
 #---------------------------
@@ -161,7 +159,7 @@ if useSqlite:
 #  PhaseIPixelNtuplizer
 #---------------------------
 process.PhaseINtuplizerPlugin = cms.EDAnalyzer('PhaseIPixelNtuplizer')
-# process.PhaseINtuplizerPlugin.trajectoryInput = cms.InputTag('generalTracks')
+process.PhaseINtuplizerPlugin.trajectoryInput = cms.InputTag('generalTracks')
 process.PhaseIPixelNtuplizer_step = cms.Path(process.PhaseINtuplizerPlugin)
 
 #---------------------------

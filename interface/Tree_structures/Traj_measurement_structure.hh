@@ -16,14 +16,16 @@ class TrajMeasData
 		// Non-split mode from here - keep order of variables
 		int validhit;
 		int missing;
-		float lx;
-		float ly;
-		float res_dx;
-		float res_dz;
-		float lev;
-		int clust_near;
-		int hit_near;
-		int pass_effcuts;
+		int col;
+		int row;
+		// float lx;
+		// float ly;
+		// float res_dx;
+		// float res_dz;
+		// float lev;
+		// int clust_near;
+		// int hit_near;
+		// int pass_effcuts;
 		// Paired branch (keep order)
 		int nclu_mod;
 		int nclu_roc;
@@ -67,14 +69,16 @@ class TrajMeasData
 		{
 			validhit=NOVAL_I;
 			missing=NOVAL_I;
-			lx=NOVAL_F;
-			ly=NOVAL_F;
-			res_dx=NOVAL_F;
-			res_dz=NOVAL_F;
-			lev=NOVAL_F;
-			clust_near=NOVAL_I;
-			hit_near=NOVAL_I;
-			pass_effcuts=NOVAL_I;
+			row=NOVAL_I;
+			col=NOVAL_I;
+			// lx=NOVAL_F;
+			// ly=NOVAL_F;
+			// res_dx=NOVAL_F;
+			// res_dz=NOVAL_F;
+			// lev=NOVAL_F;
+			// clust_near=NOVAL_I;
+			// hit_near=NOVAL_I;
+			// pass_effcuts=NOVAL_I;
 			nclu_mod=NOVAL_I;
 			nclu_roc=NOVAL_I;
 			npix_mod=NOVAL_I;

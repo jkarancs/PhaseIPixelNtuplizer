@@ -37,21 +37,22 @@ void PhaseIDataTrees::define_cluster_tree_branches(TTree*& cluster_tree, EventDa
 void PhaseIDataTrees::define_traj_tree_branches(TTree*& traj_tree, EventData& event_field, TrajMeasurement& traj_field)
 {
 	LogDebug("tree_branching") << "Defining traj tree branches..." << std::endl;
-	traj_tree -> Branch("event",            &event_field,            event_field.list.data());
-	traj_tree -> Branch("module_on",        &traj_field.mod_on,      traj_field.mod_on.list.data());
-	traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:pass_effcuts");
-	traj_tree -> Branch("traj_occup",       &traj_field.nclu_mod,    "nclu_mod/I:nclu_roc:npix_mod:npix_roc");
-	traj_tree -> Branch("traj_alphabeta",   &traj_field.alpha,       "alpha/F:beta");
-	traj_tree -> Branch("traj_dxy_cl",      &traj_field.dx_cl,       "dx_cl[2]/F:dy_cl[2]");
-	traj_tree -> Branch("traj_dxy_hit",     &traj_field.dx_hit,      "dx_hit/F:dy_hit");
-	traj_tree -> Branch("traj_norm_charge", &traj_field.norm_charge, "norm_charge/F");
-	traj_tree -> Branch("clust_size",       &traj_field.clu.size,    "size/I");
-	traj_tree -> Branch("clust_sizeXY",     &traj_field.clu.sizeX,   "sizeX/I:sizeY");
-	traj_tree -> Branch("clust_adc",        &traj_field.clu.pix,     "adc[size]/F");
-	traj_tree -> Branch("track",            &traj_field.trk,         "validfpix[2]/I:validbpix[3]:strip:nstripmissing:nstriplost:nstriplayer:quality:d0/F:dz:pt");
-	traj_tree -> Branch("track_ndofchi2",   &traj_field.trk.ndof,    "ndof/F:chi2");
-	traj_tree -> Branch("track_eta",        &traj_field.trk.eta,     "eta/F");
-	traj_tree -> Branch("track_phi",        &traj_field.trk.phi,     "phi/F");
+	// traj_tree -> Branch("event",            &event_field,            event_field.list.data());
+	// traj_tree -> Branch("module_on",        &traj_field.mod_on,      traj_field.mod_on.list.data());
+	// traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:pass_effcuts");
+	traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing/I:row/I:col/I");
+	// traj_tree -> Branch("traj_occup",       &traj_field.nclu_mod,    "nclu_mod/I:nclu_roc:npix_mod:npix_roc");
+	// traj_tree -> Branch("traj_alphabeta",   &traj_field.alpha,       "alpha/F:beta");
+	// traj_tree -> Branch("traj_dxy_cl",      &traj_field.dx_cl,       "dx_cl[2]/F:dy_cl[2]");
+	// traj_tree -> Branch("traj_dxy_hit",     &traj_field.dx_hit,      "dx_hit/F:dy_hit");
+	// traj_tree -> Branch("traj_norm_charge", &traj_field.norm_charge, "norm_charge/F");
+	// traj_tree -> Branch("clust_size",       &traj_field.clu.size,    "size/I");
+	// traj_tree -> Branch("clust_sizeXY",     &traj_field.clu.sizeX,   "sizeX/I:sizeY");
+	// traj_tree -> Branch("clust_adc",        &traj_field.clu.pix,     "adc[size]/F");
+	// traj_tree -> Branch("track",            &traj_field.trk,         "validfpix[2]/I:validbpix[3]:strip:nstripmissing:nstriplost:nstriplayer:quality:d0/F:dz:pt");
+	// traj_tree -> Branch("track_ndofchi2",   &traj_field.trk.ndof,    "ndof/F:chi2");
+	// traj_tree -> Branch("track_eta",        &traj_field.trk.eta,     "eta/F");
+	// traj_tree -> Branch("track_phi",        &traj_field.trk.phi,     "phi/F");
 	LogDebug("tree_branching") << "Done defining traj tree branches..." << std::endl;
 }
 
@@ -92,20 +93,20 @@ void PhaseIDataTrees::set_cluster_tree_data_fields(TTree*& cluster_tree, EventDa
 void PhaseIDataTrees::set_traj_tree_data_fields(TTree*& traj_tree, EventData& event_field, TrajMeasurement& traj_field)
 {
 	LogDebug("tree_branching") << "Setting branch addresses for traj tree..." << std::endl;
-	traj_tree -> SetBranchAddress("event",            &event_field);
+	// traj_tree -> SetBranchAddress("event",            &event_field);
 	// traj_tree -> SetBranchAddress("module_on",        &traj_field.mod_on);
 	traj_tree -> SetBranchAddress("traj",             &traj_field);
-	traj_tree -> SetBranchAddress("traj_occup",       &traj_field.nclu_mod);
-	traj_tree -> SetBranchAddress("traj_alphabeta",   &traj_field.alpha);
-	traj_tree -> SetBranchAddress("traj_dxy_cl",      &traj_field.dx_cl);
-	traj_tree -> SetBranchAddress("traj_dxy_hit",     &traj_field.dx_hit);
-	traj_tree -> SetBranchAddress("traj_norm_charge", &traj_field.norm_charge);
-	traj_tree -> SetBranchAddress("clust_size",       &traj_field.clu.size);
-	traj_tree -> SetBranchAddress("clust_sizeXY",     &traj_field.clu.sizeX);
-	traj_tree -> SetBranchAddress("clust_adc",        &traj_field.clu.adc);
-	traj_tree -> SetBranchAddress("track",            &traj_field.trk);
-	traj_tree -> SetBranchAddress("track_ndofchi2",   &traj_field.trk.ndof);
-	traj_tree -> SetBranchAddress("track_eta",        &traj_field.trk.eta);
-	traj_tree -> SetBranchAddress("track_phi",        &traj_field.trk.phi);
+	// traj_tree -> SetBranchAddress("traj_occup",       &traj_field.nclu_mod);
+	// traj_tree -> SetBranchAddress("traj_alphabeta",   &traj_field.alpha);
+	// traj_tree -> SetBranchAddress("traj_dxy_cl",      &traj_field.dx_cl);
+	// traj_tree -> SetBranchAddress("traj_dxy_hit",     &traj_field.dx_hit);
+	// traj_tree -> SetBranchAddress("traj_norm_charge", &traj_field.norm_charge);
+	// traj_tree -> SetBranchAddress("clust_size",       &traj_field.clu.size);
+	// traj_tree -> SetBranchAddress("clust_sizeXY",     &traj_field.clu.sizeX);
+	// traj_tree -> SetBranchAddress("clust_adc",        &traj_field.clu.adc);
+	// traj_tree -> SetBranchAddress("track",            &traj_field.trk);
+	// traj_tree -> SetBranchAddress("track_ndofchi2",   &traj_field.trk.ndof);
+	// traj_tree -> SetBranchAddress("track_eta",        &traj_field.trk.eta);
+	// traj_tree -> SetBranchAddress("track_phi",        &traj_field.trk.phi);
 	LogDebug("tree_branching") << "Done setting branch addresses for traj tree..." << std::endl;
 }

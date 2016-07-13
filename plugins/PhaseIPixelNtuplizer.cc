@@ -20,10 +20,10 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig)
 
 	// FIXME: add reco for PhaseI vertices
 	primary_vertices_token      = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
-	// clusters_token              = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
-	clusters_token              = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClustersPreSplitting"));
+	clusters_token              = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
+	// clusters_token              = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClustersPreSplitting"));
 	// traj_track_collection_token = consumes<TrajTrackAssociationCollection>(edm::InputTag("trajectoryInput"));
-	// trackAssociationToken_      = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
+	traj_track_collection_token = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
 }
 
 PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer()
@@ -65,8 +65,8 @@ void PhaseIPixelNtuplizer::beginJob()
 	cluster_tree = new TTree("clustTree", "Pixel clusters");
 	PhaseIDataTrees::define_cluster_tree_branches(cluster_tree, event_field, cluster_field);
 	// Traj tree branches
-	// traj_tree = new TTree("trajTree", "Trajectory measurements in the Pixel");
-	// PhaseIDataTrees::define_traj_tree_branches(traj_tree, event_field, traj_field);
+	traj_tree = new TTree("trajTree", "Trajectory measurements in the Pixel");
+	PhaseIDataTrees::define_traj_tree_branches(traj_tree, event_field, traj_field);
 }
 
 void PhaseIPixelNtuplizer::endJob()
@@ -166,97 +166,100 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// Traj tree //
 	///////////////
 
-	// PhaseIDataTrees::set_traj_tree_data_fields(traj_tree, event_field, traj_field);
+	PhaseIDataTrees::set_traj_tree_data_fields(traj_tree, event_field, traj_field);
 
-	// edm::ESHandle<TrackerGeometry> tracker;
-	// iSetup.get<TrackerDigiGeometryRecord>().get(tracker);
-	// if(!tracker.isValid())
-	// {
-	// 	handle_default_error("Invalid tracker.", "tool_access", "Inaccessible or invalid tracker.");
-	// }
+	edm::ESHandle<TrackerGeometry> tracker;
+	iSetup.get<TrackerDigiGeometryRecord>().get(tracker);
+	if(!tracker.isValid())
+	{
+		handle_default_error("Invalid tracker.", "tool_access", "Inaccessible or invalid tracker.");
+	}
 
-	// // Fetching the tracks by token
-	// edm::Handle<TrajTrackAssociationCollection> traj_track_collection_handle;
-	// iEvent.getByToken(trackAssociationToken_, traj_track_collection_handle);
+	// Fetching the tracks by token
+	edm::Handle<TrajTrackAssociationCollection> traj_track_collection_handle;
+	iEvent.getByToken(traj_track_collection_token, traj_track_collection_handle);
 
-	// for(const auto& current_track_keypair: *traj_track_collection_handle)
-	// {
-	// 	const auto&          traj  = current_track_keypair.key;
-	// 	const reco::TrackRef track = current_track_keypair.val; // TrackRef is actually a pointer type
+	for(const auto& current_track_keypair: *traj_track_collection_handle)
+	{
+		const auto&          traj  = current_track_keypair.key;
+		const reco::TrackRef track = current_track_keypair.val; // TrackRef is actually a pointer type
 
-	// 	bool isBpixtrack = false;
-	// 	bool isFpixtrack = false;
-	// 	int nStripHits = 0;
+		bool isBpixtrack = false;
+		bool isFpixtrack = false;
+		int nStripHits = 0;
 
-	// 	// Looping on the full track to check if we have pixel hits 
-	// 	// and to count the number of strip hits 
-	// 	for(auto& measurement: traj -> measurements())
-	// 	{
-	// 		// Check measurement validity
-	// 		if(!measurement.updatedState().isValid()) continue;
-	// 		auto hit = measurement.recHit();
-	// 		// Check hit quality
-	// 		if(!hit -> isValid()) continue;
+		// Looping on the full track to check if we have pixel hits 
+		// and to count the number of strip hits 
+		for(auto& measurement: traj -> measurements())
+		{
+			// Check measurement validity
+			if(!measurement.updatedState().isValid()) continue;
+			auto hit = measurement.recHit();
+			// Check hit quality
+			if(!hit -> isValid()) continue;
 			
-	// 		DetId det_id = hit -> geographicalId();
-	// 		uint32_t subdetid = (det_id.subdetId());
-	// 		// For saving the pixel hits
-	// 		if(subdetid == PixelSubdetector::PixelBarrel) isBpixtrack = true;
-	// 		if(subdetid == PixelSubdetector::PixelEndcap) isFpixtrack = true;
-	// 		// Counting the non-pixel hits
-	// 		if(subdetid == StripSubdetector::TIB) nStripHits++;
-	// 		if(subdetid == StripSubdetector::TOB) nStripHits++;
-	// 		if(subdetid == StripSubdetector::TID) nStripHits++;
-	// 		if(subdetid == StripSubdetector::TEC) nStripHits++;
-	// 	}
-	// 	// Discarding tracks without pixel measurements
-	// 	if(!isBpixtrack && !isFpixtrack) continue;
-	// 	// Looping again to check hit efficiency of pixel hits
-	// 	for(auto& measurement: traj -> measurements())
-	// 	{
-	// 		// Check measurement validity
-	// 		if(!measurement.updatedState().isValid()) continue;
-	// 		auto hit = measurement.recHit();
+			DetId det_id = hit -> geographicalId();
+			uint32_t subdetid = (det_id.subdetId());
+			// For saving the pixel hits
+			if(subdetid == PixelSubdetector::PixelBarrel) isBpixtrack = true;
+			if(subdetid == PixelSubdetector::PixelEndcap) isFpixtrack = true;
+			// Counting the non-pixel hits
+			if(subdetid == StripSubdetector::TIB) nStripHits++;
+			if(subdetid == StripSubdetector::TOB) nStripHits++;
+			if(subdetid == StripSubdetector::TID) nStripHits++;
+			if(subdetid == StripSubdetector::TEC) nStripHits++;
+		}
+		// Discarding tracks without pixel measurements
+		if(!isBpixtrack && !isFpixtrack) continue;
+		// Looping again to check hit efficiency of pixel hits
+		for(auto& measurement: traj -> measurements())
+		{
+			// Check measurement validity
+			if(!measurement.updatedState().isValid()) continue;
+			auto hit = measurement.recHit();
 
-	// 		DetId det_id = hit -> geographicalId();
-	// 		uint32_t subdetid = (det_id.subdetId());
+			DetId det_id = hit -> geographicalId();
+			uint32_t subdetid = (det_id.subdetId());
 
-	// 		// Looking for pixel hits
-	// 		bool is_pixel_hit = false;
-	// 		is_pixel_hit |= subdetid == PixelSubdetector::PixelBarrel;
-	// 		is_pixel_hit |= subdetid == PixelSubdetector::PixelEndcap;
-	// 		if(!is_pixel_hit) continue;
+			// Looking for pixel hits
+			bool is_pixel_hit = false;
+			is_pixel_hit |= subdetid == PixelSubdetector::PixelBarrel;
+			is_pixel_hit |= subdetid == PixelSubdetector::PixelEndcap;
+			if(!is_pixel_hit) continue;
 
-	// 		// Looking for valid and missing hits
-	// 		bool is_hit_valid   = hit -> getType() == TrackingRecHit::valid;
-	// 		bool is_hit_missing = hit -> getType() == TrackingRecHit::missing;
-	// 		// Fetch the hit
-	// 		const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(hit -> hit());
-	// 		int row = 0;
-	// 		int col = 0;
-	// 		// Check hit qualty
-	// 		if(pixhit)
-	// 		{
-	// 			// double clusterProbability= pixhit -> clusterProbability(0);
-	// 			// if (clusterProbability > 0)
-	// 			// {
-	// 				// histo[CLUSTER_PROB].fill(log10(clusterProbability), id, &iEvent);
-	// 			// } 
-	// 			const PixelGeomDetUnit* geomdetunit = dynamic_cast<const PixelGeomDetUnit*>(tracker -> idToDet(det_id));
-	// 			const PixelTopology&    topol       = geomdetunit -> specificTopology();
-	// 			LocalPoint const&       lp          = pixhit -> localPositionFast();
-	// 			MeasurementPoint        mp          = topol.measurementPosition(lp);
-	// 			row = static_cast<int>(mp.x());
-	// 			col = static_cast<int>(mp.y());
-	// 		}
-	// 		if(is_hit_valid)
-	// 			std::cerr << "Valid hit: " << std::endl;
-	// 		if(is_hit_missing)
-	// 			std::cerr << "Missing hit: " << std::endl;
-	// 		std::cerr << "row: " << row << std::endl;
-	// 		std::cerr << "col: " << col << std::endl;
-	// 	}
-	// }
+			// Looking for valid and missing hits
+			bool is_hit_valid   = hit -> getType() == TrackingRecHit::valid;
+			bool is_hit_missing = hit -> getType() == TrackingRecHit::missing;
+			// Fetch the hit
+			const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(hit -> hit());
+			int row = 0;
+			int col = 0;
+			// Check hit qualty
+			if(pixhit)
+			{
+				// double clusterProbability= pixhit -> clusterProbability(0);
+				// if (clusterProbability > 0)
+				// {
+					// histo[CLUSTER_PROB].fill(log10(clusterProbability), id, &iEvent);
+				// } 
+				const PixelGeomDetUnit* geomdetunit = dynamic_cast<const PixelGeomDetUnit*>(tracker -> idToDet(det_id));
+				const PixelTopology&    topol       = geomdetunit -> specificTopology();
+				LocalPoint const&       lp          = pixhit -> localPositionFast();
+				MeasurementPoint        mp          = topol.measurementPosition(lp);
+				row = static_cast<int>(mp.x());
+				col = static_cast<int>(mp.y());
+			}
+			traj_field.validhit = 0;
+			traj_field.missing = 0;
+			if(is_hit_valid)
+				traj_field.validhit = 1;
+			if(is_hit_missing)
+				traj_field.missing = 1;
+			traj_field.row = row;
+			traj_field.col = col;
+			traj_tree -> Fill();
+		}
+	}
 
 	// // FIXME: traj_track_collection_handle is never valid
 	// if(traj_track_collection_handle.isValid())
