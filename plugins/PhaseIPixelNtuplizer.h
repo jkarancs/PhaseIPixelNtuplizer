@@ -26,7 +26,8 @@
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 // Position
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
-
+#include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
 ///////////
 // Other //
@@ -42,6 +43,9 @@
 
 // To get token for tracks
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
+
+// To get token for FED errors
+#include "DataFormats/SiPixelRawData/interface/SiPixelRawDataError.h"
 
 //////////////////////
 // Tree definitions //
@@ -135,22 +139,13 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		edm::EDGetTokenT<TrajTrackAssociationCollection> traj_track_collection_token;
 		// edm::EDGetTokenT<TrajTrackAssociationCollection> trackAssociationToken_;
 
+		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError> > raw_data_error_token;
+
 		/////////////////
 		// For testing //
 		/////////////////
 
 		TRandom3 random;
-
-	public:
-		PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);
-		virtual ~PhaseIPixelNtuplizer();
-		virtual void beginJob();
-		virtual void endJob();
-		virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-		virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-		virtual void endRun(edm::Run const&, edm::EventSetup const&);
-		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
 		/////////////////////////////
 		// Event tree field values //
@@ -158,10 +153,18 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 
 		void get_nvtx_and_vtx_data(const edm::Event& iEvent); // FIXME: add reco for phase_I
 
+		// FED errors
+		std::map<uint32_t, int> get_FED_errors(const edm::Event& iEvent);
+
 		///////////////////////////////
 		// Cluster tree field values //
 		///////////////////////////////
 
+		/////////////////
+		// Module data //
+		/////////////////
+
+		ModuleData get_module_data(const uint32_t& rawId, const TrackerTopology* const topology, const std::map<uint32_t, int>& federrors);
 
 		////////////////////
 		// Error handling //
@@ -176,6 +179,17 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		//////////
 
 		virtual void produce_fake_events(const int& num_events);
+
+	public:
+		PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);
+		virtual ~PhaseIPixelNtuplizer();
+		virtual void beginJob();
+		virtual void endJob();
+		virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+		virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+		virtual void endRun(edm::Run const&, edm::EventSetup const&);
+		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 };
 
 #endif

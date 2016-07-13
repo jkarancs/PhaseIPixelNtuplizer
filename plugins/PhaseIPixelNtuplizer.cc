@@ -24,6 +24,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig)
 	// clusters_token              = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClustersPreSplitting"));
 	// traj_track_collection_token = consumes<TrajTrackAssociationCollection>(edm::InputTag("trajectoryInput"));
 	traj_track_collection_token = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
+	raw_data_error_token        = consumes<edm::DetSetVector<SiPixelRawDataError> >(edm::InputTag("siPixelDigis"));
 }
 
 PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer()
@@ -101,6 +102,14 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// Fill the tree
 	// event_tree -> Fill();
 
+	// FED errors
+	std::map<uint32_t, int> federrors = get_FED_errors(iEvent);
+
+	// Tracker topology for module informations
+	edm::ESHandle<TrackerTopology> tracker_topology_handle;
+	iSetup.get<TrackerTopologyRcd>().get(tracker_topology_handle);
+	const TrackerTopology* const tracker_topology = tracker_topology_handle.product();
+
 	//////////////////
 	// Cluster tree //
 	//////////////////
@@ -113,14 +122,20 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// Trying to access the clusters
 	if(cluster_collection_handle.isValid())
 	{
-		// TODO: set module field
 		int cluster_counter = 0;
 		const edmNew::DetSetVector<SiPixelCluster>& current_cluster_collection = *cluster_collection_handle;
-		// Parsing all nth cluster in the event
+		// Looping on clusters with the same location
 		typedef edmNew::DetSetVector<SiPixelCluster>::const_iterator clust_coll_it_t;
 		for(clust_coll_it_t current_cluster_set_it = current_cluster_collection.begin(); current_cluster_set_it != current_cluster_collection.end(); ++current_cluster_set_it)
 		{
 			const auto& current_cluster_set = *current_cluster_set_it;
+			DetId det_id(current_cluster_set.id());
+			unsigned int subdetId = det_id.subdetId();
+			// Take only pixel clusters
+			if(subdetId != PixelSubdetector::PixelBarrel && subdetId != PixelSubdetector::PixelEndcap)
+			{
+				continue;
+			}
 			typedef edmNew::DetSet<SiPixelCluster>::const_iterator clust_set_it_t;
 			for(clust_set_it_t current_cluster_it = current_cluster_set.begin(); current_cluster_it != current_cluster_set.end(); ++current_cluster_it)
 			{
@@ -131,6 +146,8 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 				// cluster_field.edge;
 				// cluster_field.badpix;
 				// cluster_field.tworoc;
+				// Module information
+				cluster_field.mod = get_module_data(det_id.rawId(), tracker_topology, federrors);
 				// Position and size
 				cluster_field.x     = current_cluster.x();
 				cluster_field.y     = current_cluster.y();
@@ -237,30 +254,38 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 			// Check hit qualty
 			if(pixhit)
 			{
-				const PixelGeomDetUnit* geomdetunit = dynamic_cast<const PixelGeomDetUnit*>(tracker -> idToDet(det_id));
-				const PixelTopology&    topol       = geomdetunit -> specificTopology();
-				LocalPoint const&       lp          = pixhit -> localPositionFast();
-				MeasurementPoint        mp          = topol.measurementPosition(lp);
+				const PixelGeomDetUnit* geomdetunit           = dynamic_cast<const PixelGeomDetUnit*>(tracker -> idToDet(det_id));
+				const PixelTopology&    topology              = geomdetunit -> specificTopology();
+				LocalPoint const&       lp                    = pixhit -> localPositionFast();
+				MeasurementPoint        mp                    = topology.measurementPosition(lp);
 				row = static_cast<int>(mp.x());
 				col = static_cast<int>(mp.y());
-			}
-			// Temporarily saving row and col
-			traj_field.row = row;
-			traj_field.col = col;
-			// Position measurements
-			TrajectoryStateCombiner trajStateComb;
-			TrajectoryStateOnSurface predTrajState = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
-			traj_field.glx    = predTrajState.globalPosition().x();
-			traj_field.gly    = predTrajState.globalPosition().y();
-			traj_field.glz    = predTrajState.globalPosition().z();
-			traj_field.lx     = predTrajState.localPosition().x();
-			traj_field.ly     = predTrajState.localPosition().y();
-			traj_field.lz     = predTrajState.localPosition().z();
-			traj_field.lx_err = predTrajState.localError().positionError().xx();
-			traj_field.ly_err = predTrajState.localError().positionError().yy();
+				// Temporarily saving row and col
+				traj_field.row = row;
+				traj_field.col = col;
+				// Save module data
+				traj_field.mod = get_module_data(det_id.rawId(), tracker_topology, federrors);
+				// Position measurements
+				TrajectoryStateCombiner trajStateComb;
+				TrajectoryStateOnSurface predTrajState = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
+				traj_field.glx    = predTrajState.globalPosition().x();
+				traj_field.gly    = predTrajState.globalPosition().y();
+				traj_field.glz    = predTrajState.globalPosition().z();
+				traj_field.lx     = predTrajState.localPosition().x();
+				traj_field.ly     = predTrajState.localPosition().y();
+				traj_field.lz     = predTrajState.localPosition().z();
+				traj_field.lx_err = predTrajState.localError().positionError().xx();
+				traj_field.ly_err = predTrajState.localError().positionError().yy();
+				traj_field.onedge = std::abs(traj_field.lx) < 0.55 && std::abs(traj_field.ly) < 3.0;
+				// Track local angles
+				LocalTrajectoryParameters predTrajParam = predTrajState.localParameters();
+				LocalVector local_track_direction = predTrajParam.momentum() / predTrajParam.momentum().mag();
+				traj_field.alpha = atan2(local_track_direction.z(), local_track_direction.x());
+				traj_field.beta  = atan2(local_track_direction.z(), local_track_direction.y());
 
-			// Filling the tree
-			traj_tree -> Fill();
+				// Filling the tree
+				traj_tree -> Fill();
+			}
 		}
 	}
 
@@ -339,6 +364,80 @@ void PhaseIPixelNtuplizer::get_nvtx_and_vtx_data(const edm::Event& iEvent)
 	// 		event_field.nvtx++;
 	// 	}
 	// }
+}
+
+////////////////////
+// FED error info //
+////////////////////
+
+std::map<uint32_t, int> PhaseIPixelNtuplizer::get_FED_errors(const edm::Event& iEvent)
+{
+	std::map<uint32_t, int> federrors;
+	edm::Handle<edm::DetSetVector<SiPixelRawDataError>> siPixelRawDataErrorCollectionHandle;
+	iEvent.getByToken(raw_data_error_token, siPixelRawDataErrorCollectionHandle);
+
+	if(siPixelRawDataErrorCollectionHandle.isValid())
+	{
+		for(const auto& pixel_error_set: *siPixelRawDataErrorCollectionHandle)
+		{
+			for(const auto& pixel_error: pixel_error_set)
+			{
+				if(pixel_error_set.detId()!=0xffffffff)
+				{
+					DetId detId(pixel_error_set.detId());
+					int type = pixel_error.getType();
+					federrors.insert(std::pair<uint32_t,int>(detId.rawId(), type));
+					// if(type>24&&type<=40) federr[type-25]++;
+					// else edm::LogError("data_access") << "New FED error with not recognised error-type: " << type << std::endl;
+				}
+			}
+		}
+		// for(int i=0; i<16; i++)
+		// {
+		// 	if(federr[i]!=0)
+		// 	{
+		// 		event_field.federrs[event_field.federrs_size][0] = federr[i];
+		// 		event_field.federrs[event_field.federrs_size][1] = i + 25;
+		// 		event_field.federrs_size++;
+		// 	}
+		// }
+	}
+	return federrors;
+}
+
+/////////////////////////
+// Module informations //
+/////////////////////////
+
+ModuleData PhaseIPixelNtuplizer::get_module_data(const uint32_t& rawId, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors)
+{
+	ModuleData mod;
+	mod.rawid = rawId;
+	int subdetId = DetId(mod.rawid).subdetId();
+	// Pixel Barrel hits
+	if(subdetId == PixelSubdetector::PixelBarrel)
+	{
+		mod.layer  = tracker_topology -> pxbLayer(rawId);
+		mod.ladder = tracker_topology -> pxbLadder(rawId);
+		mod.module = tracker_topology -> pxbModule(rawId);
+	}
+	// Pixel Endcap hits
+	if(subdetId == PixelSubdetector::PixelEndcap)
+	{
+		mod.side   = tracker_topology -> pxfSide(rawId);
+		mod.disk   = tracker_topology -> pxfDisk(rawId);
+		mod.blade  = tracker_topology -> pxfBlade(rawId);
+		mod.panel  = tracker_topology -> pxfDisk(rawId);
+		mod.module = tracker_topology -> pxfModule(rawId);
+	}
+	// FED error
+	mod.federr = 0;
+	auto found_error = federrors.find(mod.rawid);
+	if(found_error != federrors.end())
+	{
+		mod.federr = found_error -> second;
+	}
+	return mod;
 }
 
 ///////////////

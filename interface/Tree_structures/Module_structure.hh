@@ -19,7 +19,7 @@ class ModuleData {
 		int det;
 		int layer;
 		int ladder;
-		int half;
+		// int half;
 		int module;
 		int disk;
 		int blade;
@@ -46,7 +46,7 @@ class ModuleData {
 			det=NOVAL_I;
 			layer=NOVAL_I;
 			ladder=NOVAL_I;
-			half=NOVAL_I;
+			// half=NOVAL_I;
 			module=NOVAL_I;
 			disk=NOVAL_I;
 			blade=NOVAL_I;
@@ -76,10 +76,10 @@ class ModuleData {
 			federrortypes.insert(std::pair<int, std::string>(38, "the pixels on a ROC weren't read out from lowest to highest row and dcol value"));
 			federrortypes.insert(std::pair<int, std::string>(39, "CRC error"));
 #ifdef COMPLETE
-			list="det/I:layer:ladder:half:module:disk:blade:panel:federr:side:prt:shl:"
+			list="det/I:layer:ladder:module:disk:blade:panel:federr:side:prt:shl:"
 				"sec:outer:rawid/i";
 #else
-			list="det/I:layer:ladder:half:module:disk:blade:panel:federr";
+			list="det/I:layer:ladder:module:disk:blade:panel:federr";
 #endif
 		};
 		

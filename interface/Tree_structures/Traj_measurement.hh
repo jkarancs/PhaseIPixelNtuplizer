@@ -17,16 +17,16 @@ class TrajMeasurement : public TrajMeasData
 {
 	public:
 		// Extra: TrajMeasData in Traj_measurement_structure.hh
-		// ModuleData mod; // offline module number
+		ModuleData mod; // offline module number
 		// ModuleData mod_on; // online module number
 		// ClustData clu;
 		// TrackData trk;
 
-		TrajMeasurement() { /*mod.init(); mod_on.init(); clu.init(); trk.init(); */}
+		TrajMeasurement() { mod.init(); /*mod_on.init();*/ /*clu.init(); trk.init(); */}
 		void init() 
 		{
 			TrajMeasData::init();
-			// mod.init();
+			mod.init();
 			// mod_on.init();
 			// clu.init();
 			// trk.init();
