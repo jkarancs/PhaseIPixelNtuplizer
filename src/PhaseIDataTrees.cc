@@ -15,8 +15,8 @@ void PhaseIDataTrees::define_cluster_tree_branches(TTree*& cluster_tree, EventDa
 {
 	LogDebug("tree_branching") << "Defining cluster tree branches..." << std::endl;
 	// cluster_tree -> Branch("event",        &event_field,          event_field.list.c_str());
-	cluster_tree -> Branch("module",       &cluster_field.mod, cluster_field.mod.list.c_str());
-	// cluster_tree -> Branch("module_on",    &cluster_field.mod_on, cluster_field.mod_on.list.c_str());
+	cluster_tree -> Branch("module",       &cluster_field.mod,    ModuleData::list.c_str());
+	cluster_tree -> Branch("module_on",    &cluster_field.mod_on, ModuleData::list.c_str());
 	// Serial number of cluster in the given module
 	cluster_tree -> Branch("clust_i",      &cluster_field.i,      "i/I");
 	// // Set if there is a valid hits
@@ -39,10 +39,10 @@ void PhaseIDataTrees::define_traj_tree_branches(TTree*& traj_tree, EventData& ev
 {
 	LogDebug("tree_branching") << "Defining traj tree branches..." << std::endl;
 	// traj_tree -> Branch("event",            &event_field,            event_field.list.data());
-	// traj_tree -> Branch("module_on",        &traj_field.mod_on,      traj_field.mod_on.list.data());
-	traj_tree -> Branch("module",           &traj_field.mod,      traj_field.mod.list.data());
+	traj_tree -> Branch("module",           &traj_field.mod,         ModuleData::list.c_str());
+	traj_tree -> Branch("module_on",        &traj_field.mod_on,      ModuleData::list.c_str());
 	// traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:pass_effcuts");
-	traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing/I:row/I:col/I:lx/F:ly/F");
+	traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing/I:row/I:col/I:lx/F:ly/F:glx/F:gly/F:glz/F");
 	// traj_tree -> Branch("traj_occup",       &traj_field.nclu_mod,    "nclu_mod/I:nclu_roc:npix_mod:npix_roc");
 	// traj_tree -> Branch("traj_alphabeta",   &traj_field.alpha,       "alpha/F:beta");
 	// traj_tree -> Branch("traj_dxy_cl",      &traj_field.dx_cl,       "dx_cl[2]/F:dy_cl[2]");
@@ -73,8 +73,8 @@ void PhaseIDataTrees::set_cluster_tree_data_fields(TTree*& cluster_tree, EventDa
 {
 	LogDebug("tree_branching") << "Setting branch addresses for cluster tree..." << std::endl;
 	// cluster_tree -> SetBranchAddress("event",        &event_field);
-	cluster_tree -> SetBranchAddress("module",    &cluster_field.mod);
-	// cluster_tree -> SetBranchAddress("module_on",    &cluster_field.mod_on);
+	cluster_tree -> SetBranchAddress("module",       &cluster_field.mod);
+	cluster_tree -> SetBranchAddress("module_on",    &cluster_field.mod_on);
 	// Serial number of cluster in the given module
 	cluster_tree -> SetBranchAddress("clust_i",      &cluster_field.i);
 	// // Set if there is a valid hits
@@ -98,7 +98,7 @@ void PhaseIDataTrees::set_traj_tree_data_fields(TTree*& traj_tree, EventData& ev
 	LogDebug("tree_branching") << "Setting branch addresses for traj tree..." << std::endl;
 	// traj_tree -> SetBranchAddress("event",            &event_field);
 	traj_tree -> SetBranchAddress("module",           &traj_field.mod);
-	// traj_tree -> SetBranchAddress("module_on",        &traj_field.mod_on);
+	traj_tree -> SetBranchAddress("module_on",        &traj_field.mod_on);
 	traj_tree -> SetBranchAddress("traj",             &traj_field);
 	// traj_tree -> SetBranchAddress("traj_occup",       &traj_field.nclu_mod);
 	// traj_tree -> SetBranchAddress("traj_alphabeta",   &traj_field.alpha);

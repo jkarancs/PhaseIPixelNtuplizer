@@ -141,30 +141,25 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 
 		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError> > raw_data_error_token;
 
-		/////////////////
-		// For testing //
-		/////////////////
-
-		TRandom3 random;
-
-		/////////////////////////////
-		// Event tree field values //
-		/////////////////////////////
-
-		void get_nvtx_and_vtx_data(const edm::Event& iEvent); // FIXME: add reco for phase_I
+		//////////
+		// Data //
+		//////////
 
 		// FED errors
 		std::map<uint32_t, int> get_FED_errors(const edm::Event& iEvent);
-
-		///////////////////////////////
-		// Cluster tree field values //
-		///////////////////////////////
-
-		/////////////////
-		// Module data //
-		/////////////////
-
-		ModuleData get_module_data(const uint32_t& rawId, const TrackerTopology* const topology, const std::map<uint32_t, int>& federrors);
+		// Event data
+		void get_nvtx_and_vtx_data(const edm::Event& iEvent); // FIXME: add reco for phase_I
+		// Module data
+		ModuleData get_offline_module_data(const uint32_t& rawId, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors);
+		ModuleData convert_offline_to_online_module_data(const ModuleData mod_off);
+		int convert_offline_module_to_online_module_coordinate(const int& module);
+		int convert_offline_ladder_to_online_ladder_coordinate(const int& off_ladder, const int& quarter_size);
+		int convert_offline_disk_to_online_disk_coordinate(const int& side, const int& disk);
+		int convert_offline_blade_to_online_blade_coordinate(const int& blade);
+		// Clusters
+		void get_clusters(const edm::Event& iEvent, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors);
+		// Trajectory measurements
+		void get_traj_measurements(const edm::Event& iEvent, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors);
 
 		////////////////////
 		// Error handling //
@@ -173,12 +168,6 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		void handle_default_error(const std::string& exception_type, const std::string& stream_type, std::string msg);
 		void handle_default_error(const std::string& exception_type, const std::string& stream_type, std::vector<std::string> msg);
 		void print_evt_info(const std::string& stream_type);
-
-		//////////
-		// Test //
-		//////////
-
-		virtual void produce_fake_events(const int& num_events);
 
 	public:
 		PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);

@@ -10,7 +10,38 @@
 
 #include <string>
 
-class TrajMeasData
+//////////////////////
+// Static variables //
+//////////////////////
+
+template<class Dummy>
+struct TrajMeasData_static_variablse
+{
+	static std::map<int, std::string> federrortypes;
+	static std::string list;
+};
+
+#ifdef COMPLETE
+template<class Dummy>
+std::string TrajMeasData_static_variablse<Dummy>::list =
+    "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:"
+    "pass_efcuts:nclu_mod:nclu_roc:npix_mod:npix_roc:alpha/F:beta:dx_cl[2]:"
+    "dy_cl[2]:dx_hit:dy_hit:norm_charge:lz:glx:gly:glz:lxmatch:lymatch:i/I:"
+    "onedge:inactive:badhit:telescope:telescope_valid:dmodule:dladder:"
+    "glmatch/F:lx_err:ly_err:lz_err:lxymatch:res_hit:sig_hit:d_cl[2]";
+#else
+template<class Dummy>
+std::string TrajMeasData_static_variablse<Dummy>::list =
+    "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:"
+    "pass_efcuts:nclu_mod:nclu_roc:npix_mod:npix_roc:alpha/F:beta:dx_cl[2]:"
+    "dy_cl[2]:dx_hit:dy_hit:norm_charge";
+#endif
+
+/////////////////////////////
+// TrajMeasData definition //
+/////////////////////////////
+
+class TrajMeasData : public TrajMeasData_static_variablse<void>
 {
 	public:
 		// Non-split mode from here - keep order of variables
@@ -20,6 +51,9 @@ class TrajMeasData
 		int row;
 		float lx;
 		float ly;
+		float glx;
+		float gly;
+		float glz;
 		// float res_dx;
 		// float res_dz;
 		// float lev;
@@ -40,9 +74,6 @@ class TrajMeasData
 		// From here Split mode (if SPLIT defined)
 		float norm_charge;
 		float lz;
-		float glx;
-		float gly;
-		float glz;
 		float lxmatch;
 		float lymatch;
 		int i; // serial num of trajectory measurement on the (single) track of the event
@@ -61,9 +92,7 @@ class TrajMeasData
 		float res_hit;
 		float sig_hit;
 		float d_cl[2];
-		
-		std::string list;
-		
+
 		TrajMeasData() { init(); }
 		void init()
 		{
@@ -112,18 +141,6 @@ class TrajMeasData
 			res_hit=NOVAL_F;
 			sig_hit=NOVAL_F;
 			d_cl[0]=d_cl[1]=NOVAL_F;
-			
-#ifdef COMPLETE
-			list="validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:"
-				"pass_efcuts:nclu_mod:nclu_roc:npix_mod:npix_roc:alpha/F:beta:dx_cl[2]:"
-				"dy_cl[2]:dx_hit:dy_hit:norm_charge:lz:glx:gly:glz:lxmatch:lymatch:i/I:"
-				"onedge:inactive:badhit:telescope:telescope_valid:dmodule:dladder:"
-				"glmatch/F:lx_err:ly_err:lz_err:lxymatch:res_hit:sig_hit:d_cl[2]";
-#else
-			list="validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:"
-				"pass_efcuts:nclu_mod:nclu_roc:npix_mod:npix_roc:alpha/F:beta:dx_cl[2]:"
-				"dy_cl[2]:dx_hit:dy_hit:norm_charge";
-#endif
 		};
 };
 

@@ -85,6 +85,23 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 {
 	LogDebug("step") << "Executing PhaseIPixelNtuplizer::analyze()..." << std::endl;
 
+	//////////////////////
+	// Tool definitions //
+	//////////////////////
+
+	// Tracker for valid and missing hits
+	edm::ESHandle<TrackerGeometry> tracker;
+	iSetup.get<TrackerDigiGeometryRecord>().get(tracker);
+	if(!tracker.isValid())
+	{
+		handle_default_error("Invalid tracker.", "tool_access", "Inaccessible or invalid tracker.");
+	}
+
+	// Tracker topology for module informations
+	edm::ESHandle<TrackerTopology> tracker_topology_handle;
+	iSetup.get<TrackerTopologyRcd>().get(tracker_topology_handle);
+	const TrackerTopology* const tracker_topology = tracker_topology_handle.product();
+
 	////////////////
 	// Event tree //
 	////////////////
@@ -105,189 +122,17 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// FED errors
 	std::map<uint32_t, int> federrors = get_FED_errors(iEvent);
 
-	// Tracker topology for module informations
-	edm::ESHandle<TrackerTopology> tracker_topology_handle;
-	iSetup.get<TrackerTopologyRcd>().get(tracker_topology_handle);
-	const TrackerTopology* const tracker_topology = tracker_topology_handle.product();
-
 	//////////////////
 	// Cluster tree //
 	//////////////////
 
-	// // Set data holder objects
-	PhaseIDataTrees::set_cluster_tree_data_fields(cluster_tree, event_field, cluster_field);
-	// Fetching the clusters by token
-	edm::Handle<edmNew::DetSetVector<SiPixelCluster> > cluster_collection_handle;
-	iEvent.getByToken(clusters_token, cluster_collection_handle);
-	// Trying to access the clusters
-	if(cluster_collection_handle.isValid())
-	{
-		int cluster_counter = 0;
-		const edmNew::DetSetVector<SiPixelCluster>& current_cluster_collection = *cluster_collection_handle;
-		// Looping on clusters with the same location
-		typedef edmNew::DetSetVector<SiPixelCluster>::const_iterator clust_coll_it_t;
-		for(clust_coll_it_t current_cluster_set_it = current_cluster_collection.begin(); current_cluster_set_it != current_cluster_collection.end(); ++current_cluster_set_it)
-		{
-			const auto& current_cluster_set = *current_cluster_set_it;
-			DetId det_id(current_cluster_set.id());
-			unsigned int subdetId = det_id.subdetId();
-			// Take only pixel clusters
-			if(subdetId != PixelSubdetector::PixelBarrel && subdetId != PixelSubdetector::PixelEndcap)
-			{
-				continue;
-			}
-			typedef edmNew::DetSet<SiPixelCluster>::const_iterator clust_set_it_t;
-			for(clust_set_it_t current_cluster_it = current_cluster_set.begin(); current_cluster_it != current_cluster_set.end(); ++current_cluster_it)
-			{
-				const auto& current_cluster = *current_cluster_it;
-				// Serial num of cluster in the given module
-				cluster_field.i = current_cluster_it - current_cluster_set.begin();
-				// Set if there is a valid hits
-				// cluster_field.edge;
-				// cluster_field.badpix;
-				// cluster_field.tworoc;
-				// Module information
-				cluster_field.mod = get_module_data(det_id.rawId(), tracker_topology, federrors);
-				// Position and size
-				cluster_field.x     = current_cluster.x();
-				cluster_field.y     = current_cluster.y();
-				cluster_field.sizeX = current_cluster.sizeX();
-				cluster_field.sizeY = current_cluster.sizeY();
-				cluster_field.size  = current_cluster.size();
-				// Charge
-				cluster_field.charge = current_cluster.charge();
-				// Misc.
-				for(int i = 0; i < cluster_field.size && i < 1000; ++i)
-				{
-					const auto& current_pixels = current_cluster.pixels();
-					cluster_field.adc[i]    = current_cluster.pixelADC()[i] / 1000.0;
-					cluster_field.pix[i][0] = current_pixels[i].x;
-					cluster_field.pix[i][1] = current_pixels[i].y;
-				}
-				complete_cluster_collection.push_back(cluster_field);
-				// The number of saved clusters can be downscaled to save space
-				if(cluster_counter++ % cluster_save_downlscaling != 0)
-				{
-					continue;
-				}
-				cluster_tree -> Fill();
-			}
-		}
-	}
-	else
-	{
-		handle_default_error("data_access", "data_access", "Failed to fetch the clusters.");
-	}
+	get_clusters(iEvent, tracker_topology, federrors);
 
 	///////////////
 	// Traj tree //
 	///////////////
 
-	PhaseIDataTrees::set_traj_tree_data_fields(traj_tree, event_field, traj_field);
-
-	edm::ESHandle<TrackerGeometry> tracker;
-	iSetup.get<TrackerDigiGeometryRecord>().get(tracker);
-	if(!tracker.isValid())
-	{
-		handle_default_error("Invalid tracker.", "tool_access", "Inaccessible or invalid tracker.");
-	}
-
-	// Fetching the tracks by token
-	edm::Handle<TrajTrackAssociationCollection> traj_track_collection_handle;
-	iEvent.getByToken(traj_track_collection_token, traj_track_collection_handle);
-
-	for(const auto& current_track_keypair: *traj_track_collection_handle)
-	{
-		const auto&          traj  = current_track_keypair.key;
-		const reco::TrackRef track = current_track_keypair.val; // TrackRef is actually a pointer type
-
-		bool isBpixtrack = false;
-		bool isFpixtrack = false;
-		int nStripHits = 0;
-
-		// Looping on the full track to check if we have pixel hits 
-		// and to count the number of strip hits 
-		for(auto& measurement: traj -> measurements())
-		{
-			// Check measurement validity
-			if(!measurement.updatedState().isValid()) continue;
-			auto hit = measurement.recHit();
-			// Check hit quality
-			if(!hit -> isValid()) continue;
-			
-			DetId det_id = hit -> geographicalId();
-			uint32_t subdetid = (det_id.subdetId());
-			// For saving the pixel hits
-			if(subdetid == PixelSubdetector::PixelBarrel) isBpixtrack = true;
-			if(subdetid == PixelSubdetector::PixelEndcap) isFpixtrack = true;
-			// Counting the non-pixel hits
-			if(subdetid == StripSubdetector::TIB) nStripHits++;
-			if(subdetid == StripSubdetector::TOB) nStripHits++;
-			if(subdetid == StripSubdetector::TID) nStripHits++;
-			if(subdetid == StripSubdetector::TEC) nStripHits++;
-		}
-		// Discarding tracks without pixel measurements
-		if(!isBpixtrack && !isFpixtrack) continue;
-		// Looping again to check hit efficiency of pixel hits
-		for(auto& measurement: traj -> measurements())
-		{
-			// Check measurement validity
-			if(!measurement.updatedState().isValid()) continue;
-			auto hit = measurement.recHit();
-
-			DetId det_id = hit -> geographicalId();
-			uint32_t subdetid = (det_id.subdetId());
-
-			// Looking for pixel hits
-			bool is_pixel_hit = false;
-			is_pixel_hit |= subdetid == PixelSubdetector::PixelBarrel;
-			is_pixel_hit |= subdetid == PixelSubdetector::PixelEndcap;
-			if(!is_pixel_hit) continue;
-
-			// Looking for valid and missing hits
-			traj_field.validhit = hit -> getType() == TrackingRecHit::valid;
-			traj_field.missing  = hit -> getType() == TrackingRecHit::missing;
-			// Fetch the hit
-			const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(hit -> hit());
-			int row = 0;
-			int col = 0;
-			// Check hit qualty
-			if(pixhit)
-			{
-				const PixelGeomDetUnit* geomdetunit           = dynamic_cast<const PixelGeomDetUnit*>(tracker -> idToDet(det_id));
-				const PixelTopology&    topology              = geomdetunit -> specificTopology();
-				LocalPoint const&       lp                    = pixhit -> localPositionFast();
-				MeasurementPoint        mp                    = topology.measurementPosition(lp);
-				row = static_cast<int>(mp.x());
-				col = static_cast<int>(mp.y());
-				// Temporarily saving row and col
-				traj_field.row = row;
-				traj_field.col = col;
-				// Save module data
-				traj_field.mod = get_module_data(det_id.rawId(), tracker_topology, federrors);
-				// Position measurements
-				TrajectoryStateCombiner trajStateComb;
-				TrajectoryStateOnSurface predTrajState = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
-				traj_field.glx    = predTrajState.globalPosition().x();
-				traj_field.gly    = predTrajState.globalPosition().y();
-				traj_field.glz    = predTrajState.globalPosition().z();
-				traj_field.lx     = predTrajState.localPosition().x();
-				traj_field.ly     = predTrajState.localPosition().y();
-				traj_field.lz     = predTrajState.localPosition().z();
-				traj_field.lx_err = predTrajState.localError().positionError().xx();
-				traj_field.ly_err = predTrajState.localError().positionError().yy();
-				traj_field.onedge = std::abs(traj_field.lx) < 0.55 && std::abs(traj_field.ly) < 3.0;
-				// Track local angles
-				LocalTrajectoryParameters predTrajParam = predTrajState.localParameters();
-				LocalVector local_track_direction = predTrajParam.momentum() / predTrajParam.momentum().mag();
-				traj_field.alpha = atan2(local_track_direction.z(), local_track_direction.x());
-				traj_field.beta  = atan2(local_track_direction.z(), local_track_direction.y());
-
-				// Filling the tree
-				traj_tree -> Fill();
-			}
-		}
-	}
+	get_traj_measurements(iEvent, tracker, tracker_topology, federrors);
 
 	/////////////////////////
 	// For testing purpose //
@@ -322,14 +167,13 @@ void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const&, edm::
 
 void PhaseIPixelNtuplizer::get_nvtx_and_vtx_data(const edm::Event& iEvent)
 {
-	// From Marcel Schneider
 	// edm::Handle<reco::VertexCollection> vertices;
 	// iEvent.getByToken(primary_vertices_token, vertices);
 	// if(!vertices.isValid() || vertices -> size() == 0) return;
 
-	// // Get vertices by token
-	// edm::Handle<reco::VertexCollection> vertexCollectionHandle;
-	// iEvent.getByToken(primary_vertices_token, vertexCollectionHandle);
+	// // // Get vertices by token
+	// // edm::Handle<reco::VertexCollection> vertexCollectionHandle;
+	// // iEvent.getByToken(primary_vertices_token, vertexCollectionHandle);
 	// // Loop on vertices
 	// event_field.nvtx = 0;
 	// const reco::VertexCollection& vertices = *vertexCollectionHandle.product();
@@ -409,26 +253,27 @@ std::map<uint32_t, int> PhaseIPixelNtuplizer::get_FED_errors(const edm::Event& i
 // Module informations //
 /////////////////////////
 
-ModuleData PhaseIPixelNtuplizer::get_module_data(const uint32_t& rawId, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors)
+ModuleData PhaseIPixelNtuplizer::get_offline_module_data(const uint32_t& rawId, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors)
 {
 	ModuleData mod;
 	mod.rawid = rawId;
 	int subdetId = DetId(mod.rawid).subdetId();
-	// Pixel Barrel hits
 	if(subdetId == PixelSubdetector::PixelBarrel)
 	{
+		mod.det    = 0;
 		mod.layer  = tracker_topology -> pxbLayer(rawId);
 		mod.ladder = tracker_topology -> pxbLadder(rawId);
 		mod.module = tracker_topology -> pxbModule(rawId);
 	}
-	// Pixel Endcap hits
 	if(subdetId == PixelSubdetector::PixelEndcap)
 	{
+		mod.det    = 1;
 		mod.side   = tracker_topology -> pxfSide(rawId);
-		mod.disk   = tracker_topology -> pxfDisk(rawId);
-		mod.blade  = tracker_topology -> pxfBlade(rawId);
-		mod.panel  = tracker_topology -> pxfDisk(rawId);
-		mod.module = tracker_topology -> pxfModule(rawId);
+		mod.disk   = tracker_topology -> pxfDisk(rawId);   // Increasing abs(z): 1-3
+		mod.blade  = tracker_topology -> pxfBlade(rawId);  // Inner blades: 1-22, outer blades: 23-56
+		mod.panel  = tracker_topology -> pxfPanel(rawId);  // Forward: 1; Backward 2
+		mod.module = tracker_topology -> pxfModule(rawId); // Always 1
+		mod.ring   = 1 + (22 < mod.blade);                 // Inner: 1, Outer: 2
 	}
 	// FED error
 	mod.federr = 0;
@@ -440,132 +285,244 @@ ModuleData PhaseIPixelNtuplizer::get_module_data(const uint32_t& rawId, const Tr
 	return mod;
 }
 
+ModuleData PhaseIPixelNtuplizer::convert_offline_to_online_module_data(const ModuleData mod_off)
+{
+	ModuleData mod_on;
+	mod_on.rawid  = mod_off.rawid;
+	mod_on.det    = mod_off.det;
+	if(mod_off.det == 0)
+	{
+		mod_on.layer  = mod_off.layer;
+		mod_on.module = convert_offline_module_to_online_module_coordinate(mod_off.module);
+		mod_on.ladder = convert_offline_ladder_to_online_ladder_coordinate(mod_off.layer, mod_off.ladder);
+	}
+	if(mod_off.det == 1)
+	{
+		mod_on.side   = mod_off.side;
+		mod_on.disk   = convert_offline_disk_to_online_disk_coordinate(mod_off.side, mod_off.disk);    // Increasing abs(z): 1-3
+		mod_on.blade  = convert_offline_blade_to_online_blade_coordinate(mod_off.blade); // Inner blades: (-11)-(-1), 1-11, outer blades: (-17)-(1), 1-17
+		mod_on.panel  = mod_off.panel;  // Forward: 1; Backward 2
+		mod_on.module = mod_off.module; // Always 1
+		mod_on.ring   = mod_off.ring;   // Inner: 1, Outer: 2
+	}
+	mod_on.federr = mod_off.federr;
+	return mod_on;
+}
+
+int PhaseIPixelNtuplizer::convert_offline_module_to_online_module_coordinate(const int& module)
+{
+	int converted = NOVAL_I;
+	if(0 < module && module < 5) converted = module - 5;
+	if(4 < module && module < 9) converted = module - 4;
+	return converted;
+}
+
+int PhaseIPixelNtuplizer::convert_offline_ladder_to_online_ladder_coordinate(const int& layer, const int& ladder)
+{
+	static const std::vector<int> layer_quarter_sizes = {NOVAL_I, 3, 7, 11, 16};
+	const int& quarter_size = layer_quarter_sizes[layer];
+	int converted = NOVAL_I;
+	if(0                < ladder && ladder <= quarter_size)     converted = quarter_size - ladder + 1;
+	if(quarter_size     < ladder && ladder <= quarter_size * 3) converted = quarter_size - ladder;
+	if(quarter_size * 3 < ladder && ladder <= quarter_size * 4) converted = quarter_size * 5 - ladder;
+	return converted;
+}
+
+int PhaseIPixelNtuplizer::convert_offline_disk_to_online_disk_coordinate(const int& side, const int& disk)
+{
+	int converted = NOVAL_I;
+	if(side == 2) converted =  disk;
+	if(side == 1) converted = -disk;
+	return converted;
+}
+
+int PhaseIPixelNtuplizer::convert_offline_blade_to_online_blade_coordinate(const int& blade)
+{
+	int converted = NOVAL_I;
+	if(1  <= blade && blade < 7)  converted = 7  - blade; // 6 on 1st quarter
+	if(7  <= blade && blade < 18) converted = 6  - blade; // 11 on 2nd half
+	if(18 <= blade && blade < 23) converted = 28 - blade; // 5 on 4th quarter
+	if(23 <= blade && blade < 32) converted = 32 - blade; // 9 on 1st quarter
+	if(32 <= blade && blade < 49) converted = 31 - blade; // 17 on 2nd half
+	if(49 <= blade && blade < 57) converted = 66 - blade; // 8 on 4th quarter
+	return converted;
+}
+
+////////////////
+// Clust tree //
+////////////////
+
+void PhaseIPixelNtuplizer::get_clusters(const edm::Event& iEvent, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors)
+{
+	// Set data holder objects
+	PhaseIDataTrees::set_cluster_tree_data_fields(cluster_tree, event_field, cluster_field);
+	// Fetching the clusters by token
+	edm::Handle<edmNew::DetSetVector<SiPixelCluster> > cluster_collection_handle;
+	iEvent.getByToken(clusters_token, cluster_collection_handle);
+	// Trying to access the clusters
+	if(cluster_collection_handle.isValid())
+	{
+		int cluster_counter = 0;
+		const edmNew::DetSetVector<SiPixelCluster>& current_cluster_collection = *cluster_collection_handle;
+		// Looping on clusters with the same location
+		typedef edmNew::DetSetVector<SiPixelCluster>::const_iterator clust_coll_it_t;
+		for(clust_coll_it_t current_cluster_set_it = current_cluster_collection.begin(); current_cluster_set_it != current_cluster_collection.end(); ++current_cluster_set_it)
+		{
+			const auto& current_cluster_set = *current_cluster_set_it;
+			DetId det_id(current_cluster_set.id());
+			unsigned int subdetId = det_id.subdetId();
+			// Take only pixel clusters
+			if(subdetId != PixelSubdetector::PixelBarrel && subdetId != PixelSubdetector::PixelEndcap)
+			{
+				continue;
+			}
+			typedef edmNew::DetSet<SiPixelCluster>::const_iterator clust_set_it_t;
+			for(clust_set_it_t current_cluster_it = current_cluster_set.begin(); current_cluster_it != current_cluster_set.end(); ++current_cluster_it)
+			{
+				const auto& current_cluster = *current_cluster_it;
+				// Serial num of cluster in the given module
+				cluster_field.i = current_cluster_it - current_cluster_set.begin();
+				// Set if there is a valid hits
+				// cluster_field.edge;
+				// cluster_field.badpix;
+				// cluster_field.tworoc;
+				// Module information
+				cluster_field.mod    = get_offline_module_data(det_id.rawId(), tracker_topology, federrors);
+				cluster_field.mod_on = convert_offline_to_online_module_data(cluster_field.mod);
+				// Position and size
+				cluster_field.x     = current_cluster.x();
+				cluster_field.y     = current_cluster.y();
+				cluster_field.sizeX = current_cluster.sizeX();
+				cluster_field.sizeY = current_cluster.sizeY();
+				cluster_field.size  = current_cluster.size();
+				// Charge
+				cluster_field.charge = current_cluster.charge();
+				// Misc.
+				for(int i = 0; i < cluster_field.size && i < 1000; ++i)
+				{
+					const auto& current_pixels = current_cluster.pixels();
+					cluster_field.adc[i]    = current_cluster.pixelADC()[i] / 1000.0;
+					cluster_field.pix[i][0] = current_pixels[i].x;
+					cluster_field.pix[i][1] = current_pixels[i].y;
+				}
+				complete_cluster_collection.push_back(cluster_field);
+				// The number of saved clusters can be downscaled to save space
+				if(cluster_counter++ % cluster_save_downlscaling != 0)
+				{
+					continue;
+				}
+				cluster_tree -> Fill();
+			}
+		}
+	}
+	else
+	{
+		handle_default_error("data_access", "data_access", "Failed to fetch the clusters.");
+	}
+}
+
+
 ///////////////
 // Traj tree //
 ///////////////
 
-// void PhaseIPixelNtuplizer::get_traj_measurements(const edm::Event& iEvent)
-// {
-// 	// TODO: move this before filling the event tree
-// 	event_field.ntracks = traj_track_collection_handle -> size();
-// 	// Reset track counters
-// 	event_field.ntrackFPix[0]      = 0;
-// 	event_field.ntrackFPix[1]      = 0;
-// 	event_field.ntrackBPix[0]      = 0;
-// 	event_field.ntrackBPix[1]      = 0;
-// 	event_field.ntrackBPix[2]      = 0;
-// 	event_field.ntrackFPixvalid[0] = 0;
-// 	event_field.ntrackFPixvalid[1] = 0;
-// 	event_field.ntrackBPixvalid[0] = 0;
-// 	event_field.ntrackBPixvalid[1] = 0;
-// 	event_field.ntrackBPixvalid[2] = 0;
-
-
-// 	/////////////
-// 	// Toolkit //
-// 	/////////////
-
-// 	// Fitter
-// 	edm::ESHandle<TrajectoryFitter> aFitter;
-// 	iSetup.get<TrajectoryFitter::Record>().get("KFFittingSmootherWithOutliersRejectionAndRK",aFitter);
-// 	std::unique_ptr<TrajectoryFitter> theFitter = aFitter->clone();
-// 	// Transient Rechit Builders
-// 	edm::ESHandle<TransientTrackBuilder> transient_track_builder;
-// 	iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", transient_track_builder);
-// 	// Transient rec hits:
-// 	edm::ESHandle<TransientTrackingRecHitBuilder> hitBuilder;
-// 	iSetup.get<TransientRecHitRecord>().get("WithTrackAngle", hitBuilder);
-// 	// Cloner
-// 	const TkTransientTrackingRecHitBuilder* builder = static_cast<const TkTransientTrackingRecHitBuilder*>(hitBuilder.product());
-// 	auto hitCloner = builder -> cloner();
-// 	theFitter -> setHitCloner(&hitCloner);
-// 	// TrackPropagator:
-// 	edm::ESHandle<Propagator> prop;
-// 	iSetup.get<TrackingComponentsRecord>().get( "PropagatorWithMaterial", prop );
-// 	const Propagator* thePropagator = prop.product();
-// 	// Surface::GlobalPoint origin = Surface::GlobalPoint(0,0,0);
-
-// 	/////////////////////////
-// 	// Looping on rec_hits //
-// 	/////////////////////////
-
-// 	// Fetch all the traj measurements
-// 	TrajMeasurement traj_measurement;
-// 	for(const auto& current_track_keypair: *traj_track_collection_handle)
-// 	{
-// 		const Trajectory& traj   = *(current_track_keypair.key);
-// 		const reco::Track& track = *(current_track_keypair.val);
-// 		reco::TransientTrack tTrack    = transient_track_builder -> build(track);
-
-// 		TrajectoryStateOnSurface initialTSOS = tTrack.innermostMeasurementState();
-
-// 		// Container for tracker rec_hits
-// 		edm::OwnVector<TrackingRecHit> rec_hit_vector; // for seed
-// 		// Container for trajectory fits
-// 		Trajectory::RecHitContainer coTTRHvec;       // for fit, constant
-// 		// Loop on recHits in order to fill above hit coordinates
-// 		for(trackingRecHit_iterator rec_hit_it = track.recHitsBegin(); rec_hit_it != track.recHitsEnd(); ++rec_hit_it)
-// 		{
-// 			auto& rec_hit = *rec_hit_it;
-// 			DetId detId = rec_hit -> geographicalId();
-// 			// enum Detector { Tracker=1, Muon=2, Ecal=3, Hcal=4, Calo=5 };
-// 			if(detId.det() != 1)
-// 			{
-// 				continue;
-// 			}
-// 			rec_hit_vector.push_back(rec_hit -> clone());
-// 			auto tmprh = rec_hit -> cloneForFit(*builder -> geometry() -> idToDet(rec_hit -> geographicalId()));
-// 			auto transRecHit = hitCloner.makeShared(tmprh, initialTSOS);
-// 			coTTRHvec.push_back(transRecHit);
-// 			if(!rec_hit -> isValid())
-// 			{
-// 				continue;
-// 			}
-// 			// Global coordinates
-// 			double gX = transRecHit->globalPosition().x();
-// 			double gY = transRecHit->globalPosition().y();
-// 			double gZ = transRecHit->globalPosition().z();
-// 			if(transRecHit -> canImproveWithTrack())
-// 			{
-// 				// Use z from track to apply alignment
-// 				TrajectoryStateOnSurface propTSOS = thePropagator->propagate(initialTSOS, transRecHit -> det() -> surface());
-// 				if(propTSOS.isValid())
-// 				{
-// 					auto preciseHit = hitCloner.makeShared(tmprh, propTSOS); //pre7
-// 					gX = preciseHit -> globalPosition().x();
-// 					gY = preciseHit -> globalPosition().y();
-// 					gZ = preciseHit -> globalPosition().z();
-// 				}
-// 			}
-// 			LogDebug("calculation_details") <<
-// 			"gX: " << gX << std::endl <<
-// 			"gY: " << gY << std::endl <<
-// 			"gZ: " << gZ << std::endl <<
-// 			"gXY: " << sqrt(gX * gX + gY * gY) << std::endl;
-// 			// if(sqrt(gX * gX + gY * gY) < 99.9)
-// 			// {
-// 			// 	innerDetId = detId.rawId();
-// 			// }
-// 			}
-// 		}
-// }
-
-//////////
-// Test //
-//////////
-
-void PhaseIPixelNtuplizer::produce_fake_events(const int& num_events)
+void PhaseIPixelNtuplizer::get_traj_measurements(const edm::Event& iEvent, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors)
 {
-	for(int i = 0; i < num_events; ++i)
+	PhaseIDataTrees::set_traj_tree_data_fields(traj_tree, event_field, traj_field);
+
+	// Fetching the tracks by token
+	edm::Handle<TrajTrackAssociationCollection> traj_track_collection_handle;
+	iEvent.getByToken(traj_track_collection_token, traj_track_collection_handle);
+
+	for(const auto& current_track_keypair: *traj_track_collection_handle)
 	{
-		// Set data holder object
-		event_tree -> SetBranchAddress("event", &event_field);
-		// Assign random values to some of the fields
-		event_field.fill = static_cast<int>(random.Rndm() * 3);
-		event_field.fill = static_cast<int>(random.Rndm() * 3000 + 272232);
-		event_field.instlumi = random.Rndm() * 100;
-		// Fill the tree
-		event_tree -> Fill();
+		const auto&          traj  = current_track_keypair.key;
+		const reco::TrackRef track = current_track_keypair.val; // TrackRef is actually a pointer type
+
+		bool isBpixtrack = false;
+		bool isFpixtrack = false;
+		int nStripHits = 0;
+
+		// Looping on the full track to check if we have pixel hits 
+		// and to count the number of strip hits 
+		for(auto& measurement: traj -> measurements())
+		{
+			// Check measurement validity
+			if(!measurement.updatedState().isValid()) continue;
+			auto hit = measurement.recHit();
+			// Check hit quality
+			if(!hit -> isValid()) continue;
+			
+			DetId det_id = hit -> geographicalId();
+			uint32_t subdetid = (det_id.subdetId());
+			// For saving the pixel hits
+			if(subdetid == PixelSubdetector::PixelBarrel) isBpixtrack = true;
+			if(subdetid == PixelSubdetector::PixelEndcap) isFpixtrack = true;
+			// Counting the non-pixel hits
+			if(subdetid == StripSubdetector::TIB) nStripHits++;
+			if(subdetid == StripSubdetector::TOB) nStripHits++;
+			if(subdetid == StripSubdetector::TID) nStripHits++;
+			if(subdetid == StripSubdetector::TEC) nStripHits++;
+		}
+		// Discarding tracks without pixel measurements
+		if(!isBpixtrack && !isFpixtrack) continue;
+		// Looping again to check hit efficiency of pixel hits
+		for(auto& measurement: traj -> measurements())
+		{
+			// Check measurement validity
+			if(!measurement.updatedState().isValid()) continue;
+			auto hit = measurement.recHit();
+			// Det id
+			DetId det_id = hit -> geographicalId();
+			uint32_t subdetid = (det_id.subdetId());
+			// Looking for pixel hits
+			bool is_pixel_hit = false;
+			is_pixel_hit |= subdetid == PixelSubdetector::PixelBarrel;
+			is_pixel_hit |= subdetid == PixelSubdetector::PixelEndcap;
+			if(!is_pixel_hit) continue;
+			// Looking for valid and missing hits
+			traj_field.validhit = hit -> getType() == TrackingRecHit::valid;
+			traj_field.missing  = hit -> getType() == TrackingRecHit::missing;
+			// Fetch the hit
+			const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(hit -> hit());
+			int row = 0;
+			int col = 0;
+			// Check hit qualty
+			if(pixhit)
+			{
+				const PixelGeomDetUnit* geomdetunit           = dynamic_cast<const PixelGeomDetUnit*>(tracker -> idToDet(det_id));
+				const PixelTopology&    topology              = geomdetunit -> specificTopology();
+				LocalPoint const&       lp                    = pixhit -> localPositionFast();
+				MeasurementPoint        mp                    = topology.measurementPosition(lp);
+				row = static_cast<int>(mp.x());
+				col = static_cast<int>(mp.y());
+				// Temporarily saving row and col
+				traj_field.row = row;
+				traj_field.col = col;
+				// Save module data
+				traj_field.mod    = get_offline_module_data(det_id.rawId(), tracker_topology, federrors);
+				traj_field.mod_on = convert_offline_to_online_module_data(traj_field.mod);
+				// Position measurements
+				TrajectoryStateCombiner trajStateComb;
+				TrajectoryStateOnSurface predTrajState = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
+				traj_field.glx    = predTrajState.globalPosition().x();
+				traj_field.gly    = predTrajState.globalPosition().y();
+				traj_field.glz    = predTrajState.globalPosition().z();
+				traj_field.lx     = predTrajState.localPosition().x();
+				traj_field.ly     = predTrajState.localPosition().y();
+				traj_field.lz     = predTrajState.localPosition().z();
+				traj_field.lx_err = predTrajState.localError().positionError().xx();
+				traj_field.ly_err = predTrajState.localError().positionError().yy();
+				traj_field.onedge = std::abs(traj_field.lx) < 0.55 && std::abs(traj_field.ly) < 3.0;
+				// Track local angles
+				LocalTrajectoryParameters predTrajParam = predTrajState.localParameters();
+				LocalVector local_track_direction = predTrajParam.momentum() / predTrajParam.momentum().mag();
+				traj_field.alpha = atan2(local_track_direction.z(), local_track_direction.x());
+				traj_field.beta  = atan2(local_track_direction.z(), local_track_direction.y());
+				// Filling the tree
+				traj_tree -> Fill();
+			}
+		}
 	}
 }
 
