@@ -10,6 +10,13 @@
 *.pdf
 *.png
 
+# Compilation extras
+*.pyc
+
+# SCRAM extras
+__init__.py
+__init__.pyc
+
 # Executables
 *_process
 
@@ -29,6 +36,7 @@ jegyzet.md
 
 # Sublime text files
 *.sublime-*
+*.temp
 
 # Instlumi and pileup maps
 # Resources/Sources/Includes/Histogram_generation/Fill_parameters/Instlumi_map/run_ls_instlumi_pileup_2012.txt
