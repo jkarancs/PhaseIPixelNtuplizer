@@ -78,10 +78,6 @@ void PhaseIPixelNtuplizer::endJob()
 	LogDebug("file_operations") << "Closing file: \"" << ntuple_output_filename << "\"." << std::endl;
 	ntuple_output_file -> Close();
 	LogDebug("file_operations") << "File succesfully closed: \"" << ntuple_output_filename << "\"." << std::endl;
-	if(ntuple_output_file -> IsOpen())
-	{
-		ntuple_output_file -> Close();
-	}
 	// if(event_tree)   delete event_tree;
 	// if(cluster_tree) delete cluster_tree;
 	// if(traj_tree)    delete traj_tree;
@@ -349,7 +345,7 @@ int PhaseIPixelNtuplizer::convert_offline_blade_to_online_blade_coordinate(const
 	int converted = NOVAL_I;
 	if(1  <= blade && blade < 7)  converted = 7  - blade; // 6 on 1st quarter
 	if(7  <= blade && blade < 18) converted = 6  - blade; // 11 on 2nd half
-	if(18 <= blade && blade < 23) converted = 28 - blade; // 5 on 4th quarter
+	if(18 <= blade && blade < 23) converted = 29 - blade; // 5 on 4th quarter
 	if(23 <= blade && blade < 32) converted = 32 - blade; // 9 on 1st quarter
 	if(32 <= blade && blade < 49) converted = 31 - blade; // 17 on 2nd half
 	if(49 <= blade && blade < 57) converted = 66 - blade; // 8 on 4th quarter
