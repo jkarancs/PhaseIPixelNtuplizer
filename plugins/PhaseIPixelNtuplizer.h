@@ -61,13 +61,20 @@
 #include "../interface/Tree_structures/Cluster.hh"
 #include "../interface/Tree_structures/Traj_measurement.hh"
 
+////////////////////////////////
+// Hit efficiency measurement //
+////////////////////////////////
+
+// Cuts for hit efficicency
+#include "../interface/PhaseI_tracking_efficiency_filters.h"
+
 ////////////////////////////
 // Message logger service //
 ////////////////////////////
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 // Adding some colors :)
-#include "../interface/Console_colors.hh"
+#include "../interface/Console_colors.h"
 
 ////////////////////
 // Root libraries //
@@ -159,7 +166,10 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		// Clusters
 		void get_clusters(const edm::Event& iEvent, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors);
 		// Trajectory measurements
+		int  trajectory_has_pixel_hit(const edm::Ref<std::vector<Trajectory>>& trajectory);
 		void get_traj_measurements(const edm::Event& iEvent, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors);
+		void get_track_data();
+		void get_hit_efficiency_cuts();
 
 		////////////////////
 		// Error handling //
@@ -168,6 +178,12 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		void handle_default_error(const std::string& exception_type, const std::string& stream_type, std::string msg);
 		void handle_default_error(const std::string& exception_type, const std::string& stream_type, std::vector<std::string> msg);
 		void print_evt_info(const std::string& stream_type);
+
+		/////////////
+		// Utility //
+		/////////////
+
+		void clear_all_containers();
 
 	public:
 		PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);

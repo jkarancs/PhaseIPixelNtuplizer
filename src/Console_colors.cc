@@ -1,4 +1,4 @@
-#include "../interface/Console_colors.hh"
+#include "../interface/Console_colors.h"
 
 namespace Console_color 
 {

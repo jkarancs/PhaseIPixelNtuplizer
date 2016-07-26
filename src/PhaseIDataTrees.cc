@@ -42,7 +42,7 @@ void PhaseIDataTrees::define_traj_tree_branches(TTree*& traj_tree, EventData& ev
 	traj_tree -> Branch("module",           &traj_field.mod,         ModuleData::list.c_str());
 	traj_tree -> Branch("module_on",        &traj_field.mod_on,      ModuleData::list.c_str());
 	// traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:pass_effcuts");
-	traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing/I:row/I:col/I:lx/F:ly/F:glx/F:gly/F:glz/F");
+	traj_tree -> Branch("traj",             &traj_field,             "validhit/I:missing/I:row/I:col/I:lx/F:ly/F:glx/F:gly/F:glz/F:pass_effcuts/I");
 	// traj_tree -> Branch("traj_occup",       &traj_field.nclu_mod,    "nclu_mod/I:nclu_roc:npix_mod:npix_roc");
 	// traj_tree -> Branch("traj_alphabeta",   &traj_field.alpha,       "alpha/F:beta");
 	// traj_tree -> Branch("traj_dxy_cl",      &traj_field.dx_cl,       "dx_cl[2]/F:dy_cl[2]");
@@ -51,7 +51,7 @@ void PhaseIDataTrees::define_traj_tree_branches(TTree*& traj_tree, EventData& ev
 	// traj_tree -> Branch("clust_size",       &traj_field.clu.size,    "size/I");
 	// traj_tree -> Branch("clust_sizeXY",     &traj_field.clu.sizeX,   "sizeX/I:sizeY");
 	// traj_tree -> Branch("clust_adc",        &traj_field.clu.pix,     "adc[size]/F");
-	// traj_tree -> Branch("track",            &traj_field.trk,         "validfpix[2]/I:validbpix[3]:strip:nstripmissing:nstriplost:nstriplayer:quality:d0/F:dz:pt");
+	// traj_tree -> Branch("track",            &traj_field.trk,         traj_field.trk.list.c_str());
 	// traj_tree -> Branch("track_ndofchi2",   &traj_field.trk.ndof,    "ndof/F:chi2");
 	// traj_tree -> Branch("track_eta",        &traj_field.trk.eta,     "eta/F");
 	// traj_tree -> Branch("track_phi",        &traj_field.trk.phi,     "phi/F");

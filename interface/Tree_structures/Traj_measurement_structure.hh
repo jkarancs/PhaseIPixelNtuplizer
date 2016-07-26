@@ -59,7 +59,7 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 		// float lev;
 		// int clust_near;
 		// int hit_near;
-		// int pass_effcuts;
+		int pass_effcuts;
 		// Paired branch (keep order)
 		int nclu_mod;
 		int nclu_roc;
@@ -107,7 +107,7 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 			// lev=NOVAL_F;
 			// clust_near=NOVAL_I;
 			// hit_near=NOVAL_I;
-			// pass_effcuts=NOVAL_I;
+			pass_effcuts=NOVAL_I;
 			nclu_mod=NOVAL_I;
 			nclu_roc=NOVAL_I;
 			npix_mod=NOVAL_I;

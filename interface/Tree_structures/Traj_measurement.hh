@@ -20,16 +20,22 @@ class TrajMeasurement : public TrajMeasData
 		ModuleData mod; // offline module number
 		ModuleData mod_on; // online module number
 		// ClustData clu;
-		// TrackData trk;
+		TrackData trk;
 
-		TrajMeasurement() { mod.init(); mod_on.init(); /*clu.init(); trk.init(); */}
+		TrajMeasurement()
+		{ 
+			mod.init();
+			mod_on.init();
+			// clu.init();
+			trk.init();
+		}
 		void init()
 		{
 			TrajMeasData::init();
 			mod.init();
 			mod_on.init();
 			// clu.init();
-			// trk.init();
+			trk.init();
 		};
 };
 

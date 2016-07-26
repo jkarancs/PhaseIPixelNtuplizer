@@ -73,12 +73,18 @@ void PhaseIPixelNtuplizer::beginJob()
 void PhaseIPixelNtuplizer::endJob()
 {
 	LogDebug("step") << "Executing PhaseIPixelNtuplizer::endJob()..." << std::endl;
-
 	LogDebug("file_operations") << "Writing plots to file: \"" << ntuple_output_filename << "\"." << std::endl;
 	ntuple_output_file -> Write();
 	LogDebug("file_operations") << "Closing file: \"" << ntuple_output_filename << "\"." << std::endl;
 	ntuple_output_file -> Close();
 	LogDebug("file_operations") << "File succesfully closed: \"" << ntuple_output_filename << "\"." << std::endl;
+	if(ntuple_output_file -> IsOpen())
+	{
+		ntuple_output_file -> Close();
+	}
+	// if(event_tree)   delete event_tree;
+	// if(cluster_tree) delete cluster_tree;
+	// if(traj_tree)    delete traj_tree;
 }
 
 void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
@@ -137,6 +143,8 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	/////////////////////////
 	// For testing purpose //
 	/////////////////////////
+
+	clear_all_containers();
 
 	// produce_fake_events(1);
 }
@@ -426,46 +434,45 @@ void PhaseIPixelNtuplizer::get_clusters(const edm::Event& iEvent, const TrackerT
 // Traj tree //
 ///////////////
 
+int PhaseIPixelNtuplizer::trajectory_has_pixel_hit(const edm::Ref<std::vector<Trajectory>>& trajectory)
+{
+	bool is_barrel_pixel_track = false;
+	bool is_endcap_pixel_track = false;
+	// Looping on the full track to check if we have pixel hits 
+	// and to count the number of strip hits 
+	for(auto& measurement: trajectory -> measurements())
+	{
+		// Check measurement validity
+		if(!measurement.updatedState().isValid()) continue;
+		auto hit = measurement.recHit();
+		// Check hit quality
+		if(!hit -> isValid()) continue;
+		DetId det_id = hit -> geographicalId();
+		uint32_t subdetid = (det_id.subdetId());
+		// For saving the pixel hits
+		if(subdetid == PixelSubdetector::PixelBarrel) is_barrel_pixel_track = true;
+		if(subdetid == PixelSubdetector::PixelEndcap) is_endcap_pixel_track = true;
+	}
+	if(!is_barrel_pixel_track && !is_endcap_pixel_track)
+	{
+		return 0;
+	}
+	return 1;
+}
+
 void PhaseIPixelNtuplizer::get_traj_measurements(const edm::Event& iEvent, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors)
 {
 	PhaseIDataTrees::set_traj_tree_data_fields(traj_tree, event_field, traj_field);
-
 	// Fetching the tracks by token
 	edm::Handle<TrajTrackAssociationCollection> traj_track_collection_handle;
 	iEvent.getByToken(traj_track_collection_token, traj_track_collection_handle);
-
+	// Looping on the whole track collection
 	for(const auto& current_track_keypair: *traj_track_collection_handle)
 	{
-		const auto&          traj  = current_track_keypair.key;
-		const reco::TrackRef track = current_track_keypair.val; // TrackRef is actually a pointer type
-
-		bool isBpixtrack = false;
-		bool isFpixtrack = false;
-		int nStripHits = 0;
-
-		// Looping on the full track to check if we have pixel hits 
-		// and to count the number of strip hits 
-		for(auto& measurement: traj -> measurements())
-		{
-			// Check measurement validity
-			if(!measurement.updatedState().isValid()) continue;
-			auto hit = measurement.recHit();
-			// Check hit quality
-			if(!hit -> isValid()) continue;
-			
-			DetId det_id = hit -> geographicalId();
-			uint32_t subdetid = (det_id.subdetId());
-			// For saving the pixel hits
-			if(subdetid == PixelSubdetector::PixelBarrel) isBpixtrack = true;
-			if(subdetid == PixelSubdetector::PixelEndcap) isFpixtrack = true;
-			// Counting the non-pixel hits
-			if(subdetid == StripSubdetector::TIB) nStripHits++;
-			if(subdetid == StripSubdetector::TOB) nStripHits++;
-			if(subdetid == StripSubdetector::TID) nStripHits++;
-			if(subdetid == StripSubdetector::TEC) nStripHits++;
-		}
+		const edm::Ref<std::vector<Trajectory>> traj = current_track_keypair.key;
+		const reco::TrackRef track                   = current_track_keypair.val; // TrackRef is actually a pointer type
 		// Discarding tracks without pixel measurements
-		if(!isBpixtrack && !isFpixtrack) continue;
+		if(!trajectory_has_pixel_hit(traj)) continue;
 		// Looping again to check hit efficiency of pixel hits
 		for(auto& measurement: traj -> measurements())
 		{
@@ -485,38 +492,43 @@ void PhaseIPixelNtuplizer::get_traj_measurements(const edm::Event& iEvent, const
 			traj_field.missing  = hit -> getType() == TrackingRecHit::missing;
 			// Fetch the hit
 			const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(hit -> hit());
-			int row = 0;
-			int col = 0;
 			// Check hit qualty
 			if(pixhit)
 			{
-				const PixelGeomDetUnit* geomdetunit           = dynamic_cast<const PixelGeomDetUnit*>(tracker -> idToDet(det_id));
-				const PixelTopology&    topology              = geomdetunit -> specificTopology();
-				LocalPoint const&       lp                    = pixhit -> localPositionFast();
-				MeasurementPoint        mp                    = topology.measurementPosition(lp);
-				row = static_cast<int>(mp.x());
-				col = static_cast<int>(mp.y());
-				// Temporarily saving row and col
-				traj_field.row = row;
-				traj_field.col = col;
 				// Save module data
 				traj_field.mod    = get_offline_module_data(det_id.rawId(), tracker_topology, federrors);
 				traj_field.mod_on = convert_offline_to_online_module_data(traj_field.mod);
 				// Position measurements
-				TrajectoryStateCombiner trajStateComb;
-				TrajectoryStateOnSurface predTrajState = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
-				traj_field.glx    = predTrajState.globalPosition().x();
-				traj_field.gly    = predTrajState.globalPosition().y();
-				traj_field.glz    = predTrajState.globalPosition().z();
-				traj_field.lx     = predTrajState.localPosition().x();
-				traj_field.ly     = predTrajState.localPosition().y();
-				traj_field.lz     = predTrajState.localPosition().z();
-				traj_field.lx_err = predTrajState.localError().positionError().xx();
-				traj_field.ly_err = predTrajState.localError().positionError().yy();
+				TrajectoryStateCombiner  trajStateComb;
+				TrajectoryStateOnSurface traj_state_on_surface = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
+				auto global_position      = traj_state_on_surface.globalPosition();
+				auto local_position       = traj_state_on_surface.localPosition();
+				auto local_position_error = traj_state_on_surface.localError().positionError();
+				traj_field.glx    = global_position.x();
+				traj_field.gly    = global_position.y();
+				traj_field.glz    = global_position.z();
+				traj_field.lx     = local_position.x();
+				traj_field.ly     = local_position.y();
+				traj_field.lz     = local_position.z();
+				traj_field.lx_err = local_position_error.xx();
+				traj_field.ly_err = local_position_error.yy();
 				traj_field.onedge = std::abs(traj_field.lx) < 0.55 && std::abs(traj_field.ly) < 3.0;
+				// // Top-of-detector tracks
+				// if(0 <= traj_field.gly && traj_field.gly != NOVAL_F)
+				// {
+				// 	traj_field.trk.pixhit[0] += 1;
+				// 	if(traj_field.validhit) traj_field.trk.validpixhit[0] += 1;
+				// }
+				// // Bottom-of-detector tracks
+				// if(traj_field.gly < 0 && traj_field.gly != NOVAL_F)
+				// {
+				// 	traj_field.trk.pixhit[1] += 1;
+				// 	if(traj_field.validhit) traj_field.trk.validpixhit[1] += 1;
+				// }
 				// Track local angles
-				LocalTrajectoryParameters predTrajParam = predTrajState.localParameters();
-				LocalVector local_track_direction = predTrajParam.momentum() / predTrajParam.momentum().mag();
+				LocalTrajectoryParameters trajectory_parameters = traj_state_on_surface.localParameters();
+				auto trajectory_momentum = trajectory_parameters.momentum();
+				LocalVector local_track_direction = trajectory_momentum / trajectory_momentum.mag();
 				traj_field.alpha = atan2(local_track_direction.z(), local_track_direction.x());
 				traj_field.beta  = atan2(local_track_direction.z(), local_track_direction.y());
 				// Filling the tree
@@ -524,6 +536,41 @@ void PhaseIPixelNtuplizer::get_traj_measurements(const edm::Event& iEvent, const
 			}
 		}
 	}
+}
+
+// void PhaseIPixelNtuplizer::get_track_data()
+// {
+// 	static int track_index = 0;
+	
+// 	TrackData& track_field = traj_field.trk;
+// 	// FIXME: Add global track counting
+// 	track_field.i   = track_index++;
+// 	// Top and bottom hits
+// 	track_field.pixhit[0] = 0;
+// 	track_field.pixhit[1] = 0;
+// }
+
+void PhaseIPixelNtuplizer::get_hit_efficiency_cuts()
+{
+	// Moved to src/PhaseI_tracking_efficiency_filters.cc
+	PhaseI_tracking_efficiency_filters filter_object(event_field, traj_field);
+	int cut_results = filter_object.perform_cuts(
+		PhaseI_tracking_efficiency_filters::Cuts::nvtx   |
+		PhaseI_tracking_efficiency_filters::Cuts::federr |
+		PhaseI_tracking_efficiency_filters::Cuts::nstrip
+	);
+	traj_field.pass_effcuts = cut_results;
+}
+
+/////////////
+// Utility //
+/////////////
+
+void PhaseIPixelNtuplizer::clear_all_containers()
+{
+	complete_cluster_collection.clear();
+	complete_track_collection.clear();
+	complete_traj_meas_collection.clear();
 }
 
 ////////////////////
@@ -593,3 +640,28 @@ DEFINE_FWK_MODULE(PhaseIPixelNtuplizer);
 // 	// event_field.nclu[i] = get_nclu(); // [0: fpix, i: layer i]
 // 	// event_field.npix[i] = get_npix(); // [0: fpix, i: layer i]
 // }
+// 
+
+// const PixelGeomDetUnit* geomdetunit      = dynamic_cast<const PixelGeomDetUnit*>(tracker -> idToDet(det_id));
+// const PixelTopology&    topology         = geomdetunit -> specificTopology();
+// LocalPoint const&       localpoint       = pixhit -> localPositionFast();
+// MeasurementPoint        measurementpoint = topology.measurementPosition(localpoint);
+// row = static_cast<int>(mp.x());
+// col = static_cast<int>(mp.y());
+// Temporarily saving row and col
+// traj_field.row = row;
+// traj_field.col = col;
+
+// Pixel and strip hits
+// traj_field.trk.pix   = n_pix_hits;
+// traj_field.trk.strip = n_strip_hits;
+
+// if(hit -> isValid())
+// {
+// 	// Counting the non-pixel hits
+// 	if(subdetid == StripSubdetector::TIB) ++n_strip_hits;
+// 	if(subdetid == StripSubdetector::TOB) ++n_strip_hits;
+// 	if(subdetid == StripSubdetector::TID) ++n_strip_hits;
+// 	if(subdetid == StripSubdetector::TEC) ++n_strip_hits;
+// }
+
