@@ -141,12 +141,11 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		// Tokens for accessing the data //
 		///////////////////////////////////
 
-		edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
-		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> > clusters_token;
-		edm::EDGetTokenT<TrajTrackAssociationCollection> traj_track_collection_token;
-		// edm::EDGetTokenT<TrajTrackAssociationCollection> trackAssociationToken_;
-
 		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError> > raw_data_error_token;
+		edm::EDGetTokenT<reco::VertexCollection>                  primary_vertices_token;
+		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> >   clusters_token;
+		edm::EDGetTokenT<TrajTrackAssociationCollection>          traj_track_collection_token;
+		// edm::EDGetTokenT<TrajTrackAssociationCollection> trackAssociationToken_;
 
 		//////////
 		// Data //
