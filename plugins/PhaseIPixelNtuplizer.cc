@@ -297,21 +297,25 @@ void PhaseIPixelNtuplizer::getTrajMeasurements(const edm::Event& iEvent, const e
 				// Save module data
 				trajField.mod    = ModuleDataProducer::getPhaseOneOfflineModuleData(detId.rawId(), trackerTopology, fedErrors);
 				trajField.mod_on = ModuleDataProducer::convertPhaseOneOfflineOnline(trajField.mod);
+				// if(trajField.mod_on.det == 1)
+				// {
+					// std::cout << c_blue << "Hit on blade: " << c_def << trajField.mod.blade << "/" << trajField.mod_on.blade << std::endl; 
+				// }
 				// Position measurements
 				TrajectoryStateCombiner  trajStateComb;
 				TrajectoryStateOnSurface trajStateOnSurface = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
 				auto globalPosition      = trajStateOnSurface.globalPosition();
 				auto localPosition       = trajStateOnSurface.localPosition();
-				auto localPositionError  = trajStateOnSurface.localError().positionError();
+				// auto localPositionError  = trajStateOnSurface.localError().positionError();
 				trajField.glx    = globalPosition.x();
 				trajField.gly    = globalPosition.y();
 				trajField.glz    = globalPosition.z();
 				trajField.lx     = localPosition.x();
 				trajField.ly     = localPosition.y();
-				trajField.lz     = localPosition.z();
-				trajField.lx_err = localPositionError.xx();
-				trajField.ly_err = localPositionError.yy();
-				trajField.onedge = std::abs(trajField.lx) < 0.55 && std::abs(trajField.ly) < 3.0;
+				// trajField.lz     = localPosition.z();
+				// trajField.lx_err = localPositionError.xx();
+				// trajField.ly_err = localPositionError.yy();
+				// trajField.onedge = std::abs(trajField.lx) < 0.55 && std::abs(trajField.ly) < 3.0;
 				// // Top-of-detector tracks
 				// if(0 <= trajField.gly && trajField.gly != NOVAL_F)
 				// {

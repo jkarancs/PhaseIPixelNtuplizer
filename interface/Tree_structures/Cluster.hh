@@ -2,7 +2,7 @@
 #define CLUSTER_H
 
 #include "Cluster_structure.hh"
-#include "Module_structure.hh"
+#include "../../ModuleDataFetcher/interface/ModuleData.h"
 
 #ifndef NOVAL_I
 #define NOVAL_I -9999

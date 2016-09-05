@@ -1,7 +1,7 @@
 #ifndef TRAJ_MEASUREMENT_H
 #define TRAJ_MEASUREMENT_H
 
-#include "Module_structure.hh"
+#include "../../ModuleDataFetcher/interface/ModuleData.h"
 #include "Cluster.hh"
 #include "Track_structure.hh"
 #include "Traj_measurement_structure.hh"

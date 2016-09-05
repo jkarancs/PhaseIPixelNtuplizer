@@ -4,6 +4,7 @@
 ### &#x1F539; Base recipe:
 
 ```bash
+export SCRAM_ARCH=slc6_amd64_gcc530
 cmsrel CMSSW_8_1_0_pre8
 cd CMSSW_8_1_0_pre8/src
 cmsenv
@@ -11,7 +12,8 @@ git cms-addpkg SimGeneral/MixingModule
 git remote add hunyadix git@github.com:hunyadix/cmssw.git
 git fetch hunyadix
 git checkout -t hunyadix/CMSSW_8_1_0_pre8_for_PhaseIPixelNtuplizer
-git clone https://github.com/jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
+mkdir DPGAnalysis
+git clone git@github.com:jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
 scram b -j 20
 ln -s DPGAnalysis/PhaseIPixelNtuplizer/python/PhaseINtuplizer_GenNu_DynIneffDB_cfg.py .
 cmsRun PhaseINtuplizer_GenNu_DynIneffDB_cfg.py
