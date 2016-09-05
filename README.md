@@ -8,8 +8,9 @@ cmsrel CMSSW_8_1_0_pre8
 cd CMSSW_8_1_0_pre8/src
 cmsenv
 git cms-addpkg SimGeneral/MixingModule
-sed -i "95,106d" SimGeneral/MixingModule/python/SiPixelSimParameters_cfi.py
-sed -i "84s;digitizer.AddPixelInefficiency = cms.bool(False);digitizer.AddPixelInefficiency = cms.bool(True);" SimGeneral/MixingModule/python/SiPixelSimParameters_cfi.py
+git remote add hunyadix git@github.com:hunyadix/cmssw.git
+git fetch hunyadix
+git checkout -t hunyadix/CMSSW_8_1_0_pre8_for_PhaseIPixelNtuplizer
 git clone https://github.com/jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
 scram b -j 20
 ln -s DPGAnalysis/PhaseIPixelNtuplizer/python/PhaseINtuplizer_GenNu_DynIneffDB_cfg.py .

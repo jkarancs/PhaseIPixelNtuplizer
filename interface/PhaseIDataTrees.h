@@ -27,12 +27,12 @@
 class PhaseIDataTrees
 {
 	public:
-		static void define_event_tree_branches(TTree*& event_tree, EventData& event_field);
-		static void define_cluster_tree_branches(TTree*& cluster_tree, EventData& event_field, Cluster& cluster_field);
-		static void define_traj_tree_branches(TTree*& traj_tree, EventData& event_field, TrajMeasurement& traj_field);
-		static void set_event_tree_data_fields(TTree*& event_tree, EventData& event_field);
-		static void set_cluster_tree_data_fields(TTree*& cluster_tree, EventData& event_field, Cluster& cluster_field);
-		static void set_traj_tree_data_fields(TTree*& traj_tree, EventData& event_field, TrajMeasurement& traj_field);
+		static void defineEventTreeBranches(  TTree*& eventTree,   EventData& eventField);
+		static void defineClusterTreeBranches(TTree*& clusterTree, EventData& eventField, Cluster& clusterField);
+		static void defineTrajTreeBranches(   TTree*& trajTree,    EventData& eventField, TrajMeasurement& trajField);
+		static void setEventTreeDataFields(   TTree*& eventTree,   EventData& eventField);
+		static void setClusterTreeDataFields( TTree*& clusterTree, EventData& eventField, Cluster& clusterField);
+		static void setTrajTreeDataFields(    TTree*& trajTree,    EventData& eventField, TrajMeasurement& trajField);
 };
 
 #endif

@@ -29,6 +29,11 @@
 #include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 
+// Fed errors
+#include "../FedErrorFetcher/interface/FedErrorFetcher.h"
+// Module data
+#include "../ModuleDataFetcher/interface/ModuleDataProducer.h"
+
 ///////////
 // Other //
 ///////////
@@ -104,85 +109,76 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		// Options //
 		/////////////
 
-		int cluster_save_downlscaling;
+		int clusterSaveDownlscaling;
 
 		/////////////////
 		// Output file //
 		/////////////////
 
 		// Default: "Ntuple.root"
-		std::string ntuple_output_filename = "Ntuple.root";
-		TFile*      ntuple_output_file;
+		std::string ntupleOutputFilename = "Ntuple.root";
+		TFile*      ntupleOutputFile;
 
 		/////////////////
 		// Tree system //
 		/////////////////
 
-		TTree* event_tree;
-		TTree* lumi_tree;
-		TTree* run_tree;
-		TTree* track_tree;
-		TTree* cluster_tree;
-		TTree* traj_tree;
-		// TTree* digi_tree;
+		TTree* eventTree;
+		TTree* lumiTree;
+		TTree* runTree;
+		TTree* trackTree;
+		TTree* clusterTree;
+		TTree* trajTree;
+		// TTree* digiTree;
 
 		// Tree field definitions are in the interface directory
-		EventData       event_field;
-		LumiData        lumi_field;
-		TrajMeasurement traj_field;
-		Cluster         cluster_field;
+		EventData       eventField;
+		LumiData        lumiField;
+		TrajMeasurement trajField;
+		Cluster         clusterField;
 
 		// For handling data collections
-		std::vector<TrackData>                    complete_track_collection;                        // Track collection
-		std::vector<Cluster>                      complete_cluster_collection;                        // Cluster collection
-		std::vector<std::vector<TrajMeasurement>> complete_traj_meas_collection; // Trajectory meaurement collection
+		std::vector<TrackData>                    completeTrackCollection;                        // Track collection
+		std::vector<Cluster>                      completeClusterCollection;                        // Cluster collection
+		std::vector<std::vector<TrajMeasurement>> completeTrajMeasCollection; // Trajectory meaurement collection
 
 		///////////////////////////////////
 		// Tokens for accessing the data //
 		///////////////////////////////////
 
-		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError> > raw_data_error_token;
-		edm::EDGetTokenT<reco::VertexCollection>                  primary_vertices_token;
-		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster> >   clusters_token;
-		edm::EDGetTokenT<TrajTrackAssociationCollection>          traj_track_collection_token;
+		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>> rawDataErrorToken;
+		edm::EDGetTokenT<reco::VertexCollection>                 primaryVerticesToken;
+		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken;
+		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken;
 		// edm::EDGetTokenT<TrajTrackAssociationCollection> trackAssociationToken_;
 
 		//////////
 		// Data //
 		//////////
 
-		// FED errors
-		std::map<uint32_t, int> get_FED_errors(const edm::Event& iEvent);
 		// Event data
-		void get_nvtx_and_vtx_data(const edm::Event& iEvent); // FIXME: add reco for phase_I
-		// Module data
-		ModuleData get_offline_module_data(const uint32_t& rawId, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors);
-		ModuleData convert_offline_to_online_module_data(const ModuleData mod_off);
-		int convert_offline_module_to_online_module_coordinate(const int& module);
-		int convert_offline_ladder_to_online_ladder_coordinate(const int& off_ladder, const int& quarter_size);
-		int convert_offline_disk_to_online_disk_coordinate(const int& side, const int& disk);
-		int convert_offline_blade_to_online_blade_coordinate(const int& blade);
+		void getNvtxAndVtxData(const edm::Event& iEvent); // FIXME: add reco for phase_I
 		// Clusters
-		void get_clusters(const edm::Event& iEvent, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors);
+		void getClusters(const edm::Event& iEvent, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& federrors);
 		// Trajectory measurements
-		int  trajectory_has_pixel_hit(const edm::Ref<std::vector<Trajectory>>& trajectory);
-		void get_traj_measurements(const edm::Event& iEvent, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const tracker_topology, const std::map<uint32_t, int>& federrors);
-		void get_track_data();
-		void get_hit_efficiency_cuts();
+		int  trajectoryHasPixelHit(const edm::Ref<std::vector<Trajectory>>& trajectory);
+		void getTrajMeasurements(const edm::Event& iEvent, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& federrors);
+		void getTrackData();
+		void getHitEfficiencyCuts();
 
 		////////////////////
 		// Error handling //
 		////////////////////
 
-		void handle_default_error(const std::string& exception_type, const std::string& stream_type, std::string msg);
-		void handle_default_error(const std::string& exception_type, const std::string& stream_type, std::vector<std::string> msg);
-		void print_evt_info(const std::string& stream_type);
+		void handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::string msg);
+		void handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::vector<std::string> msg);
+		void printEvtInfo(const std::string& streamType);
 
 		/////////////
 		// Utility //
 		/////////////
 
-		void clear_all_containers();
+		void clearAllContainers();
 
 	public:
 		PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);

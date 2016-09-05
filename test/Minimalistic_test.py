@@ -19,9 +19,7 @@ process.MessageLogger = cms.Service("MessageLogger",
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 process.source = cms.Source("PoolSource",
-	# fileNames = cms.untracked.vstring('file:/data/hunyadi/CMSSW/PhaseI_SIM/Tracker_material/CMSSW_8_1_0_pre1/src/Test/Steps_test/out_step_3.root'),
-	# fileNames = cms.untracked.vstring('file:/data/hunyadi/CMSSW/PhaseI_SIM/Tracker_material/CMSSW_8_1_0_pre1/src/Test/Steps_test/out_step_3.root'),
-	fileNames = cms.untracked.vstring('file:/data/hunyadi/CMSSW/PhaseI_SIM/Tracker_material/CMSSW_8_1_0_pre8/src/Test/Stepenkent/out_step_3.root'),
+	fileNames = cms.untracked.vstring('file:out_step_3.root'),
 	secondaryFileNames = cms.untracked.vstring()
 )
 

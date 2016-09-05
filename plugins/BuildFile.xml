@@ -40,7 +40,7 @@
   <use   name="TrackingTools/MeasurementDet"/>
   <use   name="FWCore/Utilities"/>
   <use   name="DataFormats/Luminosity"/>
-  <library   file="*.cc ../src/*.cc" name="DPGAnalysisPhaseIPixelNtuplizerPlugin">
+  <library   file="*.cc ../src/*.cc ../ModuleDataFetcher/src/*.cc ../FedErrorFetcher/src/*.cc" name="DPGAnalysisPhaseIPixelNtuplizerPlugin">
     <flags CXXFLAGS="-g -D=EDM_ML_DEBUG"/>
     <flags EDM_PLUGIN="1"/>
   </library>

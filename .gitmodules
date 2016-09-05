@@ -1,0 +1,6 @@
+[submodule "ModuleDataFetcher"]
+	path = ModuleDataFetcher
+	url = git@github.com:hunyadix/ModuleDataFetcher.git
+[submodule "FedErrorFetcher"]
+	path = FedErrorFetcher
+	url = git@github.com:hunyadix/FedErrorFetcher.git
