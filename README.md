@@ -27,3 +27,10 @@ Running on RECO output seems to be impossible right now since the track refittin
 
 ### &#x1F539; No pileup
 If you don't need pileup, it is really fast to generate Ntuples starting with RAW2DIGI -> RECO. Example file: test/RAWTODIGI_RECO_test.py.
+
+### &#x1F539; New geometry
+git cms-addpkg Geometry/CMSCommonData
+git cms-addpkg Geometry/TrackerCommonData
+git cms-addpkg Geometry/TrackerNumberingBuilder
+git cms-addpkg Geometry/TrackerRecoData
+git cms-addpkg  Geometry/TrackerSimData
