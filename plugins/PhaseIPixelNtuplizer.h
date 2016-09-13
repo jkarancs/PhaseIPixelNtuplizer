@@ -17,7 +17,7 @@
 ///////////
 
 // Trajectory measurements
-#include "DataFormats/TrackReco/interface/Track.h"
+// #include "DataFormats/TrackReco/interface/Track.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
@@ -33,6 +33,8 @@
 #include "../FedErrorFetcher/interface/FedErrorFetcher.h"
 // Module data
 #include "../ModuleDataFetcher/interface/ModuleDataProducer.h"
+// Traj analyzer
+#include "../TrajAnalyzer/interface/TrajAnalyzer.h"
 
 ///////////
 // Other //
@@ -71,7 +73,7 @@
 ////////////////////////////////
 
 // Cuts for hit efficicency
-#include "../interface/PhaseI_tracking_efficiency_filters.h"
+#include "../interface/PhaseITrackingEfficiencyFilters.h"
 
 ////////////////////////////
 // Message logger service //
@@ -159,11 +161,11 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		// Event data
 		void getNvtxAndVtxData(const edm::Event& iEvent); // FIXME: add reco for phase_I
 		// Clusters
-		void getClusters(const edm::Event& iEvent, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& federrors);
+		void getClusters(const edm::Event& iEvent, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
 		// Trajectory measurements
 		int  trajectoryHasPixelHit(const edm::Ref<std::vector<Trajectory>>& trajectory);
-		void getTrajMeasurements(const edm::Event& iEvent, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& federrors);
-		void getTrackData();
+		void getTrajMeasurements(const edm::Event& iEvent, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
+		void getTrackData(const edm::Ref<std::vector<Trajectory>>& traj, const reco::TrackRef& track, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
 		void getHitEfficiencyCuts();
 
 		////////////////////

@@ -4,3 +4,6 @@
 [submodule "FedErrorFetcher"]
 	path = FedErrorFetcher
 	url = git@github.com:hunyadix/FedErrorFetcher.git
+[submodule "TrajAnalyzer"]
+	path = TrajAnalyzer
+	url = git@github.com:hunyadix/TrajAnalyzer.git

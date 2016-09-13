@@ -17,25 +17,15 @@
 template<class Dummy>
 struct TrajMeasData_static_variablse
 {
-	static std::map<int, std::string> federrortypes;
 	static std::string list;
 };
 
-#ifdef COMPLETE
 template<class Dummy>
 std::string TrajMeasData_static_variablse<Dummy>::list =
-    "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:"
-    "pass_efcuts:nclu_mod:nclu_roc:npix_mod:npix_roc:alpha/F:beta:dx_cl[2]:"
-    "dy_cl[2]:dx_hit:dy_hit:norm_charge:lz:glx:gly:glz:lxmatch:lymatch:i/I:"
-    "onedge:inactive:badhit:telescope:telescope_valid:dmodule:dladder:"
-    "glmatch/F:lx_err:ly_err:lz_err:lxymatch:res_hit:sig_hit:d_cl[2]";
-#else
-template<class Dummy>
-std::string TrajMeasData_static_variablse<Dummy>::list =
-    "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:"
-    "pass_efcuts:nclu_mod:nclu_roc:npix_mod:npix_roc:alpha/F:beta:dx_cl[2]:"
-    "dy_cl[2]:dx_hit:dy_hit:norm_charge";
-#endif
+    // "validhit/I:missing:lx/F:ly:lz:res_dx:res_dz:lev:clust_near/I:hit_near:"
+    // "pass_efcuts:nclu_mod:nclu_roc:npix_mod:npix_roc:alpha/F:beta:lx_err:ly_err:dx_cl[2]:"
+    // "dy_cl[2]:dx_hit:dy_hit:norm_charge";
+	"validhit/I:missing/I:lx/F:ly/F:lz/F:glx/F:gly/F:glz/F:pass_effcuts/I:alpha/F:beta/F:onedge/I:lx_err/F:ly_err/F";
 
 /////////////////////////////
 // TrajMeasData definition //
@@ -49,7 +39,7 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 		int missing;
 		float lx;
 		float ly;
-		// float lz;
+		float lz;
 		float glx;
 		float gly;
 		float glz;
@@ -75,7 +65,7 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 		// float lxmatch;
 		// float lymatch;
 		// int i; // serial num of trajectory measurement on the (single) track of the event
-		// int onedge;
+		int onedge;
 		// int inactive;
 		// int badhit;
 		// int telescope;
@@ -83,8 +73,8 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 		// int dmodule; // D(propagated hit, valid hit)
 		// int dladder; // D(propagated hit, valid hit)
 		// float glmatch;
-		// float lx_err;
-		// float ly_err;
+		float lx_err;
+		float ly_err;
 		// float lz_err;
 		// float lxymatch;
 		// float res_hit;
@@ -98,7 +88,7 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 			missing=NOVAL_I;
 			lx=NOVAL_F;
 			ly=NOVAL_F;
-			// lz=NOVAL_F;
+			lz=NOVAL_F;
 			// res_dx=NOVAL_F;
 			// res_dz=NOVAL_F;
 			// lev=NOVAL_F;
@@ -120,7 +110,7 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 			// lymatch=NOVAL_F;
 			// norm_charge=NOVAL_F;
 			// i=NOVAL_I;
-			// onedge=NOVAL_I;
+			onedge=NOVAL_I;
 			// inactive=NOVAL_I;
 			// badhit=NOVAL_I;
 			alpha=NOVAL_F;
@@ -130,8 +120,8 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 			// dmodule=NOVAL_I;
 			// dladder=NOVAL_I;
 			// glmatch=NOVAL_F;
-			// lx_err=NOVAL_F;
-			// ly_err=NOVAL_F;
+			lx_err=NOVAL_F;
+			ly_err=NOVAL_F;
 			// lz_err=NOVAL_F;
 			// lxymatch=NOVAL_F;
 			// res_hit=NOVAL_F;

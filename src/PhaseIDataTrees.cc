@@ -36,8 +36,10 @@ void PhaseIDataTrees::defineTrajTreeBranches(TTree*& trajTree, EventData& eventF
 	// trajTree -> Branch("event",            &eventField,            eventField.list.data());
 	trajTree -> Branch("module",           &trajField.mod,         ModuleData::list.c_str());
 	trajTree -> Branch("module_on",        &trajField.mod_on,      ModuleData::list.c_str());
+	trajTree -> Branch("track",            &trajField.trk,         trajField.trk.list.c_str());
 	// trajTree -> Branch("traj",             &trajField,             "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:pass_effcuts");
-	trajTree -> Branch("traj",             &trajField,             "validhit/I:missing/I:lx/F:ly/F:glx/F:gly/F:glz/F:pass_effcuts/I:alpha/F:beta/F");
+	// trajTree -> Branch("traj",             &trajField,             "validhit/I:missing/I:lx/F:ly/F:lz/F:glx/F:gly/F:glz/F:pass_effcuts/I:alpha/F:beta/F");
+	trajTree -> Branch("traj",             &trajField,             TrajMeasData::list.c_str());
 	// trajTree -> Branch("traj_occup",       &trajField.nclu_mod,    "nclu_mod/I:nclu_roc:npix_mod:npix_roc");
 	// trajTree -> Branch("traj_alphabeta",   &trajField.alpha,       "alpha/F:beta");
 	// trajTree -> Branch("traj_dxy_cl",      &trajField.dx_cl,       "dx_cl[2]/F:dy_cl[2]");
