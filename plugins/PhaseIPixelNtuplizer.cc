@@ -92,11 +92,15 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// Fill the tree
 	// eventTree -> Fill();
 
+	// Get vertices by token
+	edm::Handle<reco::VertexCollection> vertexCollectionHandle;
+	iEvent.getByToken(primaryVerticesToken, vertexCollectionHandle);
+
 	// FED errors
 	std::map<uint32_t, int> fedErrors = FedErrorFetcher::getFedErrors(iEvent, rawDataErrorToken);
 
 	getClusters(iEvent, trackerTopology, fedErrors);
-	getTrajMeasurements(iEvent, tracker, trackerTopology, fedErrors);
+	getTrajMeasurements(iEvent, vertexCollectionHandle, tracker, trackerTopology, fedErrors);
 	// Added for safety
 	clearAllContainers();
 }
@@ -228,7 +232,7 @@ void PhaseIPixelNtuplizer::getClusters(const edm::Event& iEvent, const TrackerTo
 	}
 }
 
-void PhaseIPixelNtuplizer::getTrajMeasurements(const edm::Event& iEvent, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors)
+void PhaseIPixelNtuplizer::getTrajMeasurements(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors)
 {
 	PhaseIDataTrees::setTrajTreeDataFields(trajTree, eventField, trajField);
 	// Fetching the tracks by token
@@ -242,7 +246,7 @@ void PhaseIPixelNtuplizer::getTrajMeasurements(const edm::Event& iEvent, const e
 		// Discarding tracks without pixel measurements
 		if(!TrajAnalyzer::trajectoryHasPixelHit(traj)) continue;
 		// Track data
-		getTrackData(traj, track, tracker, trackerTopology, fedErrors);
+		getTrackData(traj, track, vertexCollectionHandle, tracker, trackerTopology, fedErrors);
 		// Looping again to check hit efficiency of pixel hits
 		for(const TrajectoryMeasurement& measurement: traj -> measurements())
 		{
@@ -294,11 +298,13 @@ void PhaseIPixelNtuplizer::getTrajMeasurements(const edm::Event& iEvent, const e
 	}
 }
 
-void PhaseIPixelNtuplizer::getTrackData(const edm::Ref<std::vector<Trajectory>>& traj, const reco::TrackRef& track, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors)
+void PhaseIPixelNtuplizer::getTrackData(const edm::Ref<std::vector<Trajectory>>& traj, const reco::TrackRef& track, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors)
 {
 	static int trackIndex = 0;
 	TrackData& trackField = trajField.trk;
 	trackField.init();
+	// Finding the closest vertex to the track
+	reco::VertexCollection::const_iterator closestVtx = TrajAnalyzer::findClosestVertexToTrack(track, vertexCollectionHandle);
 	// FIXME: Add global track counting
 	trackField.i       = trackIndex++;
 	trackField.quality = track -> qualityMask();
