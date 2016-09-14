@@ -255,45 +255,60 @@ void PhaseIPixelNtuplizer::getTrajMeasurements(const edm::Event& iEvent, const e
 			auto hit = measurement.recHit();
 			// Det id
 			DetId detId = hit -> geographicalId();
+			// Fetch the hit
+			const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(hit -> hit());
+			// Check hit qualty
+			if(!pixhit) continue;
 			uint32_t subDetId = (detId.subdetId());
 			// Looking for pixel hits
 			if(TrajAnalyzer::subdetidIsOnPixel(subDetId)) continue;
 			// Looking for valid and missing hits
 			trajField.validhit = hit -> getType() == TrackingRecHit::valid;
 			trajField.missing  = hit -> getType() == TrackingRecHit::missing;
-			// Fetch the hit
-			const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(hit -> hit());
-			// Check hit qualty
-			if(pixhit)
+			// Save module data
+			trajField.mod    = ModuleDataProducer::getPhaseOneOfflineModuleData(detId.rawId(), trackerTopology, fedErrors);
+			trajField.mod_on = ModuleDataProducer::convertPhaseOneOfflineOnline(trajField.mod);
+			// Position measurements
+			static TrajectoryStateCombiner trajStateComb; // operator () should be const, so this is fine as a static variable
+			TrajectoryStateOnSurface trajStateOnSurface = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
+			GlobalPoint globalPosition     = trajStateOnSurface.globalPosition();
+			LocalPoint  localPosition      = trajStateOnSurface.localPosition();
+			LocalError  localPositionError = trajStateOnSurface.localError().positionError();
+			trajField.glx    = globalPosition.x();
+			trajField.gly    = globalPosition.y();
+			trajField.glz    = globalPosition.z();
+			trajField.lx     = localPosition.x();
+			trajField.ly     = localPosition.y();
+			trajField.lz     = localPosition.z();
+			trajField.lx_err = localPositionError.xx();
+			trajField.ly_err = localPositionError.yy();
+			// trajField.lz_err = localPositionError.zz();
+			// trajField.onedge = std::abs(trajField.lx) < 0.55 && std::abs(trajField.ly) < 3.0;
+			// Track local angles
+			LocalTrajectoryParameters trajectoryParameters = trajStateOnSurface.localParameters();
+			auto trajectoryMomentum = trajectoryParameters.momentum();
+			LocalVector localTrackDirection = trajectoryMomentum / trajectoryMomentum.mag();
+			trajField.alpha = atan2(localTrackDirection.z(), localTrackDirection.x());
+			trajField.beta  = atan2(localTrackDirection.z(), localTrackDirection.y());
+			// Get closest other traj measurement
+			double closestTrajMeasurementDistanceSquared = TrajAnalyzer::trajMeasurementDistanceSquared(measurement, *(trajTrackCollectionHandle -> begin() -> key -> measurements().begin()));
+			for(const auto& otherTrackKeypair: *trajTrackCollectionHandle)
 			{
-				// Save module data
-				trajField.mod    = ModuleDataProducer::getPhaseOneOfflineModuleData(detId.rawId(), trackerTopology, fedErrors);
-				trajField.mod_on = ModuleDataProducer::convertPhaseOneOfflineOnline(trajField.mod);
-				// Position measurements
-				TrajectoryStateCombiner  trajStateComb;
-				TrajectoryStateOnSurface trajStateOnSurface = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
-				auto globalPosition      = trajStateOnSurface.globalPosition();
-				auto localPosition       = trajStateOnSurface.localPosition();
-				auto localPositionError  = trajStateOnSurface.localError().positionError();
-				trajField.glx    = globalPosition.x();
-				trajField.gly    = globalPosition.y();
-				trajField.glz    = globalPosition.z();
-				trajField.lx     = localPosition.x();
-				trajField.ly     = localPosition.y();
-				trajField.lz     = localPosition.z();
-				trajField.lx_err = localPositionError.xx();
-				trajField.ly_err = localPositionError.yy();
-				// trajField.lz_err = localPositionError.zz();
-				// trajField.onedge = std::abs(trajField.lx) < 0.55 && std::abs(trajField.ly) < 3.0;
-				// Track local angles
-				LocalTrajectoryParameters trajectoryParameters = trajStateOnSurface.localParameters();
-				auto trajectoryMomentum = trajectoryParameters.momentum();
-				LocalVector localTrackDirection = trajectoryMomentum / trajectoryMomentum.mag();
-				trajField.alpha = atan2(localTrackDirection.z(), localTrackDirection.x());
-				trajField.beta  = atan2(localTrackDirection.z(), localTrackDirection.y());
-				// Filling the tree
-				trajTree -> Fill();
+				const edm::Ref<std::vector<Trajectory>> otherTraj = otherTrackKeypair.key;
+				for(const TrajectoryMeasurement& otherTrajMeasurement: otherTraj -> measurements())
+				{
+					float distanceSquared = TrajAnalyzer::trajMeasurementDistanceSquared(measurement, otherTrajMeasurement);
+					if(distanceSquared < closestTrajMeasurementDistanceSquared)
+					{
+						closestTrajMeasurementDistanceSquared = distanceSquared;
+					}
+				}
 			}
+			double closestTrajMeasurementDistance = sqrt(closestTrajMeasurementDistanceSquared);
+			// trajField.clust_near = (trajField.d_cl[0] != NOVAL_F && trajField.d_cl[0] < 0.05);
+			trajField.hit_near = (closestTrajMeasurementDistance < 0.5);
+			// Filling the tree
+			trajTree -> Fill();
 		}
 	}
 }
@@ -406,17 +421,17 @@ void PhaseIPixelNtuplizer::getHitEfficiencyCuts()
 	PhaseITrackingEfficiencyFilters filterObject(eventField, trajField);
 	int cutResults = filterObject.performCuts(
 		PhaseITrackingEfficiencyFilters::Cuts::nvtx     |
-		PhaseITrackingEfficiencyFilters::Cuts::zerobias |
+		// PhaseITrackingEfficiencyFilters::Cuts::zerobias |
 		PhaseITrackingEfficiencyFilters::Cuts::federr   |
 		PhaseITrackingEfficiencyFilters::Cuts::hp       |
 		PhaseITrackingEfficiencyFilters::Cuts::pt       |
 		PhaseITrackingEfficiencyFilters::Cuts::nstrip   |
 		PhaseITrackingEfficiencyFilters::Cuts::d0       |
 		PhaseITrackingEfficiencyFilters::Cuts::dz       |
-		PhaseITrackingEfficiencyFilters::Cuts::pixhit   |
-		PhaseITrackingEfficiencyFilters::Cuts::goodmod  |
-		PhaseITrackingEfficiencyFilters::Cuts::lx_fid   |
-		PhaseITrackingEfficiencyFilters::Cuts::ly_fid   |
+		// PhaseITrackingEfficiencyFilters::Cuts::pixhit   |
+		// PhaseITrackingEfficiencyFilters::Cuts::goodmod  |
+		// PhaseITrackingEfficiencyFilters::Cuts::lx_fid   |
+		// PhaseITrackingEfficiencyFilters::Cuts::ly_fid   |
 		PhaseITrackingEfficiencyFilters::Cuts::valmis   |
 		PhaseITrackingEfficiencyFilters::Cuts::hitsep
 	);

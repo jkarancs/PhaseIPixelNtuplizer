@@ -19,8 +19,8 @@ class TrackData
 		// int nstriplost;
 		// int nstriplayer;
 		int quality;
-		// float d0;
-		// float dz;
+		float d0;
+		float dz;
 		float pt;
 		// From here Split mode (if SPLIT defined)
 		// float ndof;
@@ -51,8 +51,8 @@ class TrackData
 			// nstriplost=NOVAL_I;
 			// nstriplayer=NOVAL_I;
 			quality=NOVAL_I;
-			// d0=NOVAL_F;
-			// dz=NOVAL_F;
+			d0=NOVAL_F;
+			dz=NOVAL_F;
 			pt=NOVAL_F;
 			// ndof=NOVAL_F;
 			// chi2=NOVAL_F;
@@ -69,7 +69,7 @@ class TrackData
 			fpix[0]=fpix[1]=NOVAL_I;
 			bpix[0]=bpix[1]=bpix[2]=NOVAL_I;
 			// highPurity=NOVAL_I;
-			list = "validfpix[2]/I:validbpix[4]/I:strip/I:quality/I:pt/F:eta/F:phi/F:theta/F:p/F:i/I:pix/I:pixhit[2]/I:validpixhit[2]/I:fpix[2]/I:bpix[4]/I";
+			list = "validfpix[2]/I:validbpix[4]/I:strip/I:quality/I:d0/F:dz/F:pt/F:eta/F:phi/F:theta/F:p/F:i/I:pix/I:pixhit[2]/I:validpixhit[2]/I:fpix[2]/I:bpix[4]/I";
 		};
 };
 

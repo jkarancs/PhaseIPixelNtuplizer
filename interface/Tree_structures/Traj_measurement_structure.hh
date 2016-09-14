@@ -25,7 +25,7 @@ std::string TrajMeasData_static_variablse<Dummy>::list =
     // "validhit/I:missing:lx/F:ly:lz:res_dx:res_dz:lev:clust_near/I:hit_near:"
     // "pass_efcuts:nclu_mod:nclu_roc:npix_mod:npix_roc:alpha/F:beta:lx_err:ly_err:dx_cl[2]:"
     // "dy_cl[2]:dx_hit:dy_hit:norm_charge";
-	"validhit/I:missing/I:lx/F:ly/F:lz/F:glx/F:gly/F:glz/F:pass_effcuts/I:alpha/F:beta/F:onedge/I:lx_err/F:ly_err/F";
+	"validhit/I:missing/I:lx/F:ly/F:lz/F:glx/F:gly/F:glz/F:hit_near/I:pass_effcuts/I:alpha/F:beta/F:onedge/I:lx_err/F:ly_err/F";
 
 /////////////////////////////
 // TrajMeasData definition //
@@ -47,7 +47,7 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 		// float res_dz;
 		// float lev;
 		// int clust_near;
-		// int hit_near;
+		int hit_near;
 		int pass_effcuts;
 		// Paired branch (keep order)
 		// int nclu_mod;
@@ -93,7 +93,7 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 			// res_dz=NOVAL_F;
 			// lev=NOVAL_F;
 			// clust_near=NOVAL_I;
-			// hit_near=NOVAL_I;
+			hit_near=NOVAL_I;
 			pass_effcuts=NOVAL_I;
 			// nclu_mod=NOVAL_I;
 			// nclu_roc=NOVAL_I;

@@ -26,17 +26,15 @@ int PhaseITrackingEfficiencyFilters::federrCut()
 	return eventField.federrs_size == 0;
 }
 
-// TODO: get tracks
 int PhaseITrackingEfficiencyFilters::hpCut()
 {
 	return (trajField.trk.quality & 4) != 0;
 }
 
-// TODO: get tracks
 int PhaseITrackingEfficiencyFilters::ptCut()
 {
 	return trajField.trk.pt > 1.0;
-	return 1;
+	// return 1;
 }
 
 int PhaseITrackingEfficiencyFilters::nstripCut()
@@ -46,8 +44,26 @@ int PhaseITrackingEfficiencyFilters::nstripCut()
 
 int PhaseITrackingEfficiencyFilters::d0Cut()
 {
-	return trajField.mod_on.det == 1 && std::abs(trajField.trk.d0) < 0.05;
-	return 1;
+	if(trajField.mod_on.det == 0)
+	{
+		switch(trajField.mod_on.layer)
+		{
+			case 1:
+				return std::abs(trajField.trk.d0 < 0.01); // Layer 1
+			case 2:
+				return std::abs(trajField.trk.d0 < 0.02); // Layer 2
+			case 3:
+				return std::abs(trajField.trk.d0 < 0.02); // Layer 3
+			case 4:
+				return std::abs(trajField.trk.d0 < 0.02); // Layer 4
+		}
+		return 0;
+	}
+	if(trajField.mod_on.det == 1)
+	{
+		return std::abs(trajField.trk.d0) < 0.05;         // Forward pixels
+	}
+	return 0;
 }
 
 int PhaseITrackingEfficiencyFilters::dzCut()
