@@ -429,7 +429,6 @@ void PhaseIPixelNtuplizer::getHitEfficiencyCuts()
 		PhaseITrackingEfficiencyFilters::Cuts::d0       |
 		PhaseITrackingEfficiencyFilters::Cuts::dz       |
 		// PhaseITrackingEfficiencyFilters::Cuts::pixhit   |
-		// PhaseITrackingEfficiencyFilters::Cuts::goodmod  |
 		// PhaseITrackingEfficiencyFilters::Cuts::lx_fid   |
 		// PhaseITrackingEfficiencyFilters::Cuts::ly_fid   |
 		PhaseITrackingEfficiencyFilters::Cuts::valmis   |

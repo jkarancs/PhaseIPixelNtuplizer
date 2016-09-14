@@ -31,7 +31,6 @@ class PhaseITrackingEfficiencyFilters
 		int d0Cut();
 		int dzCut();
 		int pixhitCut();
-		int goodModCut();
 		int lxFidCut();
 		int lyFidCut();
 		int valmisCut();
@@ -48,15 +47,15 @@ class PhaseITrackingEfficiencyFilters
 			d0       = 1 >> 5,
 			dz       = 1 >> 6,
 			pixhit   = 1 >> 7,
-			goodmod  = 1 >> 8,
-			lx_fid   = 1 >> 9,
-			ly_fid   = 1 >> 10,
-			valmis   = 1 >> 11,
-			hitsep   = 1 >> 12,
+			lx_fid   = 1 >> 8,
+			ly_fid   = 1 >> 9,
+			valmis   = 1 >> 10,
+			hitsep   = 1 >> 11,
 		};
 		PhaseITrackingEfficiencyFilters(const EventData& eventField, const TrajMeasurement& trajField);
 		~PhaseITrackingEfficiencyFilters();
 		bool performCuts(uint32_t cutList);
+		bool performAllEfficiencyCuts();
 };
 
 #endif

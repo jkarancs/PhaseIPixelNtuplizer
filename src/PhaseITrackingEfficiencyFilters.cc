@@ -11,39 +11,47 @@ trajField(trajFieldArg)
 
 PhaseITrackingEfficiencyFilters::~PhaseITrackingEfficiencyFilters() {}
 
+// Checked
 int PhaseITrackingEfficiencyFilters::nvtxCut()
 {
 	return 0 <= eventField.nvtx;
 }
 
+// FIXME: Is this required at all?
 int PhaseITrackingEfficiencyFilters::zerobiasCut()
 {
 	return 1;
 }
 
+// Checked
 int PhaseITrackingEfficiencyFilters::federrCut()
 {
 	return eventField.federrs_size == 0;
 }
 
+// Checked
 int PhaseITrackingEfficiencyFilters::hpCut()
 {
 	return (trajField.trk.quality & 4) != 0;
 }
 
+// Checked
 int PhaseITrackingEfficiencyFilters::ptCut()
 {
+	// TODO: look at pt distribution
 	return trajField.trk.pt > 1.0;
-	// return 1;
 }
 
+// Checked
 int PhaseITrackingEfficiencyFilters::nstripCut()
 {
 	return trajField.trk.strip > 10;
 }
 
+// Checked
 int PhaseITrackingEfficiencyFilters::d0Cut()
 {
+	// TODO: look at d0 distributions
 	if(trajField.mod_on.det == 0)
 	{
 		switch(trajField.mod_on.layer)
@@ -66,13 +74,16 @@ int PhaseITrackingEfficiencyFilters::d0Cut()
 	return 0;
 }
 
+// Checked
 int PhaseITrackingEfficiencyFilters::dzCut()
 {
-	return 
-		(trajField.mod_on.det == 0 && std::abs(trajField.trk.dz) < 0.1) || 
-		(trajField.mod_on.det == 1 && std::abs(trajField.trk.dz) < 0.5);
+	// TODO: look at dz distributions
+	if(trajField.mod_on.det == 0) return std::abs(trajField.trk.dz) < 0.1;
+	if(trajField.mod_on.det == 1) return std::abs(trajField.trk.dz) < 0.5;
+	return 0;
 }
 
+// TODO: consult about this one
 int PhaseITrackingEfficiencyFilters::pixhitCut()
 {
 	// if(trajField.mod_on.det == 0)
@@ -109,11 +120,6 @@ int PhaseITrackingEfficiencyFilters::pixhitCut()
 	// 	}
 	// }
 	// return 0;
-	return 1;
-}
-
-int PhaseITrackingEfficiencyFilters::goodModCut()
-{
 	return 1;
 }
 
@@ -248,7 +254,6 @@ bool PhaseITrackingEfficiencyFilters::performCuts(uint32_t cutList)
 	if(cutList & Cuts::d0)       passedCuts &= d0Cut();
 	if(cutList & Cuts::dz)       passedCuts &= dzCut();
 	if(cutList & Cuts::pixhit)   passedCuts &= pixhitCut();
-	if(cutList & Cuts::goodmod)  passedCuts &= goodModCut();
 	if(cutList & Cuts::lx_fid)   passedCuts &= lxFidCut();
 	if(cutList & Cuts::ly_fid)   passedCuts &= lyFidCut();
 	if(cutList & Cuts::valmis)   passedCuts &= valmisCut();
@@ -256,3 +261,21 @@ bool PhaseITrackingEfficiencyFilters::performCuts(uint32_t cutList)
 	return passedCuts;
 }
 
+bool PhaseITrackingEfficiencyFilters::performAllEfficiencyCuts()
+{
+	int passedCuts = 1;
+	passedCuts &= nvtxCut();
+	passedCuts &= zerobiasCut();
+	passedCuts &= federrCut();
+	passedCuts &= hpCut();
+	passedCuts &= ptCut();
+	passedCuts &= nstripCut();
+	passedCuts &= d0Cut();
+	passedCuts &= dzCut();
+	passedCuts &= pixhitCut();
+	passedCuts &= lxFidCut();
+	passedCuts &= lyFidCut();
+	passedCuts &= valmisCut();
+	passedCuts &= hitSepCut();
+	return passedCuts;	
+}
