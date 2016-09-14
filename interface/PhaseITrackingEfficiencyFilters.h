@@ -29,11 +29,11 @@ class PhaseITrackingEfficiencyFilters
 		int d0Cut();
 		int dzCut();
 		int pixhitCut();
-		int goodmodCut();
+		int goodModCut();
 		int lxFidCut();
 		int lyFidCut();
 		int valmisCut();
-		int hitsepCut();
+		int hitSepCut();
 	public:
 		enum Cuts
 		{

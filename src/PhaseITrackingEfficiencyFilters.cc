@@ -44,61 +44,59 @@ int PhaseITrackingEfficiencyFilters::nstripCut()
 	return trajField.trk.strip > 10;
 }
 
-// TODO: get tracks
 int PhaseITrackingEfficiencyFilters::d0Cut()
 {
-	// return trajField.mod_on.det == 1 && std::abs(trajField.trk.d0) < 0.05;
+	return trajField.mod_on.det == 1 && std::abs(trajField.trk.d0) < 0.05;
 	return 1;
 }
 
-// TODO: get tracks
 int PhaseITrackingEfficiencyFilters::dzCut()
 {
-	// (trajField.mod_on.det == 0 && std::abs(trajField.trk.dz) < 0.1) || 
-	// (trajField.mod_on.det == 1 && std::abs(trajField.trk.dz) < 0.5);
+	return 
+		(trajField.mod_on.det == 0 && std::abs(trajField.trk.dz) < 0.1) || 
+		(trajField.mod_on.det == 1 && std::abs(trajField.trk.dz) < 0.5);
+}
+
+int PhaseITrackingEfficiencyFilters::pixhitCut()
+{
+	// if(trajField.mod_on.det == 0)
+	// {
+	// 	switch(trajField.mod_on.layer)
+	// 	{
+	// 		case 1:
+	// 			return
+	// 				(trajField.trk.validbpix[1] > 0 && trajField.trk.validbpix[2] > 0) || 
+	// 				(trajField.trk.validbpix[1] > 0 && trajField.trk.validfpix[0] > 0) || 
+	// 				(trajField.trk.validfpix[0] > 0 && trajField.trk.validfpix[1] > 0);
+	// 		case 2:
+	// 			return
+	// 				(trajField.trk.validbpix[0] > 0 && trajField.trk.validbpix[2] > 0) || 
+	// 				(trajField.trk.validbpix[0] > 0 && trajField.trk.validfpix[0] > 0);
+	// 		case 3:
+	// 			return
+	// 				(trajField.trk.validbpix[0] > 0 && trajField.trk.validbpix[1] > 0);
+	// 		case 4:
+	// 			return 1;
+	// 	}
+	// }
+	// if(trajField.mod_on.det == 1)
+	// {
+	// 	switch(std::abs(trajField.mod_on.disk))
+	// 	{
+	// 		case 1:
+	// 			return
+	// 				(trajField.trk.validbpix[0] > 0 && trajField.trk.validfpix[1] > 0) || 
+	// 				(trajField.trk.validbpix[1] > 0 && trajField.trk.validfpix[1] > 0);
+	// 		case 2:
+	// 			return
+	// 				(trajField.trk.validbpix[0] > 0 && trajField.trk.validfpix[0] > 0);
+	// 	}
+	// }
+	// return 0;
 	return 1;
 }
 
-// TODO: get tracks
-int PhaseITrackingEfficiencyFilters::pixhitCut()
-{
-	if(trajField.mod_on.det == 0)
-	{
-		switch(trajField.mod_on.layer)
-		{
-			case 1:
-				return
-					(trajField.trk.validbpix[1] > 0 && trajField.trk.validbpix[2] > 0) || 
-					(trajField.trk.validbpix[1] > 0 && trajField.trk.validfpix[0] > 0) || 
-					(trajField.trk.validfpix[0] > 0 && trajField.trk.validfpix[1] > 0);
-			case 2:
-				return
-					(trajField.trk.validbpix[0] > 0 && trajField.trk.validbpix[2] > 0) || 
-					(trajField.trk.validbpix[0] > 0 && trajField.trk.validfpix[0] > 0);
-			case 3:
-				return
-					(trajField.trk.validbpix[0] > 0 && trajField.trk.validbpix[1] > 0);
-			case 4:
-				return 1;
-		}
-	}
-	if(trajField.mod_on.det == 1)
-	{
-		switch(std::abs(trajField.mod_on.disk))
-		{
-			case 1:
-				return
-					(trajField.trk.validbpix[0] > 0 && trajField.trk.validfpix[1] > 0) || 
-					(trajField.trk.validbpix[1] > 0 && trajField.trk.validfpix[1] > 0);
-			case 2:
-				return
-					(trajField.trk.validbpix[0] > 0 && trajField.trk.validfpix[0] > 0);
-		}
-	}
-	return 0;
-}
-
-int PhaseITrackingEfficiencyFilters::goodmodCut()
+int PhaseITrackingEfficiencyFilters::goodModCut()
 {
 	return 1;
 }
@@ -216,7 +214,7 @@ int PhaseITrackingEfficiencyFilters::valmisCut()
 }
 
 // FIXME: Find closest clusters for hits
-int PhaseITrackingEfficiencyFilters::hitsepCut()
+int PhaseITrackingEfficiencyFilters::hitSepCut()
 {
 	// return trajField.hit_near;
 	return 1;
@@ -234,11 +232,11 @@ bool PhaseITrackingEfficiencyFilters::performCuts(uint32_t cutList)
 	if(cutList & Cuts::d0)       passedCuts &= d0Cut();
 	if(cutList & Cuts::dz)       passedCuts &= dzCut();
 	if(cutList & Cuts::pixhit)   passedCuts &= pixhitCut();
-	if(cutList & Cuts::goodmod)  passedCuts &= goodmodCut();
+	if(cutList & Cuts::goodmod)  passedCuts &= goodModCut();
 	if(cutList & Cuts::lx_fid)   passedCuts &= lxFidCut();
 	if(cutList & Cuts::ly_fid)   passedCuts &= lyFidCut();
 	if(cutList & Cuts::valmis)   passedCuts &= valmisCut();
-	if(cutList & Cuts::hitsep)   passedCuts &= hitsepCut();
+	if(cutList & Cuts::hitsep)   passedCuts &= hitSepCut();
 	return passedCuts;
 }
 

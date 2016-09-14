@@ -305,6 +305,7 @@ void PhaseIPixelNtuplizer::getTrackData(const edm::Ref<std::vector<Trajectory>>&
 	trackField.init();
 	// Finding the closest vertex to the track
 	reco::VertexCollection::const_iterator closestVtx = TrajAnalyzer::findClosestVertexToTrack(track, vertexCollectionHandle);
+	// Basic track quantities
 	// FIXME: Add global track counting
 	trackField.i       = trackIndex++;
 	trackField.quality = track -> qualityMask();
@@ -313,6 +314,9 @@ void PhaseIPixelNtuplizer::getTrackData(const edm::Ref<std::vector<Trajectory>>&
 	trackField.eta     = track -> eta();
 	trackField.theta   = track -> theta();
 	trackField.phi     = track -> phi();
+	// FIXME: use best vertex selection instead of closest vertex selection
+	trackField.d0      = track -> dxy(closestVtx -> position()) * -1.0;
+	trackField.dz      = track -> dz (closestVtx -> position());
 	// Zeroing counters
 	trackField.validfpix[0]   = 0;
 	trackField.validfpix[1]   = 0;
