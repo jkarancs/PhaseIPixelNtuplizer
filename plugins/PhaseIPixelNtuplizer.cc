@@ -307,6 +307,8 @@ void PhaseIPixelNtuplizer::getTrajMeasurements(const edm::Event& iEvent, const e
 			double closestTrajMeasurementDistance = sqrt(closestTrajMeasurementDistanceSquared);
 			// trajField.clust_near = (trajField.d_cl[0] != NOVAL_F && trajField.d_cl[0] < 0.05);
 			trajField.hit_near = (closestTrajMeasurementDistance < 0.5);
+			// Add hit efficiency cuts to the saved fields
+			getHitEfficiencyCuts();
 			// Filling the tree
 			trajTree -> Fill();
 		}
