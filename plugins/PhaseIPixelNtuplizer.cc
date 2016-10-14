@@ -57,11 +57,6 @@ void PhaseIPixelNtuplizer::endJob()
 void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 	LogDebug("step") << "Executing PhaseIPixelNtuplizer::analyze()..." << std::endl;
-
-	//////////////////////
-	// Tool definitions //
-	//////////////////////
-
 	// Tracker for valid and missing hits
 	edm::ESHandle<TrackerGeometry> tracker;
 	iSetup.get<TrackerDigiGeometryRecord>().get(tracker);
@@ -69,7 +64,6 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	{
 		handleDefaultError("Invalid tracker.", "tool_access", "Inaccessible or invalid tracker.");
 	}
-
 	// Tracker topology for module informations
 	edm::ESHandle<TrackerTopology> trackerTopologyHandle;
 	iSetup.get<TrackerTopologyRcd>().get(trackerTopologyHandle);
@@ -95,10 +89,8 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// Get vertices by token
 	edm::Handle<reco::VertexCollection> vertexCollectionHandle;
 	iEvent.getByToken(primaryVerticesToken, vertexCollectionHandle);
-
 	// FED errors
 	std::map<uint32_t, int> fedErrors = FedErrorFetcher::getFedErrors(iEvent, rawDataErrorToken);
-
 	getClusters(iEvent, trackerTopology, fedErrors);
 	getTrajMeasurements(iEvent, vertexCollectionHandle, tracker, trackerTopology, fedErrors);
 	// Added for safety
@@ -109,10 +101,6 @@ void PhaseIPixelNtuplizer::beginRun(edm::Run const&, edm::EventSetup const&) {}
 void PhaseIPixelNtuplizer::endRun(edm::Run const&, edm::EventSetup const&) {}
 void PhaseIPixelNtuplizer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) {}
 void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) {}
-
-/////////////////////////////
-// Event tree calculations //
-/////////////////////////////
 
 void PhaseIPixelNtuplizer::getNvtxAndVtxData(const edm::Event& iEvent)
 {
@@ -158,10 +146,6 @@ void PhaseIPixelNtuplizer::getNvtxAndVtxData(const edm::Event& iEvent)
 	// 	}
 	// }
 }
-
-////////////////
-// Clust tree //
-////////////////
 
 void PhaseIPixelNtuplizer::getClusters(const edm::Event& iEvent, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors)
 {
@@ -256,15 +240,20 @@ void PhaseIPixelNtuplizer::getTrajMeasurements(const edm::Event& iEvent, const e
 			// Det id
 			DetId detId = hit -> geographicalId();
 			// Fetch the hit
-			const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(hit -> hit());
+			auto recHit = measurement.recHit();
+			if(recHit -> hit() == nullptr) continue;
+			const SiPixelRecHit* pixhit = dynamic_cast<const SiPixelRecHit*>(recHit -> hit());
+			SiPixelRecHit::ClusterRef const& clusterRef = pixhit -> cluster();
+			// Check hit qualty
+			if(!recHit -> isValid())       continue;
 			// Check hit qualty
 			if(!pixhit) continue;
 			uint32_t subDetId = (detId.subdetId());
 			// Looking for pixel hits
 			if(TrajAnalyzer::subdetidIsOnPixel(subDetId)) continue;
 			// Looking for valid and missing hits
-			trajField.validhit = hit -> getType() == TrackingRecHit::valid;
-			trajField.missing  = hit -> getType() == TrackingRecHit::missing;
+			trajField.validhit = recHit -> getType() == TrackingRecHit::valid;
+			trajField.missing  = recHit -> getType() == TrackingRecHit::missing;
 			// Save module data
 			trajField.mod    = ModuleDataProducer::getPhaseOneOfflineModuleData(detId.rawId(), trackerTopology, fedErrors);
 			trajField.mod_on = ModuleDataProducer::convertPhaseOneOfflineOnline(trajField.mod);
@@ -291,22 +280,19 @@ void PhaseIPixelNtuplizer::getTrajMeasurements(const edm::Event& iEvent, const e
 			trajField.alpha = atan2(localTrackDirection.z(), localTrackDirection.x());
 			trajField.beta  = atan2(localTrackDirection.z(), localTrackDirection.y());
 			// Get closest other traj measurement
-			double closestTrajMeasurementDistanceSquared = TrajAnalyzer::trajMeasurementDistanceSquared(measurement, *(trajTrackCollectionHandle -> begin() -> key -> measurements().begin()));
-			for(const auto& otherTrackKeypair: *trajTrackCollectionHandle)
+			TrajAnalyzer::getClosestOtherTrackDistanceByLooping(measurement, trajTrackCollectionHandle, trajField.d_tr, trajField.dx_tr, trajField.dy_tr);
+			trajField.dx_cl = std::abs(clusterRef -> x() - trajField.lx);
+			trajField.dy_cl = std::abs(clusterRef -> y() - trajField.ly);
+			if(trajField.dx_cl == NOVAL_F || trajField.dy_cl == NOVAL_F)
 			{
-				const edm::Ref<std::vector<Trajectory>> otherTraj = otherTrackKeypair.key;
-				for(const TrajectoryMeasurement& otherTrajMeasurement: otherTraj -> measurements())
-				{
-					float distanceSquared = TrajAnalyzer::trajMeasurementDistanceSquared(measurement, otherTrajMeasurement);
-					if(distanceSquared < closestTrajMeasurementDistanceSquared)
-					{
-						closestTrajMeasurementDistanceSquared = distanceSquared;
-					}
-				}
+				trajField.d_cl = NOVAL_F;
 			}
-			double closestTrajMeasurementDistance = sqrt(closestTrajMeasurementDistanceSquared);
-			// trajField.clust_near = (trajField.d_cl[0] != NOVAL_F && trajField.d_cl[0] < 0.05);
-			trajField.hit_near = (closestTrajMeasurementDistance < 0.5);
+			else
+			{
+				trajField.d_cl = sqrt(trajField.dx_cl * trajField.dx_cl + trajField.dy_cl + trajField.dy_cl);
+			}
+			trajField.hit_near = (trajField.d_tr < 0.5);
+			trajField.clust_near = (trajField.d_cl != NOVAL_F && trajField.d_cl < 0.05);
 			// Add hit efficiency cuts to the saved fields
 			getHitEfficiencyCuts();
 			// Filling the tree

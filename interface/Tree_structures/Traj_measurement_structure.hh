@@ -25,7 +25,7 @@ std::string TrajMeasData_static_variablse<Dummy>::list =
     // "validhit/I:missing:lx/F:ly:lz:res_dx:res_dz:lev:clust_near/I:hit_near:"
     // "pass_efcuts:nclu_mod:nclu_roc:npix_mod:npix_roc:alpha/F:beta:lx_err:ly_err:dx_cl[2]:"
     // "dy_cl[2]:dx_hit:dy_hit:norm_charge";
-	"validhit/I:missing/I:lx/F:ly/F:lz/F:glx/F:gly/F:glz/F:hit_near/I:pass_effcuts/I:alpha/F:beta/F:onedge/I:lx_err/F:ly_err/F";
+	"validhit/I:missing/I:lx/F:ly/F:lz/F:glx/F:gly/F:glz/F:clust_near/F:hit_near/I:pass_effcuts/I:alpha/F:beta/F:d_tr/F:dx_tr/F:dy_tr/F:d_cl/F:dx_cl/F:dy_cl/F:onedge/I:lx_err/F:ly_err/F";
 
 /////////////////////////////
 // TrajMeasData definition //
@@ -46,7 +46,7 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 		// float res_dx;
 		// float res_dz;
 		// float lev;
-		// int clust_near;
+		int clust_near;
 		int hit_near;
 		int pass_effcuts;
 		// Paired branch (keep order)
@@ -56,8 +56,12 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 		// int npix_roc;
 		float alpha;
 		float beta;
-		// float dx_cl[2];
-		// float dy_cl[2];
+		float d_tr;
+		float dx_tr;
+		float dy_tr;
+		float d_cl;
+		float dx_cl;
+		float dy_cl;
 		// float dx_hit;
 		// float dy_hit;
 		// // From here Split mode (if SPLIT defined)
@@ -79,54 +83,56 @@ class TrajMeasData : public TrajMeasData_static_variablse<void>
 		// float lxymatch;
 		// float res_hit;
 		// float sig_hit;
-		// float d_cl[2];
 
 		TrajMeasData() { init(); }
 		void init()
 		{
-			validhit=NOVAL_I;
-			missing=NOVAL_I;
-			lx=NOVAL_F;
-			ly=NOVAL_F;
-			lz=NOVAL_F;
+			validhit = NOVAL_I;
+			missing  = NOVAL_I;
+			lx       = NOVAL_F;
+			ly       = NOVAL_F;
+			lz       = NOVAL_F;
 			// res_dx=NOVAL_F;
 			// res_dz=NOVAL_F;
 			// lev=NOVAL_F;
-			// clust_near=NOVAL_I;
-			hit_near=NOVAL_I;
-			pass_effcuts=NOVAL_I;
+			clust_near   = NOVAL_I;
+			hit_near     = NOVAL_I;
+			pass_effcuts = NOVAL_I;
 			// nclu_mod=NOVAL_I;
 			// nclu_roc=NOVAL_I;
 			// npix_mod=NOVAL_I;
 			// npix_roc=NOVAL_I;
-			// dx_cl[0]=dx_cl[1]=NOVAL_F;
-			// dy_cl[0]=dy_cl[1]=NOVAL_F;
+			d_tr  = NOVAL_F;
+			dx_tr = NOVAL_F;
+			dy_tr = NOVAL_F;
+			d_cl  = NOVAL_F;
+			dx_cl = NOVAL_F;
+			dy_cl = NOVAL_F;
 			// dx_hit=NOVAL_F;
 			// dy_hit=NOVAL_F;
-			glx=NOVAL_F;
-			gly=NOVAL_F;
-			glz=NOVAL_F;
+			glx = NOVAL_F;
+			gly = NOVAL_F;
+			glz = NOVAL_F;
 			// lxmatch=NOVAL_F;
 			// lymatch=NOVAL_F;
 			// norm_charge=NOVAL_F;
 			// i=NOVAL_I;
-			onedge=NOVAL_I;
+			onedge = NOVAL_I;
 			// inactive=NOVAL_I;
 			// badhit=NOVAL_I;
-			alpha=NOVAL_F;
-			beta=NOVAL_F;
+			alpha = NOVAL_F;
+			beta = NOVAL_F;
 			// telescope=NOVAL_I;
 			// telescope_valid=NOVAL_I;
 			// dmodule=NOVAL_I;
 			// dladder=NOVAL_I;
 			// glmatch=NOVAL_F;
-			lx_err=NOVAL_F;
-			ly_err=NOVAL_F;
+			lx_err = NOVAL_F;
+			ly_err = NOVAL_F;
 			// lz_err=NOVAL_F;
 			// lxymatch=NOVAL_F;
 			// res_hit=NOVAL_F;
 			// sig_hit=NOVAL_F;
-			// d_cl[0]=d_cl[1]=NOVAL_F;
 		};
 };
 

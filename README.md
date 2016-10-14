@@ -11,7 +11,7 @@ cmsenv
 git cms-addpkg SimGeneral/MixingModule
 git remote add hunyadix git@github.com:hunyadix/cmssw.git
 git fetch hunyadix
-git checkout -t hunyadix/CMSSW_8_1_0_pre8_for_PhaseIPixelNtuplizer
+git checkout -t hunyadix/CMSSW_8_1_X_for_PhaseIPixelNtuplizer
 mkdir DPGAnalysis
 git clone git@github.com:jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
 scram b -j 20
@@ -28,27 +28,17 @@ Running on RECO output seems to be impossible right now since the track refittin
 ### &#x1F539; No pileup
 If you don't need pileup, it is really fast to generate Ntuples starting with RAW2DIGI -> RECO. Example file: test/RAWTODIGI_RECO_test.py.
 
-### &#x1F539; New geometry
+### &#x1F539; CMSSW config file cmsDriver.py recipe
 
 ```bash
-export SCRAM_ARCH=slc6_amd64_gcc530
-cmsrel CMSSW_8_1_0_pre8
-cd CMSSW_8_1_0_pre8/src
-cmsenv
-git cms-addpkg Configuration/StandardSequences
-git cms-addpkg Configuration/PyReleaseValidation
-git cms-addpkg Configuration/Geometry
-git cms-addpkg Geometry/CMSCommonData
-git cms-addpkg Geometry/TrackerCommonData
-git cms-addpkg Geometry/TrackerSimData
-git cms-addpkg Geometry/TrackerNumberingBuilder
-git cms-addpkg Geometry/TrackerRecoData
-git cms-addpkg SimGeneral/MixingModule
-cmsenv
-git checkout -t hunyadix/CMSSW_8_1_0_pre8_for_PhaseIPixelNtuplizer
-mkdir DPGAnalysis
-git clone git@github.com:jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
-scram b -j 20
-ln -s DPGAnalysis/PhaseIPixelNtuplizer/python/PhaseINtuplizer_GenNu_DynIneffDB_cfg.py .
-cmsRun PhaseINtuplizer_GenNu_DynIneffDB_cfg.py
+cmsDriver.py TTbar_13TeV_TuneCUETP8M1_cfi 
+-s GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,RAW2DIGI,RECO 
+--datatier GEN-SIM-RECO 
+--eventcontent RECOSIM 
+--conditions auto:phase1_2017_realistic 
+--era Run2_2017_NewFPix 
+--geometry Extended2017NewFPix 
+--beamspot Realistic50ns13TeVCollision 
+--relval 9000,50 
+-n 10 
 ```

@@ -16,10 +16,6 @@ void PhaseIDataTrees::defineClusterTreeBranches(TTree*& clusterTree, EventData& 
 	clusterTree -> Branch("module_on",    &clusterField.mod_on, ModuleData::list.c_str());
 	// Serial number of cluster in the given module
 	clusterTree -> Branch("clust_i",      &clusterField.i,      "i/I");
-	// // Set if there is a valid hits
-	// clusterTree -> Branch("clust_edge",   &clusterField.edge,   "edge/I");
-	// clusterTree -> Branch("clust_badpix", &clusterField.badpix, "badpix/I");
-	// clusterTree -> Branch("clust_tworoc", &clusterField.tworoc, "tworoc/I");
 	// Position and size
 	clusterTree -> Branch("clust_xy",     &clusterField.x,      "x/F:y");
 	clusterTree -> Branch("clust_size",   &clusterField.size,   "size/I");
@@ -37,21 +33,7 @@ void PhaseIDataTrees::defineTrajTreeBranches(TTree*& trajTree, EventData& eventF
 	trajTree -> Branch("module",           &trajField.mod,         ModuleData::list.c_str());
 	trajTree -> Branch("module_on",        &trajField.mod_on,      ModuleData::list.c_str());
 	trajTree -> Branch("track",            &trajField.trk,         trajField.trk.list.c_str());
-	// trajTree -> Branch("traj",             &trajField,             "validhit/I:missing:lx/F:ly:res_dx:res_dz:lev:clust_near/I:hit_near:pass_effcuts");
-	// trajTree -> Branch("traj",             &trajField,             "validhit/I:missing/I:lx/F:ly/F:lz/F:glx/F:gly/F:glz/F:pass_effcuts/I:alpha/F:beta/F");
 	trajTree -> Branch("traj",             &trajField,             TrajMeasData::list.c_str());
-	// trajTree -> Branch("traj_occup",       &trajField.nclu_mod,    "nclu_mod/I:nclu_roc:npix_mod:npix_roc");
-	// trajTree -> Branch("traj_alphabeta",   &trajField.alpha,       "alpha/F:beta");
-	// trajTree -> Branch("traj_dxy_cl",      &trajField.dx_cl,       "dx_cl[2]/F:dy_cl[2]");
-	// trajTree -> Branch("traj_dxy_hit",     &trajField.dx_hit,      "dx_hit/F:dy_hit");
-	// trajTree -> Branch("traj_norm_charge", &trajField.norm_charge, "norm_charge/F");
-	// trajTree -> Branch("clust_size",       &trajField.clu.size,    "size/I");
-	// trajTree -> Branch("clust_sizeXY",     &trajField.clu.sizeX,   "sizeX/I:sizeY");
-	// trajTree -> Branch("clust_adc",        &trajField.clu.pix,     "adc[size]/F");
-	// trajTree -> Branch("track",            &trajField.trk,         trajField.trk.list.c_str());
-	// trajTree -> Branch("track_ndofchi2",   &trajField.trk.ndof,    "ndof/F:chi2");
-	// trajTree -> Branch("track_eta",        &trajField.trk.eta,     "eta/F");
-	// trajTree -> Branch("track_phi",        &trajField.trk.phi,     "phi/F");
 }
 
 ////////////////////////////////////
