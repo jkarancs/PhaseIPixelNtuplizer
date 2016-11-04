@@ -5,23 +5,26 @@
 
   Description:     Data containers for Phase I Pixel detector
 
-  Version history:
-  - V1 - 2016/Nov/04 - First working version, containing most of the required event content for Phase I
+  Comments:        Please, make a new version of this file after each major revision (to be able to track ntuple content)
+                   e.g:
+		   git add src/DataStructures_v2.cc
 
-  Comment:         Please make a new version of this file after each major revision (to be able to track ntuple content)
-		   Plase update the README.md file too (With tested working recipe, stating the working CMSSW version, and ntuple version)
+		   Please, update the README.md file too (With tested working recipe, stating the working CMSSW version, and ntuple version)
                    Please, also tag corresponding working PhaseIPixelNtuplizer version
+		   If you only modify the PhaseIPixelNtuplizer, increase the subversion number in the tag, i.e: v1.1
 
 		   How to do it:
 		   - Inside PhaseIPixelNtuplizer.cc
 		   #include "../src/DataStructures_v1.cc"
 
 		   cd DPGAnalysis/PhaseIPixelNtuplizer
-		   git add src/DataStructures_v1.cc
-		   git commit -am "Update: V1 Phase I ntuple (CMSSW_8_0_0_pre15), Description: Fixed all trees and most important variables"
-		   git tag -a PhaseI_800pre15_V1 -m "V1 version of Phase I ntuples, tested to work with CMSSW_8_1_0_pre15"
+		   git commit -am "Update: v1.0 Phase I ntuple (CMSSW_8_0_0_pre15), Description: Fixed all trees and most important variables"
+		   git tag -a PhaseI_v1.0_CMSSW_8_0_0_pre15 -m "V1 version of Phase I ntuples, tested to work with CMSSW_8_1_0_pre15"
 		   git push origin
 		   git push origin --tags
+
+  Version history:
+  - V1.X - 2016/Nov/04 - First working version, containing most of the required event content for Phase I
 */
 
 
