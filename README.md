@@ -5,40 +5,25 @@
 
 ```bash
 export SCRAM_ARCH=slc6_amd64_gcc530
-cmsrel CMSSW_8_1_0_pre8
-cd CMSSW_8_1_0_pre8/src
+cmsrel CMSSW_8_1_0_pre15
+cd CMSSW_8_1_0_pre15/src
+git cms-merge-topic 16338
 cmsenv
-git cms-addpkg SimGeneral/MixingModule
-git remote add hunyadix git@github.com:hunyadix/cmssw.git
-git fetch hunyadix
-git checkout -t hunyadix/CMSSW_8_1_X_for_PhaseIPixelNtuplizer
-mkdir DPGAnalysis
-git clone git@github.com:jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
+git clone git@github.com:jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer -b PhaseI_v1.0_CMSSW_8_0_0_pre15
+cd DPGAnalysis/PhaseIPixelNtuplizer
+git submodule init && git submodule update
 scram b -j 20
-ln -s DPGAnalysis/PhaseIPixelNtuplizer/python/PhaseINtuplizer_GenNu_DynIneffDB_cfg.py .
-cmsRun PhaseINtuplizer_GenNu_DynIneffDB_cfg.py
+cmsRun test/run_PhaseIPixelNtuplizer_MinBias_cfg.py
 ```
 
 ### &#x1F539; Starting from GEN-SIM
-The PhaseINtuplizer_GenNu_DynIneffDB_cfg.py uses neutrino signals (nothing) as a base input, and mixes events to it using GEN-SIM data generated with CMSSW_8_1_0pre8 to achieve flat pileup. Right now the mixing step is really slow, and eats too much memory.
+The run_PhaseIPixelNtuplizer_MinBias_cfg.py creates/uses MinBias RECO events for input for the Ntuplizer, 1k events were generated with new geometry, but new ones can be made (set useRECO=False, saveRECO=True).
 
 ### &#x1F539; Running on Reco
-Running on RECO output seems to be impossible right now since the track refitting does not seem to work yet. If you manage to run the refitter step, please send in a pull request.
+This is the default setting.
 
-### &#x1F539; No pileup
-If you don't need pileup, it is really fast to generate Ntuples starting with RAW2DIGI -> RECO. Example file: test/RAWTODIGI_RECO_test.py.
-
-### &#x1F539; CMSSW config file cmsDriver.py recipe
+### &#x1F539; CMSSW config file cmsDriver.py recipe used as a base, can be modified to generate different types of events, change mixing etc
 
 ```bash
-cmsDriver.py TTbar_13TeV_TuneCUETP8M1_cfi 
--s GEN,SIM,DIGI:pdigi_valid,L1,DIGI2RAW,RAW2DIGI,RECO 
---datatier GEN-SIM-RECO 
---eventcontent RECOSIM 
---conditions auto:phase1_2017_realistic 
---era Run2_2017_NewFPix 
---geometry Extended2017NewFPix 
---beamspot Realistic50ns13TeVCollision 
---relval 9000,50 
--n 10 
+cmsDriver.py -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type SingleMuPt10_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry Extended2017new --fileout file:MuPt10_GENSIMRECO.root --python_filename=run_PixelHitAssociator_PhaseI_MuPt10_cfg.py -n 10 --runUnscheduled --no_exec
 ```
