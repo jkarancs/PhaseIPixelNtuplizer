@@ -111,6 +111,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		// Options //
 		/////////////
 
+		// Save only every nth cluster
 		int clusterSaveDownlscaling;
 
 		/////////////////
@@ -161,10 +162,10 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		// Event data
 		void getNvtxAndVtxData(const edm::Event& iEvent); // FIXME: add reco for phase_I
 		// Clusters
-		void getClusters(const edm::Event& iEvent, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
+		void handleClusters(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
 		// Trajectory measurements
 		int  trajectoryHasPixelHit(const edm::Ref<std::vector<Trajectory>>& trajectory);
-		void getTrajMeasurements(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
+		void handleTrajMeasurements(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
 		void getTrackData(const edm::Ref<std::vector<Trajectory>>& traj, const reco::TrackRef& track, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
 		void getHitEfficiencyCuts();
 

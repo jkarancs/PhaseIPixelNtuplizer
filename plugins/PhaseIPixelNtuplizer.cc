@@ -7,6 +7,7 @@
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig)
 {
 	// Options
+	// Save only every nth cluster
 	clusterSaveDownlscaling = 1;
 	// Product consumption declarations
 	primaryVerticesToken     = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
@@ -60,20 +61,42 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// Tracker for valid and missing hits
 	edm::ESHandle<TrackerGeometry> tracker;
 	iSetup.get<TrackerDigiGeometryRecord>().get(tracker);
-	if(!tracker.isValid())
-	{
-		handleDefaultError("Invalid tracker.", "tool_access", "Inaccessible or invalid tracker.");
-	}
+	if(!tracker.isValid()) handleDefaultError("Invalid tracker.", "tool_access", "Inaccessible or invalid tracker.");
 	// Tracker topology for module informations
 	edm::ESHandle<TrackerTopology> trackerTopologyHandle;
 	iSetup.get<TrackerTopologyRcd>().get(trackerTopologyHandle);
 	const TrackerTopology* const trackerTopology = trackerTopologyHandle.product();
 
-	////////////////
-	// Event tree //
-	////////////////
+	///////////////////
+	// Data fetching //
+	///////////////////
 
-	// Set data holder object
+	// FED errors
+	std::map<uint32_t, int> fedErrors = FedErrorFetcher::getFedErrors(iEvent, rawDataErrorToken);
+	// Fetching vertices by token
+	edm::Handle<reco::VertexCollection>     vertexCollectionHandle;
+	iEvent.getByToken(primaryVerticesToken, vertexCollectionHandle);
+	// Fetching pixel digis by token
+	// edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
+	// iEvent.getByToken(pixelDigisToken,        digiCollectionHandle);
+	// Fetching the clusters by token
+	edm::Handle<edmNew::DetSetVector<SiPixelCluster>> clusterCollectionHandle;
+	iEvent.getByToken(clustersToken,                  clusterCollectionHandle);
+	// Fetching the tracks by token
+	edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
+	iEvent.getByToken(trajTrackCollectionToken, trajTrackCollectionHandle);
+	// Check if the data is accessible
+	if(!vertexCollectionHandle    .isValid()) handleDefaultError("data access", "data_access", "Failed to fetch primary vertex collection.");
+	// if(!digiCollectionHandle      .isValid()) handleDefaultError("data access", "data_access", "Failed to fetch digi collection.");
+	if(!clusterCollectionHandle   .isValid()) handleDefaultError("data access", "data_access", "Failed to fetch clusters.");
+	if(!trajTrackCollectionHandle .isValid()) handleDefaultError("data access", "data_access", "Failed to fetch trajectory measurements.");
+
+	///////////////////
+	// Data handling //
+	///////////////////
+
+	// // Event tree
+	// // Set data holder object
 	// PhaseIDataTrees::setEventTreeDataFields(eventTree, eventField);
 	// eventField.fill         = static_cast<int>(0); // FIXME
 	// eventField.run          = static_cast<int>(iEvent.id().run());
@@ -82,17 +105,11 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// eventField.bx           = static_cast<int>(iEvent.bunchCrossing());
 	// eventField.evt          = static_cast<int>(iEvent.id().event());
 	// get_nvtx_and_vtx_data(iEvent);
-
-	// Fill the tree
+	// // Fill the tree
 	// eventTree -> Fill();
 
-	// Get vertices by token
-	edm::Handle<reco::VertexCollection> vertexCollectionHandle;
-	iEvent.getByToken(primaryVerticesToken, vertexCollectionHandle);
-	// FED errors
-	std::map<uint32_t, int> fedErrors = FedErrorFetcher::getFedErrors(iEvent, rawDataErrorToken);
-	getClusters(iEvent, trackerTopology, fedErrors);
-	getTrajMeasurements(iEvent, vertexCollectionHandle, tracker, trackerTopology, fedErrors);
+	handleClusters(clusterCollectionHandle, trackerTopology, fedErrors);
+	handleTrajMeasurements(trajTrackCollectionHandle, vertexCollectionHandle, tracker, trackerTopology, fedErrors);
 	// Added for safety
 	clearAllContainers();
 }
@@ -147,81 +164,66 @@ void PhaseIPixelNtuplizer::getNvtxAndVtxData(const edm::Event& iEvent)
 	// }
 }
 
-void PhaseIPixelNtuplizer::getClusters(const edm::Event& iEvent, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors)
+void PhaseIPixelNtuplizer::handleClusters(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors)
 {
-	// Set data holder objects
-	PhaseIDataTrees::setClusterTreeDataFields(clusterTree, eventField, clusterField);
-	// Fetching the clusters by token
-	edm::Handle<edmNew::DetSetVector<SiPixelCluster> > clusterCollectionHandle;
-	iEvent.getByToken(clustersToken, clusterCollectionHandle);
-	// Trying to access the clusters
-	if(clusterCollectionHandle.isValid())
+	int clusterCounter = 0;
+	const edmNew::DetSetVector<SiPixelCluster>& currentClusterCollection = *clusterCollectionHandle;
+	// Looping on clusters with the same location
+	typedef edmNew::DetSetVector<SiPixelCluster>::const_iterator clustCollIt_t;
+	for(clustCollIt_t currentClusterSetIt = currentClusterCollection.begin(); currentClusterSetIt != currentClusterCollection.end(); ++currentClusterSetIt)
 	{
-		int clusterCounter = 0;
-		const edmNew::DetSetVector<SiPixelCluster>& currentClusterCollection = *clusterCollectionHandle;
-		// Looping on clusters with the same location
-		typedef edmNew::DetSetVector<SiPixelCluster>::const_iterator clustCollIt_t;
-		for(clustCollIt_t currentClusterSetIt = currentClusterCollection.begin(); currentClusterSetIt != currentClusterCollection.end(); ++currentClusterSetIt)
+		const auto& currentClusterSet = *currentClusterSetIt;
+		DetId detId(currentClusterSet.id());
+		unsigned int subdetId = detId.subdetId();
+		// Take only pixel clusters
+		if(subdetId != PixelSubdetector::PixelBarrel && subdetId != PixelSubdetector::PixelEndcap)
 		{
-			const auto& currentClusterSet = *currentClusterSetIt;
-			DetId detId(currentClusterSet.id());
-			unsigned int subdetId = detId.subdetId();
-			// Take only pixel clusters
-			if(subdetId != PixelSubdetector::PixelBarrel && subdetId != PixelSubdetector::PixelEndcap)
+			continue;
+		}
+		typedef edmNew::DetSet<SiPixelCluster>::const_iterator clustSetIt_t;
+		for(clustSetIt_t currentClusterIt = currentClusterSet.begin(); currentClusterIt != currentClusterSet.end(); ++currentClusterIt)
+		{
+			const auto& currentCluster = *currentClusterIt;
+			// Serial num of cluster in the given module
+			clusterField.i = currentClusterIt - currentClusterSet.begin();
+			// Set if there is a valid hits
+			// clusterField.edge;
+			// clusterField.badpix;
+			// clusterField.tworoc;
+			// Module information
+			clusterField.mod    = ModuleDataProducer::getPhaseOneOfflineModuleData(detId.rawId(), trackerTopology, fedErrors);
+			clusterField.mod_on = ModuleDataProducer::convertPhaseOneOfflineOnline(clusterField.mod);
+			// Position and size
+			clusterField.x     = currentCluster.x();
+			clusterField.y     = currentCluster.y();
+			clusterField.sizeX = currentCluster.sizeX();
+			clusterField.sizeY = currentCluster.sizeY();
+			clusterField.size  = currentCluster.size();
+			// Charge
+			clusterField.charge = currentCluster.charge();
+			// Misc.
+			for(int i = 0; i < clusterField.size && i < 1000; ++i)
+			{
+				const auto& currentPixels = currentCluster.pixels();
+				clusterField.adc[i]    = currentCluster.pixelADC()[i] / 1000.0;
+				clusterField.pix[i][0] = currentPixels[i].x;
+				clusterField.pix[i][1] = currentPixels[i].y;
+			}
+			completeClusterCollection.push_back(clusterField);
+			// The number of saved clusters can be downscaled to save space
+			if(clusterCounter++ % clusterSaveDownlscaling != 0)
 			{
 				continue;
 			}
-			typedef edmNew::DetSet<SiPixelCluster>::const_iterator clustSetIt_t;
-			for(clustSetIt_t currentClusterIt = currentClusterSet.begin(); currentClusterIt != currentClusterSet.end(); ++currentClusterIt)
-			{
-				const auto& currentCluster = *currentClusterIt;
-				// Serial num of cluster in the given module
-				clusterField.i = currentClusterIt - currentClusterSet.begin();
-				// Set if there is a valid hits
-				// clusterField.edge;
-				// clusterField.badpix;
-				// clusterField.tworoc;
-				// Module information
-				clusterField.mod    = ModuleDataProducer::getPhaseOneOfflineModuleData(detId.rawId(), trackerTopology, fedErrors);
-				clusterField.mod_on = ModuleDataProducer::convertPhaseOneOfflineOnline(clusterField.mod);
-				// Position and size
-				clusterField.x     = currentCluster.x();
-				clusterField.y     = currentCluster.y();
-				clusterField.sizeX = currentCluster.sizeX();
-				clusterField.sizeY = currentCluster.sizeY();
-				clusterField.size  = currentCluster.size();
-				// Charge
-				clusterField.charge = currentCluster.charge();
-				// Misc.
-				for(int i = 0; i < clusterField.size && i < 1000; ++i)
-				{
-					const auto& currentPixels = currentCluster.pixels();
-					clusterField.adc[i]    = currentCluster.pixelADC()[i] / 1000.0;
-					clusterField.pix[i][0] = currentPixels[i].x;
-					clusterField.pix[i][1] = currentPixels[i].y;
-				}
-				completeClusterCollection.push_back(clusterField);
-				// The number of saved clusters can be downscaled to save space
-				if(clusterCounter++ % clusterSaveDownlscaling != 0)
-				{
-					continue;
-				}
-				clusterTree -> Fill();
-			}
+			// Set data holder objects
+			PhaseIDataTrees::setClusterTreeDataFields(clusterTree, eventField, clusterField);
+			clusterTree -> Fill();
 		}
-	}
-	else
-	{
-		handleDefaultError("data_access", "data_access", "Failed to fetch the clusters.");
 	}
 }
 
-void PhaseIPixelNtuplizer::getTrajMeasurements(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors)
+void PhaseIPixelNtuplizer::handleTrajMeasurements(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors)
 {
-	PhaseIDataTrees::setTrajTreeDataFields(trajTree, eventField, trajField);
-	// Fetching the tracks by token
-	edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
-	iEvent.getByToken(trajTrackCollectionToken, trajTrackCollectionHandle);
 	// Looping on the whole track collection
 	for(const auto& currentTrackKeypair: *trajTrackCollectionHandle)
 	{
