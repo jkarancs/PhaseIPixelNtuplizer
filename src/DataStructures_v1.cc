@@ -60,14 +60,6 @@ class RunData
 			run=NOVAL_I;
 			list="fill/I:run";
 		};
-
-		void* get(std::string field_name_p)
-		{
-			if(field_name_p == "fill") { return &fill; }
-			if(field_name_p == "run")  { return &run; }
-			std::cerr << "Error: RunData::get() is unable to find the field: " << field_name_p << ". " << std::endl;
-			exit(-1);
-		}
 };
 
 
@@ -112,22 +104,6 @@ class LumiData
 
 			list =  "fill/I:run:ls:time/i:beamint[2]:intlumi/F:instlumi:instlumi_ext:"
 							"pileup:l1_size/I:l1_prescale[l1_size]";
-		}
-		void* get(std::string field_name_p)
-		{
-			if(field_name_p == "fill")         { return &fill; }
-			if(field_name_p == "run")          { return &run; }
-			if(field_name_p == "ls")           { return &ls; }
-			if(field_name_p == "time")         { return &time; }
-			if(field_name_p == "beamint")      { return &beamint; }
-			if(field_name_p == "intlumi")      { return &intlumi; }
-			if(field_name_p == "instlumi")     { return &instlumi; }
-			if(field_name_p == "instlumi_ext") { return &instlumi_ext; }
-			if(field_name_p == "pileup")       { return &pileup; }
-			if(field_name_p == "l1_size")      { return &l1_size; }
-			if(field_name_p == "l1_prescale")  { return &l1_prescale; }
-			std::cerr << "Error: Lumidata::get() is unable to find the field: " << field_name_p << ". " << std::endl;
-			exit(-1);
 		}
 };
 
@@ -235,53 +211,6 @@ class EventData
 							"ntrackFPixvalid[3]:ntrackBPixvalid[4]:trackSep/F:federrs_size/I:"
 							"federrs[federrs_size][2]";
 		};
-
-		void* get(std::string field_name_p)
-		{
-			if(field_name_p == "fill")            { return &fill; }
-			if(field_name_p == "run")             { return &run; }
-			if(field_name_p == "ls")              { return &ls; }
-			if(field_name_p == "orb")             { return &orb; }
-			if(field_name_p == "bx")              { return &bx; }
-			if(field_name_p == "evt")             { return &evt; }
-			if(field_name_p == "nvtx")            { return &nvtx; }
-			if(field_name_p == "trig")            { return &trig; }
-			if(field_name_p == "nclu")            { return &nclu; } // [0: fpix, i: layer i]
-			if(field_name_p == "npix")            { return &npix; } // [0: fpix, i: layer i]
-			if(field_name_p == "beamint")         { return &beamint; }
-			if(field_name_p == "l1_rate")         { return &l1_rate; }
-			if(field_name_p == "intlumi")         { return &intlumi; }
-			if(field_name_p == "instlumi")        { return &instlumi; }
-			if(field_name_p == "instlumi_ext")    { return &instlumi_ext; }
-			if(field_name_p == "pileup")          { return &pileup; }
-			if(field_name_p == "weight")          { return &weight; }
-			if(field_name_p == "vtxndof")         { return &vtxndof; }
-			if(field_name_p == "vtxchi2")         { return &vtxchi2; }
-			if(field_name_p == "vtxD0")           { return &vtxD0; }
-			if(field_name_p == "vtxX")            { return &vtxX; }
-			if(field_name_p == "vtxY")            { return &vtxY; }
-			if(field_name_p == "vtxZ")            { return &vtxZ; }
-			if(field_name_p == "vtxntrk")         { return &vtxntrk; }
-			if(field_name_p == "good")            { return &good; }
-			if(field_name_p == "tmuon")           { return &tmuon; }
-			if(field_name_p == "tmuon_err")       { return &tmuon_err; }
-			if(field_name_p == "tecal")           { return &tecal; }
-			if(field_name_p == "tecal_raw")       { return &tecal_raw; }
-			if(field_name_p == "tecal_err")       { return &tecal_err; }
-			if(field_name_p == "field")           { return &field; }
-			if(field_name_p == "wbc")             { return &wbc; }
-			if(field_name_p == "delay")           { return &delay; }
-			if(field_name_p == "ntracks")         { return &ntracks; }
-			if(field_name_p == "ntrackFPix")      { return &ntrackFPix; } // tracks crossing the pixels
-			if(field_name_p == "ntrackBPix")      { return &ntrackBPix; } // tracks crossing the pixels
-			if(field_name_p == "ntrackFPixvalid") { return &ntrackFPixvalid; } // tracks crossing the pixels with valid hits
-			if(field_name_p == "ntrackBPixvalid") { return &ntrackBPixvalid; } // tracks crossing the pixels with valid hits
-			if(field_name_p == "trackSep")        { return &trackSep; }
-			if(field_name_p == "federrs_size")    { return &federrs_size; }
-			if(field_name_p == "federrs")         { return &federrs; } // [error index] [0:Nerror, 1:errorType]
-			std::cerr << "Error: EventData::get() is unable to find the field: " << field_name_p << ". " << std::endl;
-			exit(-1);
-		}
 };
 
 
@@ -380,17 +309,6 @@ class DigiData
 			adc=NOVAL_I;
 			list="i/I:row:col:adc";
 		};
-
-		void* get(std::string field_name_p)
-		{
-			if(field_name_p == "i")    { return &i; }
-			if(field_name_p == "row")  { return &row; }
-			if(field_name_p == "col")  { return &col; }
-			if(field_name_p == "adc")  { return &adc; }
-			std::cerr << "Error: DigiData::get() is unable to find the field: " << field_name_p << ". " << std::endl;
-			exit(-1);
-		}
-
 };
 
 
