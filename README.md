@@ -9,15 +9,19 @@ cmsrel CMSSW_8_1_0_pre15
 cd CMSSW_8_1_0_pre15/src
 git cms-merge-topic 16338
 cmsenv
-git clone git@github.com:jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer -b PhaseI_v1.0_CMSSW_8_0_0_pre15
+git clone git@github.com:jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
 cd DPGAnalysis/PhaseIPixelNtuplizer
 git submodule init && git submodule update
 scram b -j 20
-cmsRun test/run_PhaseIPixelNtuplizer_MinBias_cfg.py
+cd ../..
+mkdir TestPhaseINtuplizer
+cd TestPhaseINtuplizer
+ln -s ../DPGAnalysis/PhaseIPixelNtuplizer/test/run_PhaseIPixelNtuplizer_MinBias_cfg.py .
+cmsRun run_PhaseIPixelNtuplizer_MinBias_cfg.py
 ```
 
 ### &#x1F539; Starting from GEN-SIM
-The run_PhaseIPixelNtuplizer_MinBias_cfg.py creates/uses MinBias RECO events for input for the Ntuplizer, 1k events were generated with new geometry, but new ones can be made (set useRECO=False, saveRECO=True).
+The run_PhaseIPixelNtuplizer_MinBias_cfg.py creates/uses MinBias RECO events for input for the Ntuplizer, 1k events were generated with new geometry, but new ones can be made (set  useRECO=False, saveRECO=True).
 
 ### &#x1F539; Running on Reco
 This is the default setting.
