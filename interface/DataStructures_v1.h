@@ -1,5 +1,5 @@
-#ifndef DATASTRUCTURES_CC
-#define DATASTRUCTURES_CC
+#ifndef DATASTRUCTURES_H
+#define DATASTRUCTURES_H
 /*
 	Creator:         Janos Karancsi, Adam Hunyadi, Viktor Veszpremi
 
@@ -7,15 +7,15 @@
 
 	Comments:        Please, make a new version of this file after each major revision (to be able to track ntuple content)
 									 e.g:
-			 git add src/DataStructures_v2.cc
+			 git add src/DataStructures_v2.h
 
 			 Please, update the README.md file too (With tested working recipe, stating the working CMSSW version, and ntuple version)
 									 Please, also tag corresponding working PhaseIPixelNtuplizer version
 			 If you only modify the PhaseIPixelNtuplizer, increase the subversion number in the tag, i.e: v1.1
 
 			 How to do it:
-			 - Inside PhaseIPixelNtuplizer.cc
-			 #include "../src/DataStructures_v1.cc"
+			 - Inside PhaseIPixelNtuplizer.h
+			 #include "../src/DataStructures_v1.h"
 
 			 cd DPGAnalysis/PhaseIPixelNtuplizer
 			 git commit -am "Update: v1.0 Phase I ntuple (CMSSW_8_0_0_pre15), Description: Fixed all trees and most important variables"

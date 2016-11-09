@@ -31,7 +31,7 @@
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
-#include "../src/DataStructures_v1.cc" // 2016 Nov 04, CMSSW_8_1_0_pre15
+#include "../interface/DataStructures_v1.h" // 2016 Nov 04, CMSSW_8_1_0_pre15
 
 // Private codes
 #include "../TrajAnalyzer/interface/TrajAnalyzer.h" // Do we really need this? Can't we just copy the methods here?
