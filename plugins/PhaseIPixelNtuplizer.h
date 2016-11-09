@@ -61,13 +61,6 @@
 // Branch definitions are hidden in PhaseIDataTrees.h
 #include "../interface/PhaseIDataTrees.h"
 
-// Branch structures are hidden in the Tree_structures directory
-#include "../interface/Tree_structures/Event_tree_structure.hh"
-#include "../interface/Tree_structures/Luminosity_tree_structure.hh"
-#include "../interface/Tree_structures/Run_structure.hh"
-#include "../interface/Tree_structures/Cluster.hh"
-#include "../interface/Tree_structures/Traj_measurement.hh"
-
 ////////////////////////////////
 // Hit efficiency measurement //
 ////////////////////////////////
@@ -105,6 +98,15 @@
 class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 {
 	private:
+		// To add information based on tracks to the clusters
+		struct TrajClusterAssociationData
+		{
+			SiPixelRecHit::ClusterRef clusterRef;
+			float                     alpha;
+			float                     beta;
+			TrajClusterAssociationData(SiPixelRecHit::ClusterRef clusterRefArg, float alphaArg, float betaArg) : clusterRef(clusterRefArg), alpha(alphaArg), beta(betaArg) {};
+		};
+
 		edm::ParameterSet iConfig;
 
 		/////////////
@@ -161,11 +163,11 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 
 		// Event data
 		void getNvtxAndVtxData(const edm::Event& iEvent); // FIXME: add reco for phase_I
-		// Clusters
-		void handleClusters(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
 		// Trajectory measurements
-		int  trajectoryHasPixelHit(const edm::Ref<std::vector<Trajectory>>& trajectory);
-		void handleTrajMeasurements(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
+		void handleTrajMeasurements(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors, std::vector<TrajClusterAssociationData>& onTrackClusters);
+		// Clusters
+		void saveClusterData(const SiPixelCluster& cluster, const ModuleData& mod, const ModuleData& mod_on, const std::vector<TrajClusterAssociationData>& onTrackClusters);
+		void handleClusters(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors, const std::vector<TrajClusterAssociationData>& onTrackClusters);
 		void getTrackData(const edm::Ref<std::vector<Trajectory>>& traj, const reco::TrackRef& track, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
 		void getHitEfficiencyCuts();
 
