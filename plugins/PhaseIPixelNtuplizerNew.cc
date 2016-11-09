@@ -63,21 +63,7 @@ void PhaseIPixelNtuplizerNew::analyze(const edm::Event& iEvent, const edm::Event
 {
 	LogDebug("step") << "Executing PhaseIPixelNtuplizerNew::analyze()..." << std::endl;
 	// FED errors
-	edm::Handle<edm::DetSetVector<SiPixelRawDataError>> siPixelRawDataErrorCollectionHandle;
-	iEvent.getByToken(rawDataErrorToken_,               siPixelRawDataErrorCollectionHandle);
-	std::map<uint32_t, int> federrors;
-	if(siPixelRawDataErrorCollectionHandle.isValid()) 
-	{
-		for(const auto& pixel_error_set: *siPixelRawDataErrorCollectionHandle)
-		{
-			for(const auto& pixel_error: pixel_error_set) if(pixel_error_set.detId() != 0xffffffff)
-			{
-				DetId detId(pixel_error_set.detId());
-				int type = pixel_error.getType();
-				federrors.insert(std::pair<uint32_t,int>(detId.rawId(), type));
-			}
-		}
-	}
+	std::map<uint32_t, int> federrors = NtuplizerHelpers::getFedErrors(iEvent, rawDataErrorToken_);
 	// Get vertices
 	edm::Handle<reco::VertexCollection>      vertexCollectionHandle;
 	iEvent.getByToken(primaryVerticesToken_, vertexCollectionHandle);
@@ -594,5 +580,30 @@ void PhaseIPixelNtuplizerNew::getModuleData(
 	mod.federr = (federrors_it != federrors.end()) ? federrors_it -> second :0;
 }
 
-DEFINE_FWK_MODULE(PhaseIPixelNtuplizerNew);
+namespace NtuplizerHelpers
+{
+	std::map<uint32_t, int> getFedErrors(const edm::Event& iEvent, const edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>>& rawDataErrorToken)
+	{
+		std::map<uint32_t, int> federrors;
+		edm::Handle<edm::DetSetVector<SiPixelRawDataError>> siPixelRawDataErrorCollectionHandle;
+		iEvent.getByToken(rawDataErrorToken,                siPixelRawDataErrorCollectionHandle);
+		// Return empty map if no fed error entry is available
+		if(!siPixelRawDataErrorCollectionHandle.isValid()) return federrors;
+		// Loop on errors
+		for(const auto& pixel_error_set: *siPixelRawDataErrorCollectionHandle)
+		{
+			for(const auto& pixel_error: pixel_error_set)
+			{
+				if(pixel_error_set.detId() != 0xffffffff)
+				{
+					DetId detId(pixel_error_set.detId());
+					int type = pixel_error.getType();
+					federrors.insert(std::pair<uint32_t,int>(detId.rawId(), type));
+				}
+			}
+		}
+		return federrors;
+	}
+} // NtuplizerHelpers
 
+DEFINE_FWK_MODULE(PhaseIPixelNtuplizerNew);

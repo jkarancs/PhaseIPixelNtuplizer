@@ -107,4 +107,9 @@ class PhaseIPixelNtuplizerNew : public edm::EDAnalyzer
 		void getModuleData(ModuleData&, bool, const TrackerGeometry* const, const DetId &, const TrackerTopology* const, const std::map<uint32_t, int> &);
 };
 
+namespace NtuplizerHelpers 
+{
+	std::map<uint32_t, int> getFedErrors(const edm::Event& iEvent, const edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>>& rawDataErrorToken);
+} // NtuplizerHelpers
+
 #endif
