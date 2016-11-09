@@ -3,15 +3,15 @@
 //---------------------------------------------------------
 //                Constructor, Destructor
 
-PhaseIPixelNtuplizerNew::PhaseIPixelNtuplizerNew(edm::ParameterSet const& iConfig) {
+PhaseIPixelNtuplizerNew::PhaseIPixelNtuplizerNew(edm::ParameterSet const& iConfig)
+{
   iConfig_ = iConfig;
-  clusterSaveDownlscaling = 1;
+  clusterSaveDownscaling_ = 1;
 
-  primaryVerticesToken     = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
-  clustersToken            = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
-  //clustersToken            = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClustersPreSplitting"));
-  trajTrackCollectionToken = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
-  rawDataErrorToken        = consumes<edm::DetSetVector<SiPixelRawDataError> >(edm::InputTag("siPixelDigis"));
+  rawDataErrorToken_        = consumes<edm::DetSetVector<SiPixelRawDataError> >(edm::InputTag("siPixelDigis"));
+  primaryVerticesToken_     = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+  clustersToken_            = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
+  trajTrackCollectionToken_ = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
 }
 
 PhaseIPixelNtuplizerNew::~PhaseIPixelNtuplizerNew() {}
@@ -22,13 +22,13 @@ PhaseIPixelNtuplizerNew::~PhaseIPixelNtuplizerNew() {}
 //                      begin/endJob
 
 void PhaseIPixelNtuplizerNew::beginJob() {
-  if(iConfig_.exists("fileName")) ntupleOutputFilename = iConfig_.getParameter<std::string>("filename");
+  if(iConfig_.exists("fileName")) ntupleOutputFilename_ = iConfig_.getParameter<std::string>("filename");
 
   // Create output file
-  ntupleOutputFile = new TFile(ntupleOutputFilename.c_str(), "RECREATE");
-  if(!(ntupleOutputFile->IsOpen()))
-    handleDefaultError("file_operations", "file_operations", { "Failed to open output file: ", ntupleOutputFilename });
-  LogDebug("file_operations") << "Output file: \"" << ntupleOutputFilename << "\" created." << std::endl;
+  ntupleOutputFile_ = new TFile(ntupleOutputFilename_.c_str(), "RECREATE");
+  if(!(ntupleOutputFile_->IsOpen()))
+    handleDefaultError("file_operations", "file_operations", { "Failed to open output file: ", ntupleOutputFilename_ });
+  LogDebug("file_operations") << "Output file: \"" << ntupleOutputFilename_ << "\" created." << std::endl;
 
   // Tree definitions
   // Event tree
@@ -59,9 +59,9 @@ void PhaseIPixelNtuplizerNew::beginJob() {
 }
 
 void PhaseIPixelNtuplizerNew::endJob() {
-  LogDebug("file_operations") << "Writing plots to file: \"" << ntupleOutputFilename << "\"." << std::endl;
-  ntupleOutputFile->Write();
-  ntupleOutputFile->Close();
+  LogDebug("file_operations") << "Writing plots to file: \"" << ntupleOutputFilename_ << "\"." << std::endl;
+  ntupleOutputFile_->Write();
+  ntupleOutputFile_->Close();
 }
 
 
@@ -84,15 +84,15 @@ void PhaseIPixelNtuplizerNew::analyze(const edm::Event& iEvent, const edm::Event
 
   // Get vertices
   edm::Handle<reco::VertexCollection> vertexCollectionHandle;
-  iEvent.getByToken(primaryVerticesToken, vertexCollectionHandle);
+  iEvent.getByToken(primaryVerticesToken_, vertexCollectionHandle);
 
   // Get cluster collection
   edm::Handle<edmNew::DetSetVector<SiPixelCluster> > clusterCollectionHandle;
-  iEvent.getByToken(clustersToken, clusterCollectionHandle);
+  iEvent.getByToken(clustersToken_, clusterCollectionHandle);
 
   // Get Traj-Track Collection
   edm::Handle<TrajTrackAssociationCollection> trajTrackCollectionHandle;
-  iEvent.getByToken(trajTrackCollectionToken, trajTrackCollectionHandle);
+  iEvent.getByToken(trajTrackCollectionToken_, trajTrackCollectionHandle);
 
   // TrackerTopology and TrackerGeometry for module informations
   edm::ESHandle<TrackerTopology> tTopoHandle;
@@ -104,7 +104,7 @@ void PhaseIPixelNtuplizerNew::analyze(const edm::Event& iEvent, const edm::Event
 
   // FED errors
   edm::Handle<edm::DetSetVector<SiPixelRawDataError>> siPixelRawDataErrorCollectionHandle;
-  iEvent.getByToken(rawDataErrorToken,                siPixelRawDataErrorCollectionHandle);
+  iEvent.getByToken(rawDataErrorToken_,                siPixelRawDataErrorCollectionHandle);
 
   std::map<uint32_t, int> federrors;
   if(siPixelRawDataErrorCollectionHandle.isValid()) for(const auto& pixel_error_set: *siPixelRawDataErrorCollectionHandle)
@@ -267,7 +267,7 @@ void PhaseIPixelNtuplizerNew::analyze(const edm::Event& iEvent, const edm::Event
           clu_.pix[i][1] = currentPixels[i].y;
         }
         // The number of saved clusters can be downscaled to save space
-        if(clusterCounter++ % clusterSaveDownlscaling != 0) continue;
+        if(clusterCounter++ % clusterSaveDownscaling_ != 0) continue;
         clustTree_->Fill();
       }
     }

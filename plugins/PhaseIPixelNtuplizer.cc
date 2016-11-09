@@ -7,7 +7,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig)
 {
 	// Options
 	// Save only every nth cluster
-	clusterSaveDownlscaling = 1;
+	clusterSaveDownscaling = 1;
 	// Product consumption declarations
 	primaryVerticesToken     = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
 	clustersToken            = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
@@ -270,7 +270,7 @@ void PhaseIPixelNtuplizer::handleClusters(const edm::Handle<edmNew::DetSetVector
 		{
 			// Only save every nth cluster
 			// The number of saved clusters can be downscaled to save space
-			if(clusterCounter++ % clusterSaveDownlscaling != 0) continue;
+			if(clusterCounter++ % clusterSaveDownscaling != 0) continue;
 			const auto& currentCluster = *currentClusterIt;
 			ModuleData mod    = ModuleDataProducer::getPhaseZeroOfflineModuleData(detId.rawId(), trackerTopology, fedErrors);
 			ModuleData mod_on = ModuleDataProducer::convertPhaseZeroOfflineOnline(mod);

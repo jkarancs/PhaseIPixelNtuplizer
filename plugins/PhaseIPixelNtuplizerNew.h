@@ -76,9 +76,9 @@ class PhaseIPixelNtuplizerNew : public edm::EDAnalyzer
 	private:
 		edm::ParameterSet iConfig_;
 		// Options
-		int clusterSaveDownlscaling;
-		std::string ntupleOutputFilename = "Ntuple.root";
-		TFile*      ntupleOutputFile;
+		int clusterSaveDownscaling_;
+		std::string ntupleOutputFilename_ = "Ntuple.root";
+		TFile*      ntupleOutputFile_;
 		// Trees
 		TTree* eventTree_;
 		TTree* lumiTree_;
@@ -96,10 +96,10 @@ class PhaseIPixelNtuplizerNew : public edm::EDAnalyzer
 		TrackData       track_;
 		TrajMeasurement traj_;
 		// Tokens
-		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>> rawDataErrorToken;
-		edm::EDGetTokenT<reco::VertexCollection>                 primaryVerticesToken;
-		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken;
-		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken;
+		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>> rawDataErrorToken_;
+		edm::EDGetTokenT<reco::VertexCollection>                 primaryVerticesToken_;
+		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken_;
+		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken_;
 		// Private methods
 		void handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::string msg);
 		void handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::vector<std::string> msg);
