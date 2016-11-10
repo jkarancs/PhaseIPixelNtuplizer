@@ -1,16 +1,7 @@
 #ifndef PHASEI_TRACKING_EFFICIENCY_FILTERS_H
 #define PHASEI_TRACKING_EFFICIENCY_FILTERS_H
 
-//////////////////////
-// Tree definitions //
-//////////////////////
-
-#include "../interface/Tree_structures/Event_tree_structure.hh"
-// #include "../interface/Tree_structures/Luminosity_tree_structure.hh"
-// #include "../interface/Tree_structures/Run_structure.hh"
-// #include "../interface/Tree_structures/Cluster.hh"
-#include "../interface/Tree_structures/Traj_measurement.hh"
-
+#include "../interface/DataStructures_v1.h"
 #include <cmath>
 
 class PhaseITrackingEfficiencyFilters
