@@ -114,7 +114,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		/////////////
 
 		// Save only every nth cluster
-		int clusterSaveDownlscaling;
+		int clusterSaveDownscaling;
 
 		/////////////////
 		// Output file //
