@@ -228,7 +228,7 @@ class ModuleData
 		int          federr;
 		unsigned int rawid;
 
-		const std::string                list = "i/I:row:col:adc";
+		const std::string                list = "det/I:shl:layer:sec:ladder:module:outer:half:side:disk:blade:panel:ring:federr:rawid/i";
 		const std::map<int, std::string> federrortypes = 
 		{
 			std::make_pair<int, std::string>(25, "invalidROC"),
