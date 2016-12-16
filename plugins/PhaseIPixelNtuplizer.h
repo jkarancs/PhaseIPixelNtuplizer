@@ -1,189 +1,65 @@
-#ifndef	PHASEIPIXELNTUPLIZER_H
-#define	PHASEIPIXELNTUPLIZER_H
+#ifndef PHASEIPIXELNTUPLIZER_H
+#define PHASEIPIXELNTUPLIZER_H
 
-//////////////////////////
-// EDM plugin libraries //
-//////////////////////////
-
+// CMSSW code
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
-// #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/ESHandle.h"
-
-///////////
-// Tools //
-///////////
-
-// Trajectory measurements
-// #include "DataFormats/TrackReco/interface/Track.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+//#include "DataFormats/TrackReco/interface/Track.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
-#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
-#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
+#include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/Common/interface/DetSetVector.h"
+#include "DataFormats/Common/interface/DetSetVectorNew.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
+#include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
-// Position
-#include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
-#include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
-#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
-
-// Fed errors
-#include "../FedErrorFetcher/interface/FedErrorFetcher.h"
-// Module data
-#include "../ModuleDataFetcher/interface/ModuleDataProducer.h"
-// Traj analyzer
-#include "../TrajAnalyzer/interface/TrajAnalyzer.h"
-
-///////////
-// Other //
-///////////
-
-// Vertex collection handling
+#include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
+#include "DataFormats/SiPixelRawData/interface/SiPixelRawDataError.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-
-// To get tokens for pixeldigis, rawdataerrors and clusters 
-#include "DataFormats/Common/interface/DetSetVectorNew.h"
-#include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
-
-// To get token for tracks
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
+#include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
+#include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
 
-// To get token for FED errors
-#include "DataFormats/SiPixelRawData/interface/SiPixelRawDataError.h"
+// Datastructures - Keep all this in one file
+// This has to be a versioned file
+// It cannot go into separate files included from everywhere
+#include "../interface/DataStructures_v2.h" // 2016 Dec 16, CMSSW_8_1_0
 
-//////////////////////
-// Tree definitions //
-//////////////////////
+// New class for plotting Phase 0/1 Geometry (Will be added to DQM later)
+#include "../interface/SiPixelCoordinates.h"
 
-// Branch definitions are hidden in PhaseIDataTrees.h
-#include "../interface/PhaseIDataTrees.h"
-
-////////////////////////////////
-// Hit efficiency measurement //
-////////////////////////////////
-
-// Cuts for hit efficicency
-#include "../interface/PhaseITrackingEfficiencyFilters.h"
-
-////////////////////////////
-// Message logger service //
-////////////////////////////
-
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-// Adding some colors :)
-#include "../interface/Console_colors.h"
-
-////////////////////
-// Root libraries //
-////////////////////
-
+// ROOT Libraries
 #include <TROOT.h>
 #include <TFile.h>
 #include <TTree.h>
-// #include <TH1F.h>
-// #include <TH2F.h>
+// #include <TH1D.h>
+// #include <TH2D.h>
 #include <TRandom3.h>
 
-////////////////
-// C++ system //
-////////////////
-
+// C++
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+
+// Compiler directives
+#define EDM_ML_LOGDEBUG
+#define ML_DEBUG
 
 class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 {
 	private:
-		// To add information based on tracks to the clusters
-		struct TrajClusterAssociationData
-		{
-			SiPixelRecHit::ClusterRef clusterRef;
-			float                     alpha;
-			float                     beta;
-			TrajClusterAssociationData(SiPixelRecHit::ClusterRef clusterRefArg, float alphaArg, float betaArg) : clusterRef(clusterRefArg), alpha(alphaArg), beta(betaArg) {};
-		};
-
-		edm::ParameterSet iConfig;
-
-		/////////////
-		// Options //
-		/////////////
-
-		// Save only every nth cluster
-		int clusterSaveDownscaling;
-
-		/////////////////
-		// Output file //
-		/////////////////
-
-		// Default: "Ntuple.root"
-		std::string ntupleOutputFilename = "Ntuple.root";
-		TFile*      ntupleOutputFile;
-
-		/////////////////
-		// Tree system //
-		/////////////////
-
-		TTree* eventTree;
-		TTree* lumiTree;
-		TTree* runTree;
-		TTree* trackTree;
-		TTree* clusterTree;
-		TTree* trajTree;
-		// TTree* digiTree;
-
-		// Tree field definitions are in the interface directory
-		EventData       eventField;
-		LumiData        lumiField;
-		TrajMeasurement trajField;
-		Cluster         clusterField;
-
-		// For handling data collections
-		std::vector<TrackData>                    completeTrackCollection;                        // Track collection
-		std::vector<Cluster>                      completeClusterCollection;                        // Cluster collection
-		std::vector<std::vector<TrajMeasurement>> completeTrajMeasCollection; // Trajectory meaurement collection
-
-		///////////////////////////////////
-		// Tokens for accessing the data //
-		///////////////////////////////////
-
-		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>> rawDataErrorToken;
-		edm::EDGetTokenT<reco::VertexCollection>                 primaryVerticesToken;
-		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken;
-		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken;
-		// edm::EDGetTokenT<TrajTrackAssociationCollection> trackAssociationToken_;
-
-		//////////
-		// Data //
-		//////////
-
-		// Event data
-		void getNvtxAndVtxData(const edm::Event& iEvent); // FIXME: add reco for phase_I
-		// Trajectory measurements
-		void handleTrajMeasurements(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors, std::vector<TrajClusterAssociationData>& onTrackClusters);
-		// Clusters
-		void saveClusterData(const SiPixelCluster& cluster, const ModuleData& mod, const ModuleData& mod_on, const std::vector<TrajClusterAssociationData>& onTrackClusters);
-		void handleClusters(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors, const std::vector<TrajClusterAssociationData>& onTrackClusters);
-		void getTrackData(const edm::Ref<std::vector<Trajectory>>& traj, const reco::TrackRef& track, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::ESHandle<TrackerGeometry>& tracker, const TrackerTopology* const trackerTopology, const std::map<uint32_t, int>& fedErrors);
-		void getHitEfficiencyCuts();
-
-		////////////////////
-		// Error handling //
-		////////////////////
-
-		void handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::string msg);
-		void handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::vector<std::string> msg);
-		void printEvtInfo(const std::string& streamType);
-
-		/////////////
-		// Utility //
-		/////////////
-
-		void clearAllContainers();
 
 	public:
 		PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);
@@ -195,6 +71,62 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		virtual void endRun(edm::Run const&, edm::EventSetup const&);
 		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+	private:
+		SiPixelCoordinates coord_;
+		edm::ParameterSet iConfig_;
+		// Options
+		int clusterSaveDownscaling_;
+		std::string ntupleOutputFilename_ = "Ntuple.root";
+		TFile*      ntupleOutputFile_;
+		// Trees
+		TTree* eventTree_;
+		TTree* lumiTree_;
+		TTree* runTree_;
+		TTree* digiTree_;
+		TTree* clustTree_;
+		TTree* trackTree_;
+		TTree* trajTree_;
+		// Tree field definitions are in the interface directory
+		EventData       evt_;
+		LumiData        lumi_;
+		RunData         run_;
+		Digi            digi_;
+		Cluster         clu_;
+		TrackData       track_;
+		TrajMeasurement traj_;
+		// Tokens
+		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>> rawDataErrorToken_;
+		edm::EDGetTokenT<reco::VertexCollection>                 primaryVerticesToken_;
+		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken_;
+		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken_;
+		// Tools
+		const TrackerTopology* trackerTopology_;
+		const TrackerGeometry* trackerGeometry_;
+		// Private methods
+		void getEvtInfo(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
+		void getClustInfo(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const std::map<uint32_t, int>& federrors);
+		void getTrajTrackInfo(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const std::map<uint32_t, int>& federrors);
+		void getTrackInfo(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Ref<std::vector<Trajectory>>& traj, const reco::TrackRef& track, const std::map<uint32_t, int>& federrors, const int& trackIndex);
+		void handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::string msg);
+		void handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::vector<std::string> msg);
+		void printEvtInfo(const std::string& streamType);
+		void getModuleData(ModuleData&, bool, const DetId &, const std::map<uint32_t, int> &);
+		void getRocData(ModuleData&, bool, const DetId &, const PixelDigi*);
+		void getRocData(ModuleData&, bool, const DetId &, const SiPixelCluster*);
+		void getRocData(ModuleData&, bool, const SiPixelRecHit*);
 };
+
+namespace NtuplizerHelpers 
+{
+	std::map<uint32_t, int> getFedErrors(const edm::Event& iEvent, const edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>>& rawDataErrorToken);
+	bool detidIsOnPixel(const DetId& detid);
+	int trajectoryHasPixelHit(const edm::Ref<std::vector<Trajectory>>& trajectory);
+	reco::VertexCollection::const_iterator findClosestVertexToTrack(const reco::TrackRef& track, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle);
+	std::pair<float, float> getLocalXY(const TrajectoryMeasurement& measurement);
+	float trajMeasurementDistanceSquared(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs);
+	void trajMeasurementDistanceSquared(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs, float& distanceSquared, float& dxSquared, float& dySquared);
+	void trajMeasurementDistance(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs, float& distance, float& dx, float& dy);
+	void getClosestOtherTrackDistanceByLooping(const TrajectoryMeasurement& measurement, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, float& distance, float& dx, float& dy);
+} // NtuplizerHelpers
 
 #endif

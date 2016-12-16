@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type MinBias_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry Extended2017new --fileout file:MinBias_GENSIMRECO.root --python_filename=PhaseIPixelNtuplizer_MinBias_cfg.py -n 10 --runUnscheduled --no_exec
+# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type MinBias_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry DB:Extended --fileout file:MinBias_GENSIMRECO.root --python_filename=PahseI_MinBias_cfg.py --runUnscheduled -n 10
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -15,8 +15,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2017newReco_cff')
-process.load('Configuration.Geometry.GeometryExtended2017new_cff')
+process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.StandardSequences.GeometrySimDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
@@ -67,6 +67,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
+process.XMLFromDBSource.label = cms.string("Extended")
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
@@ -134,7 +135,8 @@ process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.simulation_step,process.digitisation_step,process.L1simulation_step,process.digi2raw_step,process.raw2digi_step,process.reconstruction_step,process.endjob_step,process.RECOSIMoutput_step)
 # filter all path with the production filter sequence
 for path in process.paths:
-	getattr(process,path)._seq = process.generator * getattr(process,path)._seq 
+	getattr(process,path)._seq = process.generator * getattr(process,path)._seq
+
 
 
 
@@ -149,7 +151,7 @@ for path in process.paths:
 
 #--------------- Added for TimingStudy ---------------
 
-process.maxEvents.input = 1000
+process.maxEvents.input = -1
 
 #---------------------------
 #  Pile-up (RunIISummer15GS)
@@ -197,7 +199,7 @@ if useSqlite:
 #---------------------------
 #  PhaseIPixelNtuplizer
 #---------------------------
-process.PhaseINtuplizerPlugin = cms.EDAnalyzer('PhaseIPixelNtuplizerNew')
+process.PhaseINtuplizerPlugin = cms.EDAnalyzer('PhaseIPixelNtuplizer')
 process.PhaseINtuplizerPlugin.trajectoryInput = cms.InputTag('generalTracks')
 #process.PhaseINtuplizerPlugin.trajectoryInput = cms.InputTag('initialStepTracks')
 process.PhaseIPixelNtuplizer_step = cms.Path(process.PhaseINtuplizerPlugin)
@@ -210,8 +212,16 @@ if useRECO:
     process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
 	    # This is the file you create with saveRECO, by default
 	    #'file:MinBias_GENSIMRECO.root'
-	    # 1k event made with new geom
-	    'file:/data/jkarancs/CMSSW/PhaseI/PhaseIPixelNtuplizer/CMSSW_8_1_0_pre15/src/DPGAnalysis/PhaseIPixelNtuplizer/MinBias_GENSIMRECO_1k_event.root'
+	    # 50k event made with new geom, generic CPE
+	    #'file:/data/jkarancs/CMSSW/PhaseI/Latest/GENSIMRECO_MuPt10_GenericReco_50000.root'
+	    # 810 relval
+	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/04BA77F5-4ABF-E611-9CEC-0CC47A78A2F6.root',
+	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/0A9CE862-43BF-E611-B83A-0025905A6132.root',
+	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/583A740D-58BF-E611-B960-0CC47A4C8ED8.root',
+	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/86563DDC-43BF-E611-A69C-0CC47A4D7678.root',
+	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/865B21CC-42BF-E611-BE4B-0CC47A78A45A.root',
+	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/8E1A04B2-58BF-E611-AE25-0CC47A7C345C.root',
+	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/F04F1CE0-43BF-E611-B4F2-0025905A6132.root'
 	    ))
     process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
     process.PhaseINtuplizerPlugin.trajectoryInput = 'TrackRefitter'
@@ -226,15 +236,12 @@ else:
 #---------------------------
 #  MessageLogger
 #---------------------------
-# process.MessageLogger.cerr.FwkReport.reportEvery = 1
-process.MessageLogger = cms.Service("MessageLogger",
-	destinations = cms.untracked.vstring('cerr'),
-	cerr = cms.untracked.PSet(threshold  = cms.untracked.string('DEBUG')),
-	debugModules = cms.untracked.vstring('PhaseINtuplizerPlugin'))
+#process.MessageLogger = cms.Service("MessageLogger",
+#	destinations = cms.untracked.vstring('cerr'),
+#	cerr = cms.untracked.PSet(threshold  = cms.untracked.string('DEBUG')),
+#	debugModules = cms.untracked.vstring('PhaseINtuplizerPlugin'))
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 #--------------------------- END INSERTED CODE ---------------------------------
-
-
-
 
 
 
