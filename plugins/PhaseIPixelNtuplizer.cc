@@ -1,6 +1,5 @@
 #include "PhaseIPixelNtuplizer.h"
 
-
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig)
 {
 	iConfig_                = iConfig;
@@ -60,8 +59,17 @@ void PhaseIPixelNtuplizer::endRun(edm::Run const& iRun, edm::EventSetup const& i
 void PhaseIPixelNtuplizer::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iSetup) {}
 void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iSetup) {}
 
+// BLUE:    "\03334[m"
+// RED:     "\03331[m"
+// DEFAULT: "\03339[m"
+
 void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+	if(isEventFromMc_ != (iEvent.id().run() == 1))
+	{
+		isEventFromMc_ = iEvent.id().run() == 1;
+		std::cout << "Deduced data type: " << (isEventFromMc_ ? "MONTE-CARLO" : "REAL RAW DATA") << "." << std::endl;
+	}
 	LogDebug("step") << "Executing PhaseIPixelNtuplizer::analyze()..." << std::endl;
 	// FED errors
 	std::map<uint32_t, int> federrors = NtuplizerHelpers::getFedErrors(iEvent, rawDataErrorToken_);
@@ -469,6 +477,7 @@ void PhaseIPixelNtuplizer::getTrajTrackInfo(const edm::Handle<reco::VertexCollec
 // BLUE:    "\03334[m"
 // RED:     "\03331[m"
 // DEFAULT: "\03339[m"
+
 void PhaseIPixelNtuplizer::handleDefaultError(const std::string& exception_type, const std::string& streamType, std::string msg)
 {
 	edm::LogError(streamType.c_str()) << "\03331[m" << msg << "\03339[m" << std::endl;
@@ -488,114 +497,151 @@ void PhaseIPixelNtuplizer::handleDefaultError(const std::string& exception_type,
 
 void PhaseIPixelNtuplizer::printEvtInfo(const std::string& streamType)
 {
-	edm::LogError(streamType.c_str()) << "\03334[m" <<
-	                                  "Run: " << evt_.run <<
-	                                  " Ls: " << evt_.ls  <<
-	                                  " Evt:" << evt_.evt << "\03339[m" << std::endl;
+	edm::LogError(streamType.c_str())
+	    << "\03334[m"
+	    << "Run: " << evt_.run << " Ls: " << evt_.ls << " Evt:" << evt_.evt
+	    << "\03339[m" << std::endl;
 }
 
-
-
-void PhaseIPixelNtuplizer::getModuleData(ModuleData& mod, bool online, const DetId& detId, const std::map<uint32_t, int>& federrors) {
-  mod.init();
-
-  mod.det  = detId.subdetId() - 1;
-  mod.shl  = coord_.quadrant(detId);
-  mod.side = coord_.side(detId);
-  if (detId.subdetId() == PixelSubdetector::PixelBarrel) {
-    mod.sec      = coord_.sector(detId);
-    mod.half     = coord_.half(detId);
-    mod.layer    = coord_.layer(detId);
-    mod.flipped  = coord_.flipped(detId); // opposite of outer
-    if (online) {
-      mod.ladder = coord_.signed_ladder(detId);
-      mod.module = coord_.signed_module(detId);
-    } else {
-      mod.ladder = coord_.ladder(detId);
-      mod.module = coord_.module(detId);
-    }
-  } else if (detId.subdetId() == PixelSubdetector::PixelEndcap) {
-    mod.ring   = coord_.ring(detId);
-    mod.panel  = coord_.panel(detId);
-    mod.module = coord_.module(detId);
-    if (online) {
-      mod.disk   = coord_.signed_disk(detId);
-      mod.blade  = coord_.signed_blade(detId);
-    } else {
-      mod.disk   = coord_.disk(detId);
-      mod.blade  = coord_.blade(detId);
-    }
-  }
-
-  mod.rawid = detId.rawId();
-  mod.fedid = coord_.fedid(detId);
-
-  // FED error
-  std::map<uint32_t, int>::const_iterator federrors_it=federrors.find(detId.rawId());
-  mod.federr = (federrors_it!=federrors.end()) ? federrors_it->second :0;
+void PhaseIPixelNtuplizer::getModuleData(ModuleData &mod, bool online, const DetId &detId, const std::map<uint32_t, int> &federrors)
+{
+	mod.init();
+	mod.det  = detId.subdetId() - 1;
+	mod.shl  = coord_.quadrant(detId);
+	mod.side = coord_.side(detId);
+	if(detId.subdetId() == PixelSubdetector::PixelBarrel)
+	{
+		mod.sec     = coord_.sector(detId);
+		mod.half    = coord_.half(detId);
+		mod.layer   = coord_.layer(detId);
+		mod.flipped = coord_.flipped(detId); // opposite of outer
+		if(online)
+		{
+			mod.ladder = coord_.signed_ladder(detId);
+			mod.module = coord_.signed_module(detId);
+		}
+		else
+		{
+			mod.ladder = coord_.ladder(detId);
+			mod.module = coord_.module(detId);
+		}
+	}
+	else if(detId.subdetId() == PixelSubdetector::PixelEndcap)
+	{
+		mod.ring   = coord_.ring(detId);
+		mod.panel  = coord_.panel(detId);
+		mod.module = coord_.module(detId);
+		if(online)
+		{
+			mod.disk  = coord_.signed_disk(detId);
+			mod.blade = coord_.signed_blade(detId);
+		}
+		else
+		{
+			mod.disk  = coord_.disk(detId);
+			mod.blade = coord_.blade(detId);
+		}
+	}
+	mod.rawid = detId.rawId();
+	mod.fedid = coord_.fedid(detId);
+	// FED error
+	std::map<uint32_t, int>::const_iterator federrors_it =
+	    federrors.find(detId.rawId());
+	mod.federr = (federrors_it != federrors.end()) ? federrors_it->second : 0;
 }
-void PhaseIPixelNtuplizer::getRocData(ModuleData& mod, bool online, const DetId& detId, const PixelDigi* digi) {
-  mod.channel = coord_.channel(detId, digi);
-  mod.roc     = coord_.roc (detId, digi);
-  if (detId.subdetId() == PixelSubdetector::PixelBarrel) {
-    if (online) {
-      mod.module_coord      = coord_.signed_module_coord(detId, digi);
-      mod.ladder_coord      = coord_.signed_ladder_coord(detId, digi);
-    } else {
-      mod.module_coord      = coord_.module_coord(detId, digi);
-      mod.ladder_coord      = coord_.ladder_coord(detId, digi);
-    }
-  } else if (detId.subdetId() == PixelSubdetector::PixelEndcap) {
-    if (online) {
-      mod.disk_ring_coord   = coord_.signed_disk_ring_coord(detId, digi);
-      mod.blade_panel_coord = coord_.signed_shifted_blade_panel_coord(detId, digi);
-    } else {
-      mod.disk_ring_coord   = coord_.disk_ring_coord(detId, digi);
-      mod.blade_panel_coord = coord_.blade_panel_coord(detId, digi);
-    }
-  }
+void PhaseIPixelNtuplizer::getRocData(ModuleData &mod, bool online, const DetId &detId, const PixelDigi *digi)
+{
+	mod.channel = coord_.channel(detId, digi);
+	mod.roc     = coord_.roc(detId, digi);
+	if(detId.subdetId() == PixelSubdetector::PixelBarrel)
+	{
+		if(online)
+		{
+			mod.module_coord = coord_.signed_module_coord(detId, digi);
+			mod.ladder_coord = coord_.signed_ladder_coord(detId, digi);
+		}
+		else
+		{
+			mod.module_coord = coord_.module_coord(detId, digi);
+			mod.ladder_coord = coord_.ladder_coord(detId, digi);
+		}
+	}
+	else if(detId.subdetId() == PixelSubdetector::PixelEndcap)
+	{
+		if(online)
+		{
+			mod.disk_ring_coord   = coord_.signed_disk_ring_coord(detId, digi);
+			mod.blade_panel_coord = coord_.signed_shifted_blade_panel_coord(detId, digi);
+		}
+		else
+		{
+			mod.disk_ring_coord   = coord_.disk_ring_coord(detId, digi);
+			mod.blade_panel_coord = coord_.blade_panel_coord(detId, digi);
+		}
+	}
 }
-void PhaseIPixelNtuplizer::getRocData(ModuleData& mod, bool online, const DetId& detId, const SiPixelCluster* cluster) {
-  mod.channel = coord_.channel(detId, cluster);
-  mod.roc     = coord_.roc (detId, cluster);
-  if (detId.subdetId() == PixelSubdetector::PixelBarrel) {
-    if (online) {
-      mod.module_coord      = coord_.signed_module_coord(detId, cluster);
-      mod.ladder_coord      = coord_.signed_ladder_coord(detId, cluster);
-    } else {
-      mod.module_coord      = coord_.module_coord(detId, cluster);
-      mod.ladder_coord      = coord_.ladder_coord(detId, cluster);
-    }
-  } else if (detId.subdetId() == PixelSubdetector::PixelEndcap) {
-    if (online) {
-      mod.disk_ring_coord   = coord_.signed_disk_ring_coord(detId, cluster);
-      mod.blade_panel_coord = coord_.signed_shifted_blade_panel_coord(detId, cluster);
-    } else {
-      mod.disk_ring_coord   = coord_.disk_ring_coord(detId, cluster);
-      mod.blade_panel_coord = coord_.blade_panel_coord(detId, cluster);
-    }
-  }
+void PhaseIPixelNtuplizer::getRocData(ModuleData &mod, bool online, const DetId &detId, const SiPixelCluster *cluster)
+{
+	mod.channel = coord_.channel(detId, cluster);
+	mod.roc     = coord_.roc(detId, cluster);
+	if(detId.subdetId() == PixelSubdetector::PixelBarrel)
+	{
+		if(online)
+		{
+			mod.module_coord = coord_.signed_module_coord(detId, cluster);
+			mod.ladder_coord = coord_.signed_ladder_coord(detId, cluster);
+		}
+		else
+		{
+			mod.module_coord = coord_.module_coord(detId, cluster);
+			mod.ladder_coord = coord_.ladder_coord(detId, cluster);
+		}
+	}
+	else if(detId.subdetId() == PixelSubdetector::PixelEndcap)
+	{
+		if(online)
+		{
+			mod.disk_ring_coord   = coord_.signed_disk_ring_coord(detId, cluster);
+			mod.blade_panel_coord = coord_.signed_shifted_blade_panel_coord(detId, cluster);
+		}
+		else
+		{
+			mod.disk_ring_coord   = coord_.disk_ring_coord(detId, cluster);
+			mod.blade_panel_coord = coord_.blade_panel_coord(detId, cluster);
+		}
+	}
 }
-void PhaseIPixelNtuplizer::getRocData(ModuleData& mod, bool online, const SiPixelRecHit* rechit) {
-  mod.channel = coord_.channel(rechit);
-  mod.roc     = coord_.roc (rechit);
-  if (rechit->geographicalId().subdetId() == PixelSubdetector::PixelBarrel) {
-    if (online) {
-      mod.module_coord      = coord_.signed_module_coord(rechit);
-      mod.ladder_coord      = coord_.signed_ladder_coord(rechit);
-    } else {
-      mod.module_coord      = coord_.module_coord(rechit);
-      mod.ladder_coord      = coord_.ladder_coord(rechit);
-    }
-  } else if (rechit->geographicalId().subdetId() == PixelSubdetector::PixelEndcap) {
-    if (online) {
-      mod.disk_ring_coord   = coord_.signed_disk_ring_coord(rechit);
-      mod.blade_panel_coord = coord_.signed_shifted_blade_panel_coord(rechit);
-    } else {
-      mod.disk_ring_coord   = coord_.disk_ring_coord(rechit);
-      mod.blade_panel_coord = coord_.blade_panel_coord(rechit);
-    }
-  }
+
+void PhaseIPixelNtuplizer::getRocData(ModuleData &mod, bool online, const SiPixelRecHit *rechit)
+{
+	mod.channel = coord_.channel(rechit);
+	mod.roc     = coord_.roc(rechit);
+	if(rechit->geographicalId().subdetId() == PixelSubdetector::PixelBarrel)
+	{
+		if(online)
+		{
+			mod.module_coord = coord_.signed_module_coord(rechit);
+			mod.ladder_coord = coord_.signed_ladder_coord(rechit);
+		}
+		else
+		{
+			mod.module_coord = coord_.module_coord(rechit);
+			mod.ladder_coord = coord_.ladder_coord(rechit);
+		}
+	}
+	else if(rechit->geographicalId().subdetId() == PixelSubdetector::PixelEndcap)
+	{
+		if(online)
+		{
+			mod.disk_ring_coord   = coord_.signed_disk_ring_coord(rechit);
+			mod.blade_panel_coord = coord_.signed_shifted_blade_panel_coord(rechit);
+		}
+		else
+		{
+			mod.disk_ring_coord   = coord_.disk_ring_coord(rechit);
+			mod.blade_panel_coord = coord_.blade_panel_coord(rechit);
+		}
+	}
 }
 
 namespace NtuplizerHelpers

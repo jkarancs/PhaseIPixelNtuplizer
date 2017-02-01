@@ -72,8 +72,9 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 	private:
-		SiPixelCoordinates coord_;
 		edm::ParameterSet iConfig_;
+		// States
+		int isEventFromMc_ = -1;
 		// Options
 		int clusterSaveDownscaling_;
 		std::string ntupleOutputFilename_ = "Ntuple.root";
@@ -100,6 +101,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken_;
 		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken_;
 		// Tools
+		SiPixelCoordinates coord_;
 		const TrackerTopology* trackerTopology_;
 		const TrackerGeometry* trackerGeometry_;
 		// Private methods

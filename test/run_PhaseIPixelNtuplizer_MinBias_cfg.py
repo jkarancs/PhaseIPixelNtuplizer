@@ -30,9 +30,7 @@ process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
-)
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 
 # Input source
 process.source = cms.Source("EmptySource")
@@ -137,21 +135,9 @@ process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary
 for path in process.paths:
 	getattr(process,path)._seq = process.generator * getattr(process,path)._seq
 
-
-
-
-
-
-
-
-
-
-
 #-------------------------- BEGIN INSERTED CODE --------------------------------
 
 #--------------- Added for TimingStudy ---------------
-
-process.maxEvents.input = -1
 
 #---------------------------
 #  Pile-up (RunIISummer15GS)
@@ -240,7 +226,7 @@ else:
 #	destinations = cms.untracked.vstring('cerr'),
 #	cerr = cms.untracked.PSet(threshold  = cms.untracked.string('DEBUG')),
 #	debugModules = cms.untracked.vstring('PhaseINtuplizerPlugin'))
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
 #--------------------------- END INSERTED CODE ---------------------------------
 
 
