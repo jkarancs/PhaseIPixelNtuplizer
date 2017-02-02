@@ -37,7 +37,7 @@ void PhaseIPixelNtuplizer::beginJob()
 	clustTree_ -> Branch("mod",    &clu_.mod,     clu_.mod    .list.c_str());
 	clustTree_ -> Branch("clust",  &clu_,         clu_        .list.c_str());
         clustTree_ -> Branch("clust_adc", &clu_.adc, "adc[size]/F");
-        clustTree_ -> Branch("clust_pix", &clu_.pix, "pix[size][2]/F")
+        clustTree_ -> Branch("clust_pix", &clu_.pix, "pix[size][2]/F");
 	// Track treex
 	trackTree_ -> Branch("event",  &evt_,         evt_        .list.c_str());
 	trackTree_ -> Branch("track",  &track_,       track_      .list.c_str());

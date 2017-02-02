@@ -238,14 +238,10 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
 process.PhaseIPixelNtuplizer_step = cms.Path(process.PhaseINtuplizerPlugin)
 
 # myAnalyzer Path
-if opt.useRECO and opt.useClustersOnTrack:
-	process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-	process.TrackRefitter.src = "generalTracks"
-	process.PhaseINtuplizerPlugin.trajectoryInput = 'TrackRefitter'
-	process.myAnalyzer_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter*process.PhaseINtuplizerPlugin)
-else:
-	process.myAnalyzer_step = cms.Path(process.PhaseINtuplizerPlugin)
-
+process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
+process.TrackRefitter.src = "generalTracks"
+process.PhaseINtuplizerPlugin.trajectoryInput = 'TrackRefitter'
+process.myAnalyzer_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter*process.PhaseINtuplizerPlugin)
 
 #________________________________________________________________________
 #                        DataBase Stuff
