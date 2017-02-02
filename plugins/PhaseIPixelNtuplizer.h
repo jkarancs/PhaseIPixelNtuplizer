@@ -72,12 +72,12 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 	private:
+		std::string ntupleOutputFilename_;
 		edm::ParameterSet iConfig_;
 		// States
 		int isEventFromMc_ = -1;
 		// Options
 		int clusterSaveDownscaling_;
-		std::string ntupleOutputFilename_ = "Ntuple.root";
 		TFile*      ntupleOutputFile_;
 		// Trees
 		TTree* eventTree_;

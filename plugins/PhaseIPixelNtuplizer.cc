@@ -1,6 +1,7 @@
 #include "PhaseIPixelNtuplizer.h"
 
-PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig)
+PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
+  ntupleOutputFilename_(iConfig.getUntrackedParameter<std::string>("outputFileName", "Ntuple.root"))
 {
 	iConfig_                = iConfig;
 	clusterSaveDownscaling_ = 1;
@@ -35,7 +36,9 @@ void PhaseIPixelNtuplizer::beginJob()
 	clustTree_ -> Branch("mod_on", &clu_.mod_on,  clu_.mod_on .list.c_str());
 	clustTree_ -> Branch("mod",    &clu_.mod,     clu_.mod    .list.c_str());
 	clustTree_ -> Branch("clust",  &clu_,         clu_        .list.c_str());
-	// Track tree
+        clustTree_ -> Branch("clust_adc", &clu_.adc, "adc[size]/F");
+        clustTree_ -> Branch("clust_pix", &clu_.pix, "pix[size][2]/F")
+	// Track treex
 	trackTree_ -> Branch("event",  &evt_,         evt_        .list.c_str());
 	trackTree_ -> Branch("track",  &track_,       track_      .list.c_str());
 	// Trajectory tree
@@ -43,6 +46,8 @@ void PhaseIPixelNtuplizer::beginJob()
 	trajTree_  -> Branch("mod_on", &traj_.mod_on, traj_.mod_on.list.c_str());
 	trajTree_  -> Branch("mod",    &traj_.mod,    traj_.mod   .list.c_str());
 	trajTree_  -> Branch("clust",  &traj_.clu,    traj_.clu   .list.c_str());
+        trajTree_  -> Branch("clust_adc", &traj_.clu.adc, "adc[size]/F");
+        trajTree_  -> Branch("clust_pix", &traj_.clu.pix, "pix[size][2]/F");
 	trajTree_  -> Branch("track",  &track_,       track_      .list.c_str());
 	trajTree_  -> Branch("traj",   &traj_,        traj_       .list.c_str());
 }

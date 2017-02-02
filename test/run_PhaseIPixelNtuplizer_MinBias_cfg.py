@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type MinBias_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry DB:Extended --fileout file:MinBias_GENSIMRECO.root --python_filename=PahseI_MinBias_cfg.py --runUnscheduled -n 10
+# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,RECO --evt_type MinBias_13TeV_pythia8_TuneCUETP8M1_cfi --conditions auto:phase1_2017_realistic --era Run2_2017 --geometry Extended2017 --fileout file:GENSIMRECO_MinBias.root --python_filename=PhaseI_MinBias_cfg.py --runUnscheduled -n 10
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -15,8 +15,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.StandardSequences.GeometrySimDB_cff')
+process.load('Configuration.Geometry.GeometryExtended2017Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2017_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
@@ -30,7 +30,9 @@ process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(
+    input = cms.untracked.int32(10)
+)
 
 # Input source
 process.source = cms.Source("EmptySource")
@@ -41,7 +43,7 @@ process.options = cms.untracked.PSet(
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    annotation = cms.untracked.string('MinBias_cfi nevts:10'),
+    annotation = cms.untracked.string('MinBias_13TeV_pythia8_TuneCUETP8M1_cfi nevts:10'),
     name = cms.untracked.string('Applications'),
     version = cms.untracked.string('$Revision: 1.19 $')
 )
@@ -57,7 +59,7 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
-    fileName = cms.untracked.string('file:MinBias_GENSIMRECO.root'),
+    fileName = cms.untracked.string('file:GENSIMRECO_MinBias.root'),
     outputCommands = process.RECOSIMEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
@@ -65,57 +67,43 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
-process.XMLFromDBSource.label = cms.string("Extended")
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2017_realistic', '')
 
-process.generator = cms.EDFilter("Pythia6GeneratorFilter",
+process.generator = cms.EDFilter("Pythia8GeneratorFilter",
     PythiaParameters = cms.PSet(
-        parameterSets = cms.vstring('pythiaUESettings', 
+        parameterSets = cms.vstring('pythia8CommonSettings', 
+            'pythia8CUEP8M1Settings', 
             'processParameters'),
-        processParameters = cms.vstring('MSEL=0         ! User defined processes', 
-            'MSUB(11)=1     ! Min bias process', 
-            'MSUB(12)=1     ! Min bias process', 
-            'MSUB(13)=1     ! Min bias process', 
-            'MSUB(28)=1     ! Min bias process', 
-            'MSUB(53)=1     ! Min bias process', 
-            'MSUB(68)=1     ! Min bias process', 
-            'MSUB(92)=1     ! Min bias process, single diffractive', 
-            'MSUB(93)=1     ! Min bias process, single diffractive', 
-            'MSUB(94)=1     ! Min bias process, double diffractive', 
-            'MSUB(95)=1     ! Min bias process'),
-        pythiaUESettings = cms.vstring('MSTJ(11)=3     ! Choice of the fragmentation function', 
-            'MSTJ(22)=2     ! Decay those unstable particles', 
-            'PARJ(71)=10 .  ! for which ctau  10 mm', 
-            'MSTP(2)=1      ! which order running alphaS', 
-            'MSTP(33)=0     ! no K factors in hard cross sections', 
-            'MSTP(51)=10042 ! structure function chosen (external PDF CTEQ6L1)', 
-            'MSTP(52)=2     ! work with LHAPDF', 
-            'MSTP(81)=1     ! multiple parton interactions 1 is Pythia default', 
-            'MSTP(82)=4     ! Defines the multi-parton model', 
-            'MSTU(21)=1     ! Check on possible errors during program execution', 
-            'PARP(82)=1.8387   ! pt cutoff for multiparton interactions', 
-            'PARP(89)=1960. ! sqrts for which PARP82 is set', 
-            'PARP(83)=0.5   ! Multiple interactions: matter distrbn parameter', 
-            'PARP(84)=0.4   ! Multiple interactions: matter distribution parameter', 
-            'PARP(90)=0.16  ! Multiple interactions: rescaling power', 
-            'PARP(67)=2.5    ! amount of initial-state radiation', 
-            'PARP(85)=1.0  ! gluon prod. mechanism in MI', 
-            'PARP(86)=1.0  ! gluon prod. mechanism in MI', 
-            'PARP(62)=1.25   ! ', 
-            'PARP(64)=0.2    ! ', 
-            'MSTP(91)=1      !', 
-            'PARP(91)=2.1   ! kt distribution', 
-            'PARP(93)=15.0  ! ')
+        processParameters = cms.vstring('SoftQCD:nonDiffractive = on', 
+            'SoftQCD:singleDiffractive = on', 
+            'SoftQCD:doubleDiffractive = on'),
+        pythia8CUEP8M1Settings = cms.vstring('Tune:pp 14', 
+            'Tune:ee 7', 
+            'MultipartonInteractions:pT0Ref=2.4024', 
+            'MultipartonInteractions:ecmPow=0.25208', 
+            'MultipartonInteractions:expPow=1.6'),
+        pythia8CommonSettings = cms.vstring('Tune:preferLHAPDF = 2', 
+            'Main:timesAllowErrors = 10000', 
+            'Check:epTolErr = 0.01', 
+            'Beams:setProductionScalesFromLHEF = off', 
+            'SLHA:keepSM = on', 
+            'SLHA:minMassSM = 1000.', 
+            'ParticleDecays:limitTau0 = on', 
+            'ParticleDecays:tau0Max = 10', 
+            'ParticleDecays:allowPhotonRadiation = on')
     ),
-    comEnergy = cms.double(10000.0),
+    comEnergy = cms.double(13000.0),
+    crossSection = cms.untracked.double(71390000000.0),
     filterEfficiency = cms.untracked.double(1.0),
     maxEventsToPrint = cms.untracked.int32(0),
     pythiaHepMCVerbosity = cms.untracked.bool(False),
-    pythiaPylistVerbosity = cms.untracked.int32(0)
+    pythiaPylistVerbosity = cms.untracked.int32(1)
 )
 
+
+process.ProductionFilterSequence = cms.Sequence(process.generator)
 
 # Path and EndPath definitions
 process.generation_step = cms.Path(process.pgen)
@@ -133,103 +121,290 @@ process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.simulation_step,process.digitisation_step,process.L1simulation_step,process.digi2raw_step,process.raw2digi_step,process.reconstruction_step,process.endjob_step,process.RECOSIMoutput_step)
 # filter all path with the production filter sequence
 for path in process.paths:
-	getattr(process,path)._seq = process.generator * getattr(process,path)._seq
+	getattr(process,path)._seq = process.ProductionFilterSequence * getattr(process,path)._seq 
 
-#-------------------------- BEGIN INSERTED CODE --------------------------------
 
-#--------------- Added for TimingStudy ---------------
 
-#---------------------------
-#  Pile-up (RunIISummer15GS)
-#---------------------------
-runOnGrid = False
-saveRECO  = False
-useRECO   = True
 
-# Flat pileup modification: 1-20 uniform
-##  process.mix.input.nbPileupEvents.probFunctionVariable = cms.vint32(range(0, 21))
-##  process.mix.input.nbPileupEvents.probValue = cms.vdouble([0.0] + [0.05] * 20)
-##  
-##  if runOnGrid:
-##  	from DPGAnalysis.PhaseIPixelNtuplizer.PoolSource_13TeV_RunII_pre17_GS import RunII_GS_Phase_I_2017_pileup_file_paths
-##  	process.mix.input.fileNames = RunII_GS_Phase_I_2017_pileup_file_paths
-##  else:
-##  	process.mix.input.fileNames = cms.untracked.vstring(
-##  		'file:/data/hunyadi/CMSSW/PhaseI_SIM/Tracker_material/CMSSW_8_1_0_pre8/src/Test/Stepenkent/out_step_1.root',
-##  		# '/store/user/ahunyadi/GEN_SIM/PhaseI_CMSSW81X/PhaseI_81X_mcRun2_GEN_SIM_evt100000/160708_091624/0000/GEN_SIM_81x_PHASEI_104.root',
-##  		# "file:/data/store/user/ahunyadi/GEN_SIM/PhaseI_CMSSW81X/PhaseI_81X_mcRun2_GEN_SIM_evt100000/160708_091624/0000/GEN_SIM_81x_PHASEI_104.root",
-##  	)
 
-#---------------------------
-#  DynIneff from DB
-#---------------------------
-useSqlite = False
 
-if useSqlite:
-	from CondCore.CondDB.CondDB_cfi import *
-	process.DynIneffDBSource = cms.ESSource("PoolDBESSource",
-		DBParameters = cms.PSet(
-			authenticationPath = cms.untracked.string(''),
-			authenticationSystem = cms.untracked.int32(0),
-			security = cms.untracked.string(''),
-			messageLevel = cms.untracked.int32(0),
-		),
-		connect = cms.string('sqlite_file:hardpixelineff_0_05_for_testing_81x.db'),
-		toGet = cms.VPSet(cms.PSet(
-			record = cms.string('SiPixelDynamicInefficiencyRcd'),
-			tag = cms.string('SiPixelDynamicInefficiency_v1')
+
+
+
+
+
+
+# begin inserting configs
+#------------------------------------------
+#  Options - can be given from command line
+#------------------------------------------
+import FWCore.ParameterSet.VarParsing as opts
+
+opt = opts.VarParsing ('analysis')
+
+opt.register('globalTag',          '',
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
+	     'Global Tag, Default="" which uses auto:run2_data')
+
+opt.register('useClustersOnTrack', True,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'True: use RecHits of generalTracks, False: use siPixelRecHits')
+
+opt.register('useTemplates',       True,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Only for On-track clusters! True: use Template reco, False: use Generic reco')
+
+opt.register('saveRECO',           False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Option to keep GEN-SIM-RECO')
+
+opt.register('useRECO',            False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Option to use GEN-SIM-RECO')
+
+opt.register('RECOFileName',  '',
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
+	     'Name of the histograms file')
+
+opt.register('outputFileName',      '',
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
+	     'Name of the histograms file')
+
+opt.register('useLocalLASim',      False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test LA (SIM) conditions locally (prep/prod database or sqlite file')
+
+opt.register('useLocalQuality',    False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test Quality conditions locally (prep/prod database or sqlite file')
+
+opt.register('useLocalLA',         False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test LA (RECO) conditions locally (prep/prod database or sqlite file')
+
+opt.register('useLocalGain',       False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test Gain conditions locally (prep/prod database or sqlite file')
+
+opt.register('useLocalGenErr',     False,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
+	     'Test GenError conditions locally (prep/prod database or sqlite file')
+
+### Events to process: 'maxEvents' is already registered by the framework
+opt.setDefault('maxEvents', 1000)
+
+# Proceed with settings from command line
+opt.parseArguments()
+
+process.maxEvents.input = opt.maxEvents
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
+
+# Set some default options based on others
+if opt.useClustersOnTrack:
+	if opt.useTemplates:
+		process.initialStepTracks.TTRHBuilder = 'WithAngleAndTemplate'
+		if opt.RECOFileName == '': opt.RECOFileName = 'file:GENSIMRECO_MuPt10_TemplateReco_'+str(opt.maxEvents)+'.root'
+	else:
+		process.initialStepTracks.TTRHBuilder = 'WithTrackAngle'
+		if opt.RECOFileName == '': opt.RECOFileName = 'file:GENSIMRECO_MuPt10_GenericReco_'+str(opt.maxEvents)+'.root'
+else:
+	if opt.RECOFileName == '': opt.RECOFileName = 'file:GENSIMRECO_MuPt10_GenericReco_'+str(opt.maxEvents)+'.root'
+
+# Add Input file in case using it
+if opt.useRECO:
+	process.setName_("TEST")
+	process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
+		# This is the file you create with saveRECO, by default
+		opt.RECOFileName # Use previously saved RECO as input
 		))
-	)
-	process.es_prefer_DynIneffDBSource = cms.ESPrefer("PoolDBESSource","DynIneffDBSource")
+
+#________________________________________________________________________
+#                        Main Analysis Module
+
+# Specify inputs/outputs
+if opt.useTemplates:
+	if opt.outputFileName == '': opt.outputFileName = 'Ntuple_TemplateReco_'+str(opt.maxEvents)+'.root'
+else:
+	if opt.outputFileName == '': opt.outputFileName = 'Ntuple_GenericReco_'+str(opt.maxEvents)+'.root'
 
 #---------------------------
 #  PhaseIPixelNtuplizer
 #---------------------------
-process.PhaseINtuplizerPlugin = cms.EDAnalyzer('PhaseIPixelNtuplizer')
-process.PhaseINtuplizerPlugin.trajectoryInput = cms.InputTag('generalTracks')
-#process.PhaseINtuplizerPlugin.trajectoryInput = cms.InputTag('initialStepTracks')
+process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
+	outputFileName = cms.untracked.string(opt.outputFileName),
+	#trajectoryInput = cms.InputTag('initialStepTracks'),
+	trajectoryInput = cms.InputTag('generalTracks'),
+	)
 process.PhaseIPixelNtuplizer_step = cms.Path(process.PhaseINtuplizerPlugin)
 
-#---------------------------
-#  Path/Schedule
-#---------------------------
-if useRECO:
-    process.setName_("NTUPLE")
-    process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(
-	    # This is the file you create with saveRECO, by default
-	    #'file:MinBias_GENSIMRECO.root'
-	    # 50k event made with new geom, generic CPE
-	    #'file:/data/jkarancs/CMSSW/PhaseI/Latest/GENSIMRECO_MuPt10_GenericReco_50000.root'
-	    # 810 relval
-	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/04BA77F5-4ABF-E611-9CEC-0CC47A78A2F6.root',
-	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/0A9CE862-43BF-E611-B83A-0025905A6132.root',
-	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/583A740D-58BF-E611-B960-0CC47A4C8ED8.root',
-	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/86563DDC-43BF-E611-A69C-0CC47A4D7678.root',
-	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/865B21CC-42BF-E611-BE4B-0CC47A78A45A.root',
-	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/8E1A04B2-58BF-E611-AE25-0CC47A7C345C.root',
-	    'file:/data/store/relval/CMSSW_8_1_0/RelValMinBias_13/GEN-SIM-RECO/81X_upgrade2017_realistic_v26_HLT2017-v1/10000/F04F1CE0-43BF-E611-B4F2-0025905A6132.root'
-	    ))
-    process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
-    process.PhaseINtuplizerPlugin.trajectoryInput = 'TrackRefitter'
-    process.PhaseIPixelNtuplizer_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter*process.PhaseINtuplizerPlugin)
-    process.schedule = cms.Schedule(process.PhaseIPixelNtuplizer_step)
+# myAnalyzer Path
+if opt.useRECO and opt.useClustersOnTrack:
+	process.load("RecoTracker.TrackProducer.TrackRefitters_cff")
+	process.TrackRefitter.src = "generalTracks"
+	process.PhaseINtuplizerPlugin.trajectoryInput = 'TrackRefitter'
+	process.myAnalyzer_step = cms.Path(process.MeasurementTrackerEvent*process.TrackRefitter*process.PhaseINtuplizerPlugin)
 else:
-    if not saveRECO: process.schedule.remove(process.RECOSIMoutput_step)
-    process.schedule.remove(process.endjob_step)
-    process.schedule.remove(process.genfiltersummary_step)
-    process.schedule.append(process.PhaseIPixelNtuplizer_step)
+	process.myAnalyzer_step = cms.Path(process.PhaseINtuplizerPlugin)
+
+
+#________________________________________________________________________
+#                        DataBase Stuff
+
+# Print settings
+print "Using options: "
+if opt.globalTag == '':
+    print "  globalTag (auto:phase1_2017_realistic) = "+str(process.GlobalTag.globaltag)
+else:
+    if "auto:" in opt.globalTag:
+	process.GlobalTag = GlobalTag(process.GlobalTag, opt.globalTag, '')
+	print "  globalTag ("+opt.globalTag+") = "+str(process.GlobalTag.globaltag)
+    else:
+	process.GlobalTag.globaltag = opt.globalTag
+	print "  globalTag (manually chosen)            = "+str(process.GlobalTag.globaltag)
+print "  useClustersOnTrack                     = "+str(opt.useClustersOnTrack)
+print "  useTemplates                           = "+str(opt.useTemplates)
+print "  saveRECO                               = "+str(opt.saveRECO)
+print "  useRECO                                = "+str(opt.useRECO)
+print "  RECOFileName                           = "+str(opt.RECOFileName)
+print "  outputFileName                         = "+str(opt.outputFileName)
+print "  maxEvents                              = "+str(opt.maxEvents)
+print "  useLocalLASim                          = "+str(opt.useLocalLASim)
+print "  useLocalQuality                        = "+str(opt.useLocalQuality)
+print "  useLocalLA                             = "+str(opt.useLocalLA)
+print "  useLocalGain                           = "+str(opt.useLocalGain)
+print "  useLocalGenErr                         = "+str(opt.useLocalGenErr)
+
+# Test Local DB conditions
+# LA (SIM)
+LASim_tag       = "SiPixelLorentzAngleSim_phase1_mc_v1"
+#LASim_db        = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngleSim_phase1_mc_v1.db'
+LASim_db        = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#LASim_db        = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+# Quality
+Qua_tag         = 'SiPixelQuality_phase1_ideal'
+#Qua_db          = 'sqlite_file:../../../../../DB/phase1/SiPixelQuality_phase1_ideal.db'
+Qua_db          = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#Qua_db          = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+# LA (RECO)
+LA_tag          = 'SiPixelLorentzAngle_phase1_mc_v1'
+LA_Width_tag    = 'SiPixelLorentzAngle_phase1_mc_v1'
+#LA_db           = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db'
+#LA_db           = 'frontier://FrontierPrep/CMS_CONDITIONS'
+LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
+#LA_Width_db     = 'sqlite_file:../../../../../DB/phase1/SiPixelLorentzAngle_phase1_mc_v1.db'
+#LA_Width_db     = 'frontier://FrontierPrep/CMS_CONDITIONS'
+LA_Width_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+# Gains
+#Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v1'
+Gain_tag        = 'SiPixelGainCalibration_phase1_mc_v2'
+#Gain_tag        = 'SiPixelGainCalibration_phase1_ideal'
+#Gain_tag        = 'SiPixelGainCalibration_phase1_ideal_v2'
+Gain_db         = 'sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_mc_v2.db'
+#Gain_db         = 'sqlite_file:../../../../../DB/phase1/SiPixelGainCalibration_phase1_ideal_v2.db'
+#Gain_db         = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#Gain_db         = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+# GenErrors
+GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v1'
+#GenErr_db       = 'sqlite_file:siPixelGenErrors38T.db'
+#GenErr_db       = 'frontier://FrontierPrep/CMS_COND_PIXEL'
+#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
+
+#LA
+if opt.useLocalLASim :
+	process.LASimReader = cms.ESSource("PoolDBESSource",
+		DBParameters = cms.PSet(
+			messageLevel = cms.untracked.int32(0),
+			authenticationPath = cms.untracked.string('')),
+		toGet = cms.VPSet(cms.PSet(
+			record = cms.string("SiPixelLorentzAngleSimRcd"),
+			tag = cms.string(LASim_tag))),
+		connect = cms.string(LASim_db))
+	process.lasimprefer = cms.ESPrefer("PoolDBESSource","LASimReader")
+
+# Quality
+if opt.useLocalQuality :
+	process.QualityReader = cms.ESSource("PoolDBESSource",
+		DBParameters = cms.PSet(
+			messageLevel = cms.untracked.int32(0),
+			authenticationPath = cms.untracked.string('')),
+		toGet = cms.VPSet(cms.PSet(
+			record = cms.string('SiPixelQualityFromDbRcd'),
+			tag = cms.string('SiPixelQuality_phase1_ideal'))),
+		connect = cms.string(Qua_tag))
+	process.es_prefer_QualityReader = cms.ESPrefer("PoolDBESSource","QualityReader")
+
+# for reco
+# LA 
+if opt.useLocalLA :
+	process.LAReader = cms.ESSource("PoolDBESSource",
+		DBParameters = cms.PSet(
+			messageLevel = cms.untracked.int32(0),
+			authenticationPath = cms.untracked.string('')),
+		toGet = cms.VPSet(cms.PSet(
+			record = cms.string("SiPixelLorentzAngleRcd"),
+			tag = cms.string(LA_tag))),
+		connect = cms.string(LA_db))
+	process.LAprefer = cms.ESPrefer("PoolDBESSource","LAReader")
+	# now the forWidth LA
+	process.LAWidthReader = cms.ESSource("PoolDBESSource",
+		DBParameters = cms.PSet(
+			messageLevel = cms.untracked.int32(0),
+			authenticationPath = cms.untracked.string('')),
+		toGet = cms.VPSet(cms.PSet(
+			record = cms.string("SiPixelLorentzAngleRcd"),
+			label = cms.untracked.string("forWidth"),
+			tag = cms.string(LA_Width_tag))),
+		connect = cms.string(LA_Width_db))
+	process.LAWidthprefer = cms.ESPrefer("PoolDBESSource","LAWidthReader")
+
+# Gain 
+if opt.useLocalGain :
+	process.GainsReader = cms.ESSource("PoolDBESSource",
+		DBParameters = cms.PSet(
+			messageLevel = cms.untracked.int32(0),
+			authenticationPath = cms.untracked.string('')),
+		toGet = cms.VPSet(cms.PSet(
+			record = cms.string('SiPixelGainCalibrationOfflineRcd'),
+			tag = cms.string(Gain_tag))),
+		connect = cms.string(Gain_db))
+	process.Gainprefer = cms.ESPrefer("PoolDBESSource","GainsReader")
+
+# GenError
+if opt.useLocalGenErr :
+	process.GenErrReader = cms.ESSource("PoolDBESSource",
+		DBParameters = cms.PSet(
+			messageLevel = cms.untracked.int32(0),
+			authenticationPath = cms.untracked.string('')),
+		toGet = cms.VPSet(cms.PSet(
+			record = cms.string('SiPixelGenErrorDBObjectRcd'),
+			tag = cms.string(GenErr_tag))),
+		connect = cms.string(GenErr_db))
+	process.generrprefer = cms.ESPrefer("PoolDBESSource","GenErrReader")
 
 #---------------------------
-#  MessageLogger
+#  Schedule
 #---------------------------
-#process.MessageLogger = cms.Service("MessageLogger",
-#	destinations = cms.untracked.vstring('cerr'),
-#	cerr = cms.untracked.PSet(threshold  = cms.untracked.string('DEBUG')),
-#	debugModules = cms.untracked.vstring('PhaseINtuplizerPlugin'))
-process.MessageLogger.cerr.FwkReport.reportEvery = 10
-#--------------------------- END INSERTED CODE ---------------------------------
 
-
+# Modify Schedule
+if opt.useRECO:
+	process.schedule = cms.Schedule(process.myAnalyzer_step)
+else:
+	if not opt.saveRECO:
+		process.schedule.remove(process.RECOSIMoutput_step)
+	else:
+		process.RECOSIMoutput.fileName = opt.RECOFileName
+		# Additionally, save the pixel sim hits and digis too
+		process.RECOSIMoutput.outputCommands.extend(('keep *_g4SimHits_*Pixel*_*','keep *_simSiPixelDigis_*_*','drop *_mix_simSiPixelDigis*_*'))
+	# Remove unnecessary steps and add Analyzer in the end of the chain
+	process.schedule.remove(process.endjob_step)
+	process.schedule.remove(process.genfiltersummary_step)
+	process.schedule.append(process.myAnalyzer_step)
+# End of inserted code
 
 
 
@@ -249,3 +424,8 @@ process=cleanUnscheduled(process)
 
 
 # Customisation from command line
+
+# Add early deletion of temporary data products to reduce peak memory need
+from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+process = customiseEarlyDelete(process)
+# End adding early deletion
