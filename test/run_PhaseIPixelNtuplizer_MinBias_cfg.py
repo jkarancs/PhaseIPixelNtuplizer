@@ -30,9 +30,7 @@ process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
-)
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 
 # Input source
 process.source = cms.Source("EmptySource")
@@ -123,17 +121,6 @@ process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary
 for path in process.paths:
 	getattr(process,path)._seq = process.ProductionFilterSequence * getattr(process,path)._seq 
 
-
-
-
-
-
-
-
-
-
-
-
 # begin inserting configs
 #------------------------------------------
 #  Options - can be given from command line
@@ -190,13 +177,9 @@ opt.register('useLocalGenErr',     False,
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
 	     'Test GenError conditions locally (prep/prod database or sqlite file')
 
-### Events to process: 'maxEvents' is already registered by the framework
-opt.setDefault('maxEvents', 1000)
-
 # Proceed with settings from command line
 opt.parseArguments()
 
-process.maxEvents.input = opt.maxEvents
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 # Set some default options based on others

@@ -144,8 +144,8 @@ void PhaseIPixelNtuplizer::getEvtInfo(const edm::Event& iEvent, const edm::Handl
 		}
 	}
 	// Quick loop to get number of clusters on layers/disk
-	std::fill(evt_.nclu, evt_.nclu + 6, 0);
-	std::fill(evt_.npix, evt_.npix + 6, 0);
+	std::fill(evt_.nclu, evt_.nclu + 7, 0);
+	std::fill(evt_.npix, evt_.npix + 7, 0);
 	if(clusterCollectionHandle.isValid())
 	{
 		for(const auto& clu_set: *clusterCollectionHandle)
@@ -170,8 +170,8 @@ void PhaseIPixelNtuplizer::getEvtInfo(const edm::Event& iEvent, const edm::Handl
 	}
 	// Quick loop to get track numbers
 	evt_.ntracks = 0;
-	std::fill(evt_.ntrackBPix, evt_.ntrackBPix + 3, 0);
-	std::fill(evt_.ntrackFPix, evt_.ntrackFPix + 2, 0);
+	std::fill(evt_.ntrackFPix, evt_.ntrackFPix + 3, 0);
+	std::fill(evt_.ntrackBPix, evt_.ntrackBPix + 4, 0);
 	for(const auto& pair: *trajTrackCollectionHandle)
 	{
 		const edm::Ref<std::vector<Trajectory>> traj  = pair.key;
@@ -270,12 +270,12 @@ void PhaseIPixelNtuplizer::getTrackInfo(const edm::Handle<reco::VertexCollection
 	// FIXME: Move conter zeroing to the DataStructures
 	track_.init();
 	// Zeroing counters
-	std::fill(track_.validfpix,   track_.validfpix   + 2, 0);
-	std::fill(track_.validbpix,   track_.validbpix   + 3, 0);
-	std::fill(track_.pixhit,      track_.pixhit      + 1, 0);
-	std::fill(track_.validpixhit, track_.validpixhit + 1, 0);
-	std::fill(track_.bpix,        track_.bpix        + 3, 0);
-	std::fill(track_.fpix,        track_.fpix        + 2, 0);
+	std::fill(track_.pixhit,      track_.pixhit      + 2, 0);
+	std::fill(track_.validpixhit, track_.validpixhit + 2, 0);
+	std::fill(track_.fpix,        track_.fpix        + 3, 0);
+	std::fill(track_.bpix,        track_.bpix        + 4, 0);
+	std::fill(track_.validfpix,   track_.validfpix   + 3, 0);
+	std::fill(track_.validbpix,   track_.validbpix   + 4, 0);
 	track_.strip          = 0;
 	// Basic track quantities
 	track_.i       = trackIndex;
