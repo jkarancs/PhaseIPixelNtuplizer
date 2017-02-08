@@ -10,8 +10,9 @@ class PhaseITrackingEfficiencyFilters
 		// Disable default constructor
 		PhaseITrackingEfficiencyFilters() = delete;
 		// Data fields
-		const EventData&       eventField;
-		const TrajMeasurement& trajField;
+		EventData* const       eventField;
+		TrajMeasurement* const trajField;
+		TrackData* const       trackField;
 	private:
 		int nvtxCut();
 		int zerobiasCut();
@@ -43,7 +44,7 @@ class PhaseITrackingEfficiencyFilters
 			valmis   = 1 >> 10,
 			hitsep   = 1 >> 11,
 		};
-		PhaseITrackingEfficiencyFilters(const EventData& eventField, const TrajMeasurement& trajField);
+		PhaseITrackingEfficiencyFilters(EventData* const eventField, TrajMeasurement* const trajField, TrackData* const trackFieldArg);
 		~PhaseITrackingEfficiencyFilters();
 		bool performCuts(uint32_t cutList);
 		bool performAllEfficiencyCuts();

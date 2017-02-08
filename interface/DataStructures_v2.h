@@ -101,7 +101,7 @@ class LumiData
 			instlumi_ext = NOVAL_F;
 			pileup       = NOVAL_F;
 			l1_size      = 0;
-			std::fill(l1_prescale, l1_prescale + 999, NOVAL_I);
+			std::fill(l1_prescale, l1_prescale + 1000, NOVAL_I);
 		}
 };
 
@@ -171,8 +171,8 @@ class EventData
 			evt  = NOVAL_I;
 			nvtx = NOVAL_I;
 			trig = NOVAL_I;
-			std::fill(nclu, nclu + 6, NOVAL_I);
-			std::fill(npix, npix + 6, NOVAL_I);
+			std::fill(nclu, nclu + 7, NOVAL_I);
+			std::fill(npix, npix + 7, NOVAL_I);
 			beamint[0]   = abs(NOVAL_I);
 			beamint[1]   = abs(NOVAL_I);
 			l1_rate      = NOVAL_F;
@@ -198,15 +198,15 @@ class EventData
 			wbc          = NOVAL_I;
 			delay        = NOVAL_I;
 			ntracks      = NOVAL_I;
-			std::fill(ntrackBPix,      ntrackBPix      + 3, NOVAL_I);
-			std::fill(ntrackBPixvalid, ntrackBPixvalid + 3, NOVAL_I);
-			std::fill(ntrackFPix,      ntrackFPix      + 2, NOVAL_I);
-			std::fill(ntrackFPixvalid, ntrackFPixvalid + 2, NOVAL_I);
+			std::fill(ntrackBPix,      ntrackBPix      + 4, NOVAL_I);
+			std::fill(ntrackBPixvalid, ntrackBPixvalid + 4, NOVAL_I);
+			std::fill(ntrackFPix,      ntrackFPix      + 3, NOVAL_I);
+			std::fill(ntrackFPixvalid, ntrackFPixvalid + 3, NOVAL_I);
 			trackSep     = NOVAL_F;
 			federrs_size = 0;
 			for(size_t i = 0; i < 16; i++)
 			{
-				std::fill(federrs[i], federrs[i] + 1, NOVAL_I);
+				std::fill(federrs[i], federrs[i] + 2, NOVAL_I);
 			} 
 		};
 };
@@ -365,15 +365,15 @@ class ClustData
 			sizeX  = NOVAL_I;
 			sizeY  = NOVAL_I;
 			i      = NOVAL_I;
-			// edge   = NOVAL_I;
-			// badpix = NOVAL_I;
-			// tworoc = NOVAL_I;
+			edge   = NOVAL_I;
+			badpix = NOVAL_I;
+			tworoc = NOVAL_I;
 			size   = 0;
 			charge = NOVAL_F;
-			std::fill(adc, adc + 999, NOVAL_F);
-			for(size_t j = 0; j<1000; j++)
+			std::fill(adc, adc + 1000, NOVAL_F);
+			for(size_t j = 0; j < 1000; j++)
 			{
-				std::fill(pix[j], pix[j] + 1, NOVAL_F);
+				std::fill(pix[j], pix[j] + 2, NOVAL_F);
 			}
 		};
 };
@@ -404,14 +404,7 @@ class TrackData
 		float p;
 		float d0;
 		float dz;
-		// From here Split mode (if SPLIT defined)
-		// float ndof;
-		// float chi2;
-		// int   algo;
 		// int   fromVtx;
-		// int   nstripmissing;
-		// int   nstriplost;
-		// int   nstriplayer;
 		int   strip; // total valid hits on the strip detector parts
 		int   quality;
 		int   i;
@@ -422,11 +415,62 @@ class TrackData
 		int   bpix[4]; // recHits in Layer 1,2,3,4
 		int   validfpix[3]; // valid recHits in Diks1,2,3
 		int   validbpix[4]; // valid recHits in Layer 1,2,3,4
-		// int   highPurity;
 
 		const std::string list = "pt/F:eta:phi:theta:p:d0:dz:strip/I:quality:i:pix:pixhit[2]:validpixhit[2]:fpix[3]:bpix[4]:validfpix[3]:validbpix[4]";
 
 		TrackData() { init(); }
+		TrackData(const TrackData& other)
+		{
+			pt             = other.pt;
+			eta            = other.eta;
+			phi            = other.phi;
+			theta          = other.theta;
+			p              = other.p;
+			d0             = other.d0;
+			dz             = other.dz;
+			// fromVtx        = other.fromVtx;
+			strip          = other.strip;
+			quality        = other.quality;
+			i              = other.i;
+			pix            = other.pix;
+			std::copy(other.pixhit,      other.pixhit      + 2, pixhit);
+			std::copy(other.validpixhit, other.validpixhit + 2, validpixhit);
+			std::copy(other.fpix,        other.fpix        + 3, fpix);
+			std::copy(other.bpix,        other.bpix        + 4, bpix);
+			std::copy(other.validfpix,   other.validfpix   + 3, validfpix);
+			std::copy(other.validbpix,   other.validbpix   + 4, validbpix);
+		}
+		TrackData(TrackData&& other)
+		{
+			swap(*this, other);
+		}
+		friend void swap(TrackData& first, TrackData& second)
+		{
+			using std::swap;
+			swap(first.pt,          second.pt);
+			swap(first.eta,         second.eta);
+			swap(first.phi,         second.phi);
+			swap(first.theta,       second.theta);
+			swap(first.p,           second.p);
+			swap(first.d0,          second.d0);
+			swap(first.dz,          second.dz);
+			// swap(first.fromVtx,     second.fromVtx);
+			swap(first.strip,       second.strip);
+			swap(first.quality,     second.quality);
+			swap(first.i,           second.i);
+			swap(first.pix,         second.pix);
+			swap(first.pixhit,      second.pixhit);
+			swap(first.validpixhit, second.validpixhit);
+			swap(first.fpix,        second.fpix);
+			swap(first.bpix,        second.bpix);
+			swap(first.validfpix,   second.validfpix);
+			swap(first.validbpix,   second.validbpix);
+		}
+		TrackData& operator =(TrackData other) noexcept
+		{
+			swap(*this, other);
+			return *this;
+		}
 		void init()
 		{
 			pt             = NOVAL_F;
@@ -436,23 +480,17 @@ class TrackData
 			p              = NOVAL_F;
 			d0             = NOVAL_F;
 			dz             = NOVAL_F;
-			// ndof           = NOVAL_F;
-			// chi2           = NOVAL_F;
-			// algo           = NOVAL_I;
 			// fromVtx        = NOVAL_I;
-			// nstripmissing  = NOVAL_I;
-			// nstriplost     = NOVAL_I;
-			// nstriplayer    = NOVAL_I;
 			strip          = NOVAL_I;
 			quality        = NOVAL_I;
 			i              = NOVAL_I;
 			pix            = NOVAL_I;
-			std::fill(pixhit,      pixhit      + 1, NOVAL_I);
-			std::fill(validpixhit, validpixhit + 1, NOVAL_I);
-			std::fill(fpix,        fpix        + 2, NOVAL_I);
-			std::fill(bpix,        bpix        + 3, NOVAL_I);
-			std::fill(validfpix,   validfpix   + 2, NOVAL_I);
-			std::fill(validbpix,   validbpix   + 3, NOVAL_I);
+			std::fill(pixhit,      pixhit      + 2, NOVAL_I);
+			std::fill(validpixhit, validpixhit + 2, NOVAL_I);
+			std::fill(fpix,        fpix        + 3, NOVAL_I);
+			std::fill(bpix,        bpix        + 4, NOVAL_I);
+			std::fill(validfpix,   validfpix   + 3, NOVAL_I);
+			std::fill(validbpix,   validbpix   + 4, NOVAL_I);
 		}
 };
 

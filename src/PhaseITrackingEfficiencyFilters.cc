@@ -1,122 +1,106 @@
 #include "../interface/PhaseITrackingEfficiencyFilters.h"
 
-// TODO: check if the references are correct, try reference constructor if fails
-PhaseITrackingEfficiencyFilters::PhaseITrackingEfficiencyFilters(const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg) :
-eventField(eventFieldArg),
-trajField(trajFieldArg)
-{
-	// eventField	= eventFieldArg;
-	// trajField  = trajFieldArg;
-}
+PhaseITrackingEfficiencyFilters::PhaseITrackingEfficiencyFilters(EventData* const eventFieldArg, TrajMeasurement* const trajFieldArg, TrackData* const trackFieldArg) :
+	eventField(eventFieldArg),
+	trajField(trajFieldArg),
+	trackField(trackFieldArg) {}
 
 PhaseITrackingEfficiencyFilters::~PhaseITrackingEfficiencyFilters() {}
 
-// Checked
 int PhaseITrackingEfficiencyFilters::nvtxCut()
 {
-	return 0 <= eventField.nvtx;
+	return 0 <= eventField -> nvtx;
 }
 
-// FIXME: Is this required at all?
 int PhaseITrackingEfficiencyFilters::zerobiasCut()
 {
 	return 1;
 }
 
-// Checked
 int PhaseITrackingEfficiencyFilters::federrCut()
 {
-	return eventField.federrs_size == 0;
+	return eventField -> federrs_size == 0;
 }
 
-// Checked
 int PhaseITrackingEfficiencyFilters::hpCut()
 {
-	return (trajField.trk.quality & 4) != 0;
+	return (trackField -> quality & 4) != 0;
 }
 
-// Checked
 int PhaseITrackingEfficiencyFilters::ptCut()
 {
-	// TODO: look at pt distribution
-	return trajField.trk.pt > 1.0;
+	return trackField -> pt > 1.0;
 }
 
-// Checked
 int PhaseITrackingEfficiencyFilters::nstripCut()
 {
-	return trajField.trk.strip > 10;
+	return trackField -> strip > 10;
 }
 
-// Checked
 int PhaseITrackingEfficiencyFilters::d0Cut()
 {
-	// TODO: look at d0 distributions
-	if(trajField.mod_on.det == 0)
+	if(trajField -> mod_on.det == 0)
 	{
-		switch(trajField.mod_on.layer)
+		switch(trajField -> mod_on.layer)
 		{
 			case 1:
-				return std::abs(trajField.trk.d0 < 0.01); // Layer 1
+				return std::abs(trackField -> d0 < 0.01); // Layer 1
 			case 2:
-				return std::abs(trajField.trk.d0 < 0.02); // Layer 2
+				return std::abs(trackField -> d0 < 0.02); // Layer 2
 			case 3:
-				return std::abs(trajField.trk.d0 < 0.02); // Layer 3
+				return std::abs(trackField -> d0 < 0.02); // Layer 3
 			case 4:
-				return std::abs(trajField.trk.d0 < 0.02); // Layer 4
+				return std::abs(trackField -> d0 < 0.02); // Layer 4
 		}
 		return 0;
 	}
-	if(trajField.mod_on.det == 1)
+	if(trajField -> mod_on.det == 1)
 	{
-		return std::abs(trajField.trk.d0) < 0.05;         // Forward pixels
+		return std::abs(trackField -> d0) < 0.05;         // Forward pixels
 	}
 	return 0;
 }
 
-// Checked
 int PhaseITrackingEfficiencyFilters::dzCut()
 {
-	// TODO: look at dz distributions
-	if(trajField.mod_on.det == 0) return std::abs(trajField.trk.dz) < 0.1;
-	if(trajField.mod_on.det == 1) return std::abs(trajField.trk.dz) < 0.5;
+	if(trajField -> mod_on.det == 0) return std::abs(trackField -> dz) < 0.1;
+	if(trajField -> mod_on.det == 1) return std::abs(trackField -> dz) < 0.5;
 	return 0;
 }
 
-// TODO: consult about this one
 int PhaseITrackingEfficiencyFilters::pixhitCut()
 {
-	// if(trajField.mod_on.det == 0)
+	// if(trajField -> mod_on.det == 0)
 	// {
-	// 	switch(trajField.mod_on.layer)
+	// 	switch(trajField -> mod_on.layer)
 	// 	{
 	// 		case 1:
 	// 			return
-	// 				(trajField.trk.validbpix[1] > 0 && trajField.trk.validbpix[2] > 0) || 
-	// 				(trajField.trk.validbpix[1] > 0 && trajField.trk.validfpix[0] > 0) || 
-	// 				(trajField.trk.validfpix[0] > 0 && trajField.trk.validfpix[1] > 0);
+	// 				(trackField -> validbpix[1] > 0 && trackField -> validbpix[2] > 0) || 
+	// 				(trackField -> validbpix[1] > 0 && trackField -> validfpix[0] > 0) || 
+	// 				(trackField -> validfpix[0] > 0 && trackField -> validfpix[1] > 0);
 	// 		case 2:
 	// 			return
-	// 				(trajField.trk.validbpix[0] > 0 && trajField.trk.validbpix[2] > 0) || 
-	// 				(trajField.trk.validbpix[0] > 0 && trajField.trk.validfpix[0] > 0);
+	// 				(trackField -> validbpix[0] > 0 && trackField -> validbpix[2] > 0) || 
+	// 				(trackField -> validbpix[0] > 0 && trackField -> validfpix[0] > 0);
 	// 		case 3:
 	// 			return
-	// 				(trajField.trk.validbpix[0] > 0 && trajField.trk.validbpix[1] > 0);
+	// 				(trackField -> validbpix[0] > 0 && trackField -> validbpix[1] > 0);
 	// 		case 4:
 	// 			return 1;
 	// 	}
 	// }
-	// if(trajField.mod_on.det == 1)
+	// if(trajField -> mod_on.det == 1)
 	// {
-	// 	switch(std::abs(trajField.mod_on.disk))
+	// 	switch(std::abs(trajField -> mod_on.disk))
 	// 	{
 	// 		case 1:
 	// 			return
-	// 				(trajField.trk.validbpix[0] > 0 && trajField.trk.validfpix[1] > 0) || 
-	// 				(trajField.trk.validbpix[1] > 0 && trajField.trk.validfpix[1] > 0);
+	// 				(trackField -> validbpix[0] > 0 && trackField -> validfpix[1] > 0) || 
+	// 				(trackField -> validbpix[1] > 0 && trackField -> validfpix[1] > 0);
 	// 		case 2:
 	// 			return
-	// 				(trajField.trk.validbpix[0] > 0 && trajField.trk.validfpix[0] > 0);
+	// 				(trackField -> validbpix[0] > 0 && trackField -> validfpix[0] > 0);
 	// 	}
 	// }
 	// return 0;
@@ -130,101 +114,100 @@ int PhaseITrackingEfficiencyFilters::lxFidCut()
 	// // Pixel barrel
 	// if(mod_on.det == 0)
 	// {
-	// 	switch(trajField.mod_on.half)
+	// 	switch(trajField -> mod_on.half)
 	// 	{
 	// 		case 0:
 	// 			notEdgeLx = 
-	// 				std::abs(trajField.lx)<0.65;
+	// 				std::abs(trajField -> lx)<0.65;
 	// 			break;
 	// 		case 1:
 	// 			notEdgeLx = 
-	// 				trajField.lx > -0.3 && trajField.lx < 0.25;
+	// 				trajField -> lx > -0.3 && trajField -> lx < 0.25;
 	// 			break;
 	// 	}
 	// }
 	// // Pixel endcap
 	// if(mod_on.det == 1)
 	// {
-	// 	switch(trajField.mod_on.panel)
+	// 	switch(trajField -> mod_on.panel)
 	// 	{
 	// 		// Pixel endcap, forward direction
 	// 		case 1:
 	// 			// FIXME: Module is always 1, check blade instead
-	// 			switch(trajField.mod_on.module)
+	// 			switch(trajField -> mod_on.module)
 	// 			{
 	// 				case 1:
 	// 					notEdgeLx = 
-	// 						trajField.lx > -0.15 && trajField.lx < 0.3;
+	// 						trajField -> lx > -0.15 && trajField -> lx < 0.3;
 	// 					break;
 	// 				case 2:
-	// 					if(std::abs(trajField.mod_on.disk) == 1)
+	// 					if(std::abs(trajField -> mod_on.disk) == 1)
 	// 					{
 	// 						notEdgeLx = 
-	// 							trajField.lx > -0.55 && trajField.lx < 0.6;
+	// 							trajField -> lx > -0.55 && trajField -> lx < 0.6;
 	// 					}
-	// 					if(std::abs(trajField.mod_on.disk) == 2)
+	// 					if(std::abs(trajField -> mod_on.disk) == 2)
 	// 					{
 	// 						notEdgeLx = 
-	// 							trajField.lx > -0.6 && trajField.lx < 0.3;
+	// 							trajField -> lx > -0.6 && trajField -> lx < 0.3;
 	// 					}
 	// 					break;
 	// 				case 3:
-	// 					if(std::abs(trajField.mod_on.disk) == 1)
+	// 					if(std::abs(trajField -> mod_on.disk) == 1)
 	// 					{
 	// 						notEdgeLx = 
-	// 							trajField.lx > 0.3 && trajField.lx < 0.6;
+	// 							trajField -> lx > 0.3 && trajField -> lx < 0.6;
 	// 					}
-	// 					if(std::abs(trajField.mod_on.disk) == 2)
+	// 					if(std::abs(trajField -> mod_on.disk) == 2)
 	// 					{
 	// 						notEdgeLx = 
-	// 							trajField.lx>-0.6 && trajField.lx < 0.5;
+	// 							trajField -> lx>-0.6 && trajField -> lx < 0.5;
 	// 					}
 	// 					break;
 	// 				case 4:
 	// 					notEdgeLx = 
-	// 							trajField.lx > -0.3 && trajField.lx < 0.15;
+	// 							trajField -> lx > -0.3 && trajField -> lx < 0.15;
 	// 					break;
 	// 			}
 	// 		// Pixel endcap, backwards direction
 	// 		case 2:
-	// 			switch(trajField.mod_on.module)
+	// 			switch(trajField -> mod_on.module)
 	// 			{
 	// 				case 1:
 	// 					notEdgeLx = 
-	// 						trajField.lx > -0.55 && trajField.lx < 0.6;
+	// 						trajField -> lx > -0.55 && trajField -> lx < 0.6;
 	// 					break;
 	// 				case 2:
-	// 					switch(std::abs(trajField.mod_on.disk))
+	// 					switch(std::abs(trajField -> mod_on.disk))
 	// 					{
 	// 						case 1:
 	// 							notEdgeLx = 
-	// 								std::abs(trajField.mod_on.disk);
+	// 								std::abs(trajField -> mod_on.disk);
 	// 							break;
 	// 						case 2:
 	// 							notEdgeLx = 
-	// 								trajField.lx > -0.6 && trajField.lx < 0.55;
+	// 								trajField -> lx > -0.6 && trajField -> lx < 0.55;
 	// 							break;
 	// 					}
 	// 					break;
 	// 				case 3:
 	// 					notEdgeLx = 
-	// 						std::abs(trajField.lx) < 0.55;
+	// 						std::abs(trajField -> lx) < 0.55;
 	// 					break;
 	// 			}
 	// 	}
 
 
 	// // FIXME: look ROC edge geometry up
-	// int rocedgeLx = !((trajField.mod_on.half==0
-	// 	||(trajField.mod_on.det==1&&!(trajField.mod_on.panel==1&&
-	// 		(trajField.mod_on.module==1||trajField.mod_on.module==4))))&&
-	// 		 std::abs(trajField.lx)<0.06);
+	// int rocedgeLx = !((trajField -> mod_on.half==0
+	// 	||(trajField -> mod_on.det==1&&!(trajField -> mod_on.panel==1&&
+	// 		(trajField -> mod_on.module==1||trajField -> mod_on.module==4))))&&
+	// 		 std::abs(trajField -> lx)<0.06);
 
 	// return edge_lx && rocedgeLx;
 	return 1;
 }
 
-// TODO: implement ly fid cut
 int PhaseITrackingEfficiencyFilters::lyFidCut()
 {
 	return 1;
@@ -232,10 +215,9 @@ int PhaseITrackingEfficiencyFilters::lyFidCut()
 
 int PhaseITrackingEfficiencyFilters::valmisCut()
 {
-	return trajField.validhit || trajField.missing;
+	return trajField -> validhit || trajField -> missing;
 }
 
-// FIXME: Find closest clusters for hits
 int PhaseITrackingEfficiencyFilters::hitSepCut()
 {
 	// return trajField.hit_near;
@@ -265,17 +247,29 @@ bool PhaseITrackingEfficiencyFilters::performAllEfficiencyCuts()
 {
 	int passedCuts = 1;
 	passedCuts &= nvtxCut();
+	if(passedCuts ^ 1) {std::cout << "nvtxCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= zerobiasCut();
+	if(passedCuts ^ 1) {std::cout << "zerobiasCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= federrCut();
+	if(passedCuts ^ 1) {std::cout << "federrCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= hpCut();
+	if(passedCuts ^ 1) {std::cout << "hpCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= ptCut();
+	if(passedCuts ^ 1) {std::cout << "ptCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= nstripCut();
+	if(passedCuts ^ 1) {std::cout << "nstripCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= d0Cut();
+	if(passedCuts ^ 1) {std::cout << "d0Cut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= dzCut();
+	if(passedCuts ^ 1) {std::cout << "dzCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= pixhitCut();
+	if(passedCuts ^ 1) {std::cout << "pixhitCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= lxFidCut();
+	if(passedCuts ^ 1) {std::cout << "lxFidCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= lyFidCut();
+	if(passedCuts ^ 1) {std::cout << "lyFidCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= valmisCut();
+	if(passedCuts ^ 1) {std::cout << "valmisCut not passed." << std::endl; std::cin.get(); return 0;}
 	passedCuts &= hitSepCut();
 	return passedCuts;	
 }

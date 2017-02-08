@@ -105,17 +105,17 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		const TrackerTopology* trackerTopology_;
 		const TrackerGeometry* trackerGeometry_;
 		// Private methods
-		void getEvtInfo(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
-		void getClustInfo(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const std::map<uint32_t, int>& federrors);
-		void getTrajTrackInfo(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const std::map<uint32_t, int>& federrors);
-		void getTrackInfo(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Ref<std::vector<Trajectory>>& traj, const reco::TrackRef& track, const std::map<uint32_t, int>& federrors, const int& trackIndex);
-		void handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::string msg);
-		void handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::vector<std::string> msg);
-		void printEvtInfo(const std::string& streamType);
-		void getModuleData(ModuleData&, bool, const DetId &, const std::map<uint32_t, int> &);
-		void getRocData(ModuleData&, bool, const DetId &, const PixelDigi*);
-		void getRocData(ModuleData&, bool, const DetId &, const SiPixelCluster*);
-		void getRocData(ModuleData&, bool, const SiPixelRecHit*);
+		void                                getEvtInfo(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
+		void                                getClustInfo(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const std::map<uint32_t, int>& federrors);
+		void                                getTrajTrackInfo(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const std::map<uint32_t, int>& federrors);
+		std::map<reco::TrackRef, TrackData> getTrackInfo(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const std::map<uint32_t, int>& federrors);
+		void                                handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::string msg);
+		void                                handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::vector<std::string> msg);
+		void                                printEvtInfo(const std::string& streamType);
+		void                                getModuleData(ModuleData&, bool, const DetId &, const std::map<uint32_t, int> &);
+		void                                getRocData(ModuleData&, bool, const DetId &, const PixelDigi*);
+		void                                getRocData(ModuleData&, bool, const DetId &, const SiPixelCluster*);
+		void                                getRocData(ModuleData&, bool, const SiPixelRecHit*);
 };
 
 namespace NtuplizerHelpers 
