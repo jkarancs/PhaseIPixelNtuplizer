@@ -9,6 +9,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 //#include "DataFormats/TrackReco/interface/Track.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
@@ -27,6 +28,7 @@
 #include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
 #include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
@@ -34,7 +36,7 @@
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
-#include "../interface/DataStructures_v2.h" // 2016 Dec 16, CMSSW_8_1_0
+#include "../interface/DataStructures_v3.h" // 2016 Dec 16, CMSSW_8_1_0
 
 // New class for plotting Phase 0/1 Geometry (Will be added to DQM later)
 #include "../interface/SiPixelCoordinates.h"
@@ -77,8 +79,10 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		// States
 		int isEventFromMc_ = -1;
 		// Options
-		int clusterSaveDownscaling_;
-		TFile*      ntupleOutputFile_;
+		int                      clusterSaveDownscaling_;
+		TFile*                   ntupleOutputFile_;
+		std::vector<std::string> triggerNames_;
+		edm::InputTag            triggerTag_;
 		// Trees
 		TTree* eventTree_;
 		TTree* lumiTree_;
@@ -98,6 +102,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		// Tokens
 		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>> rawDataErrorToken_;
 		edm::EDGetTokenT<reco::VertexCollection>                 primaryVerticesToken_;
+		edm::EDGetTokenT<edm::TriggerResults>                    triggerResultsToken_;
 		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken_;
 		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken_;
 		// Tools
@@ -105,7 +110,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		const TrackerTopology* trackerTopology_;
 		const TrackerGeometry* trackerGeometry_;
 		// Private methods
-		void                                getEvtInfo(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
+		void                                getEvtInfo(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
 		void                                getClustInfo(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const std::map<uint32_t, int>& federrors);
 		void                                getTrajTrackInfo(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const std::map<uint32_t, int>& federrors);
 		std::map<reco::TrackRef, TrackData> getTrackInfo(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, const std::map<uint32_t, int>& federrors);
@@ -129,6 +134,7 @@ namespace NtuplizerHelpers
 	void trajMeasurementDistanceSquared(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs, float& distanceSquared, float& dxSquared, float& dySquared);
 	void trajMeasurementDistance(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs, float& distance, float& dx, float& dy);
 	void getClosestOtherTrackDistanceByLooping(const TrajectoryMeasurement& measurement, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, float& distance, float& dx, float& dy);
+	int getTrackParentVtxNumTracks(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const reco::TrackRef trackToFind);
 } // NtuplizerHelpers
 
 #endif

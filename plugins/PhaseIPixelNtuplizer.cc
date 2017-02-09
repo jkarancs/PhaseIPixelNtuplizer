@@ -5,9 +5,29 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
 {
 	iConfig_                = iConfig;
 	clusterSaveDownscaling_ = 1;
+	if(iConfig_.exists("triggerTag"))
+	{
+		triggerTag_ = iConfig_.getParameter<edm::InputTag>("triggerTag");
+		std::cout << "NON-DEFAULT PARAMETER: triggerTag = " << triggerTag_ << std::endl;
+	}
+	else { triggerTag_ = edm::InputTag("TriggerResults", "", "HLT"); }
+	if(iConfig_.exists("triggerNames"))
+	{
+		triggerNames_ = iConfig_.getParameter<std::vector<std::string>>("triggerNames");
+		std::cout << "NON-DEFAULT PARAMETER: triggerNames= ";
+		for(size_t i = 0; i < triggerNames_.size(); i++) std::cout << triggerNames_[i] << " ";
+		std::cout << std::endl;
+	}
+	else
+	{
+		triggerNames_.clear();
+		triggerNames_.push_back("HLT_ZeroBias");
+		triggerNames_.push_back("HLT_Random");
+	}
 	// Tokens
 	rawDataErrorToken_        = consumes<edm::DetSetVector<SiPixelRawDataError> >(edm::InputTag("siPixelDigis"));
 	primaryVerticesToken_     = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
+	triggerResultsToken_      = consumes<edm::TriggerResults>(triggerTag_);
 	clustersToken_            = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
 	trajTrackCollectionToken_ = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
 }
@@ -81,6 +101,9 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// Get vertices
 	edm::Handle<reco::VertexCollection>      vertexCollectionHandle;
 	iEvent.getByToken(primaryVerticesToken_, vertexCollectionHandle);
+	// Get trigger info
+	edm::Handle<edm::TriggerResults> triggerResultsHandle;
+	iEvent.getByToken(triggerResultsToken_, triggerResultsHandle);
 	// Get cluster collection
 	edm::Handle<edmNew::DetSetVector<SiPixelCluster>> clusterCollectionHandle;
 	iEvent.getByToken(clustersToken_,                 clusterCollectionHandle);
@@ -96,12 +119,12 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	iSetup.get<TrackerDigiGeometryRecord>().get(trackerGeometryHandle);
 	trackerGeometry_ = trackerGeometryHandle.product();
 	coord_.init(iSetup);
-	getEvtInfo(iEvent, vertexCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
+	getEvtInfo(iEvent, vertexCollectionHandle, triggerResultsHandle, clusterCollectionHandle, trajTrackCollectionHandle);
 	getClustInfo(clusterCollectionHandle, federrors);
 	getTrajTrackInfo(vertexCollectionHandle, trajTrackCollectionHandle, federrors);
 }
 
-void PhaseIPixelNtuplizer::getEvtInfo(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
+void PhaseIPixelNtuplizer::getEvtInfo(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
 {
 	// Event info
 	// Set data holder object
@@ -112,33 +135,59 @@ void PhaseIPixelNtuplizer::getEvtInfo(const edm::Event& iEvent, const edm::Handl
 	evt_.orb          = iEvent.orbitNumber();
 	evt_.bx           = iEvent.bunchCrossing();
 	evt_.evt          = iEvent.id().event();
+	if(triggerResultsHandle.isValid())
+	{
+		evt_.trig = 0;
+		// Get the trigger names found in the current event
+		const edm::TriggerNames& eventTriggerNames = iEvent.triggerNames(*triggerResultsHandle);
+		for(size_t eventNumTrigger = 0; eventNumTrigger < eventTriggerNames.size(); eventNumTrigger++)
+		{
+			std::string eventTriggerNameToTest = eventTriggerNames.triggerNames()[eventNumTrigger];
+			// Compare current trigger name to the ones found in the config 
+			for(size_t configNumTrigger = 0; configNumTrigger < triggerNames_.size(); configNumTrigger++)
+			{
+				// If the name starts with the one specified in the configuration
+				if(eventTriggerNameToTest.find(triggerNames_[configNumTrigger])) continue;
+				/// Check: Has the eventNumTrigger-th path accepted the event?
+				if(triggerResultsHandle -> accept(eventNumTrigger) == 0) continue;
+				evt_.trig |= (1 << configNumTrigger);
+			}
+		}
+	}
+	else
+	{
+		if(isEventFromMc_)
+		{
+			evt_.trig = 1; // Assuming that ZeroBias is the first trigger bit
+		}
+	}
 	// Loop on vertices
-	evt_.nvtx               = 0;
+	evt_.nvtx    = 0;
 	evt_.vtxntrk = 0;
-	for(const auto& current_vertex: *vertexCollectionHandle)
+	for(const auto &currentVertex : *vertexCollectionHandle)
 	{
 		// Invalid vertex
-		if(!current_vertex.isValid()) continue;
+		if(!currentVertex.isValid()) continue;
 		// Check if it is the best vertex (largest trk number, preferably in the middle
 		if(
-			(current_vertex.tracksSize()  > static_cast<size_t>(evt_.vtxntrk)) ||
-			(current_vertex.tracksSize() == static_cast<size_t>(evt_.vtxntrk)  && 
-			std::abs(current_vertex.z()) < std::abs(evt_.vtxZ)))
+		    (currentVertex.tracksSize() > static_cast<size_t>(evt_.vtxntrk)) ||
+		    (currentVertex.tracksSize() == static_cast<size_t>(evt_.vtxntrk) &&
+		     std::abs(currentVertex.z()) < std::abs(evt_.vtxZ)))
 		{
-			evt_.vtxntrk = current_vertex.tracksSize();
-			evt_.vtxD0   = current_vertex.position().rho();
-			evt_.vtxX    = current_vertex.x();
-			evt_.vtxY    = current_vertex.y();
-			evt_.vtxZ    = current_vertex.z();
-			evt_.vtxndof = current_vertex.ndof();
-			evt_.vtxchi2 = current_vertex.chi2();
-			//primary_vtx         = static_cast<reco::VertexCollection::const_iterator>(&current_vertex);
+			evt_.vtxntrk = currentVertex.tracksSize();
+			evt_.vtxD0   = currentVertex.position().rho();
+			evt_.vtxX    = currentVertex.x();
+			evt_.vtxY    = currentVertex.y();
+			evt_.vtxZ    = currentVertex.z();
+			evt_.vtxndof = currentVertex.ndof();
+			evt_.vtxchi2 = currentVertex.chi2();
+			//primary_vtx         = static_cast<reco::VertexCollection::const_iterator>(&currentVertex);
 		}
 		// Counting the good vertices
 		if(
-			std::abs(current_vertex.z())              <  24.0 && 
-			std::abs(current_vertex.position().rho()) <  2.0  &&
-			current_vertex.ndof()                     >= 4)
+		    std::abs(currentVertex.z()) < 24.0 &&
+		    std::abs(currentVertex.position().rho()) < 2.0 &&
+		    currentVertex.ndof() >= 4)
 		{
 			evt_.nvtx++;
 		}
@@ -148,21 +197,23 @@ void PhaseIPixelNtuplizer::getEvtInfo(const edm::Event& iEvent, const edm::Handl
 	std::fill(evt_.npix, evt_.npix + 7, 0);
 	if(clusterCollectionHandle.isValid())
 	{
-		for(const auto& clu_set: *clusterCollectionHandle)
+		for(const auto &clu_set : *clusterCollectionHandle)
 		{
 			int layDiskIndex = -1;
 			DetId detId(clu_set.id());
-			if(detId.subdetId() == PixelSubdetector::PixelBarrel) layDiskIndex = trackerTopology_ -> pxbLayer(detId.rawId()) - 1;
+			if(detId.subdetId() == PixelSubdetector::PixelBarrel)
+				layDiskIndex = trackerTopology_->pxbLayer(detId.rawId()) - 1;
 			else
 			{
-				if(detId.subdetId() == PixelSubdetector::PixelEndcap) layDiskIndex = trackerTopology_ -> pxfDisk(detId.rawId()) + 3;
+				if(detId.subdetId() == PixelSubdetector::PixelEndcap)
+					layDiskIndex = trackerTopology_->pxfDisk(detId.rawId()) + 3;
 				else
 				{
 					continue;
 				}
 			}
 			evt_.nclu[layDiskIndex] += clu_set.size();
-			for(const auto& clu: clu_set)
+			for(const auto &clu : clu_set)
 			{
 				evt_.npix[layDiskIndex] += clu.size();
 			}
@@ -172,39 +223,39 @@ void PhaseIPixelNtuplizer::getEvtInfo(const edm::Event& iEvent, const edm::Handl
 	evt_.ntracks = 0;
 	std::fill(evt_.ntrackFPix, evt_.ntrackFPix + 3, 0);
 	std::fill(evt_.ntrackBPix, evt_.ntrackBPix + 4, 0);
-	for(const auto& pair: *trajTrackCollectionHandle)
+	for(const auto &pair : *trajTrackCollectionHandle)
 	{
-		const edm::Ref<std::vector<Trajectory>> traj  = pair.key;
-		const reco::TrackRef                    track = pair.val;
+		const edm::Ref<std::vector<Trajectory>> traj = pair.key;
+		const reco::TrackRef track                   = pair.val;
 		// Discarding tracks without pixel measurements
 		if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
 		++evt_.ntracks;
-		for(const auto& measurement: traj -> measurements())
+		for(const auto &measurement : traj->measurements())
 		{
 			if(!measurement.updatedState().isValid()) continue;
-			DetId detId(measurement.recHit() -> geographicalId());
+			DetId detId(measurement.recHit()->geographicalId());
 			if(detId.subdetId() == PixelSubdetector::PixelBarrel)
 			{
-				evt_.ntrackBPix[trackerTopology_ -> pxbLayer(detId.rawId()) - 1]++;
-				if(measurement.recHit() -> getType() == TrackingRecHit::valid)
+				evt_.ntrackBPix[trackerTopology_->pxbLayer(detId.rawId()) - 1]++;
+				if(measurement.recHit()->getType() == TrackingRecHit::valid)
 				{
-					evt_.ntrackBPixvalid[trackerTopology_ -> pxbLayer(detId.rawId()) - 1]++;
+					evt_.ntrackBPixvalid[trackerTopology_->pxbLayer(detId.rawId()) - 1]++;
 				}
 			}
 			else
 			{
 				if(detId.subdetId() == PixelSubdetector::PixelEndcap)
 				{
-					evt_.ntrackFPix[trackerTopology_ -> pxfDisk(detId.rawId()) - 1]++;
-					if(measurement.recHit() -> getType() == TrackingRecHit::valid)
+					evt_.ntrackFPix[trackerTopology_->pxfDisk(detId.rawId()) - 1]++;
+					if(measurement.recHit()->getType() == TrackingRecHit::valid)
 					{
-						evt_.ntrackFPixvalid[trackerTopology_ -> pxfDisk(detId.rawId()) - 1]++;
+						evt_.ntrackFPixvalid[trackerTopology_->pxfDisk(detId.rawId()) - 1]++;
 					}
 				}
 			}
 		}
 	}
-	eventTree_ -> Fill();
+	eventTree_->Fill();
 }
 
 
@@ -272,6 +323,8 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackInfo(const edm
 		const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
 		const reco::TrackRef                    track = currentTrackKeypair.val;
 		TrackData* trackField;
+		// Create new TrackData instance, when this trackRef is a new one,
+		// set track properties and zero out counters
 		try { trackField = &(trackDataCollection.at(track)); }
 		catch(std::out_of_range e)
 		{
@@ -285,19 +338,20 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackInfo(const edm
 			std::fill(newTrackData.validfpix,   newTrackData.validfpix   + 3, 0);
 			std::fill(newTrackData.validbpix,   newTrackData.validbpix   + 4, 0);
 			newTrackData.strip          = 0;
+			// FIXME: use best vertex selection instead of closest vertex selection
 			reco::VertexCollection::const_iterator closestVtx = NtuplizerHelpers::findClosestVertexToTrack(track, vertexCollectionHandle);
 			// Basic track quantities
-			newTrackData.i       = trackIndex++;
-			newTrackData.quality = track -> qualityMask();
-			newTrackData.pt      = track -> pt();
-			newTrackData.p       = track -> p();
-			newTrackData.eta     = track -> eta();
-			newTrackData.theta   = track -> theta();
-			newTrackData.phi     = track -> phi();
-			// FIXME: use best vertex selection instead of closest vertex selection
-			newTrackData.d0      = track -> dxy(closestVtx -> position()) * -1.0;
-			newTrackData.dz      = track -> dz(closestVtx -> position());
-			trackDataCollection.insert({track, newTrackData});
+			newTrackData.i           = trackIndex++;
+			newTrackData.quality     = track -> qualityMask();
+			newTrackData.pt          = track -> pt();
+			newTrackData.p           = track -> p();
+			newTrackData.eta         = track -> eta();
+			newTrackData.theta       = track -> theta();
+			newTrackData.phi         = track -> phi();
+			newTrackData.d0          = track -> dxy(closestVtx -> position()) * -1.0;
+			newTrackData.dz          = track -> dz(closestVtx -> position());
+			newTrackData.fromVtxNtrk = NtuplizerHelpers::getTrackParentVtxNumTracks(vertexCollectionHandle, track);
+			trackDataCollection.insert({track, std::move(newTrackData)});
 			trackField = &(trackDataCollection.at(track));
 		}
 		// Counted here:
@@ -322,7 +376,7 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackInfo(const edm
 					}
 			}
 			// Looking for pixel hits
-			if(NtuplizerHelpers::detidIsOnPixel(detId)) continue;
+			if(!NtuplizerHelpers::detidIsOnPixel(detId)) continue;
 			// Looking for valid and missing hits
 			const int& validhit = hit -> getType() == TrackingRecHit::valid;
 			// const int& missing  = hit -> getType() == TrackingRecHit::missing;
@@ -792,6 +846,23 @@ namespace NtuplizerHelpers
 		}
 		trajMeasurementDistance(measurement, *closestMeasurementIt, distance, dx, dy);
 	}
+	int getTrackParentVtxNumTracks(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const reco::TrackRef trackToFind)
+	{
+		for(const auto &currentVertex : *vertexCollectionHandle)
+		{
+			for(reco::Vertex::trackRef_iterator trackRefIt = currentVertex.tracks_begin(); trackRefIt != currentVertex.tracks_end(); ++trackRefIt)
+			{
+				// This is black magic. Don't touch this :D
+				const auto comparableVtxTrackRef = trackRefIt -> castTo<const reco::TrackRef>();
+				if(trackToFind == comparableVtxTrackRef)
+				{
+					return currentVertex.tracksSize();
+				}
+			}
+		}	
+		return 0;
+		// return reco::VertexRef(1);
+	} 
 } // NtuplizerHelpers
 
 DEFINE_FWK_MODULE(PhaseIPixelNtuplizer);
