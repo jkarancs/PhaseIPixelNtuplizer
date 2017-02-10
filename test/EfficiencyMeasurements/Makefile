@@ -33,6 +33,10 @@ CANVASEXTRAS_S = ./src/CanvasExtras.$(SrcSuf)
 CANVASEXTRAS_O = ./obj/CanvasExtras.$(ObjSuf)
 OBJS     += $(CANVASEXTRAS_O)
 
+EFFICIENCY_FILTERS_S = ../../src/PhaseITrackingEfficiencyFilters.$(SrcSuf)
+EFFICIENCY_FILTERS_O = ./obj/PhaseITrackingEfficiencyFilters.$(ObjSuf)
+OBJS     += $(EFFICIENCY_FILTERS_O)
+
 # PROGRAMS
 
 EFFICIENCY_MAIN_S = ./src/efficiency_main.$(SrcSuf)
@@ -41,16 +45,43 @@ EFFICIENCY_MAIN_A = ./bin/efficiency_main$(ExeSuf)
 OBJS     += $(EFFICIENCY_MAIN_O)
 PROGRAMS += $(EFFICIENCY_MAIN_A)
 
+EFFICIENCY_MULTIHITMEAS_S = ./src/efficiency_multiHitMeas.$(SrcSuf)
+EFFICIENCY_MULTIHITMEAS_O = ./obj/efficiency_multiHitMeas.$(ObjSuf)
+EFFICIENCY_MULTIHITMEAS_A = ./bin/efficiency_multiHitMeas$(ExeSuf)
+OBJS     += $(EFFICIENCY_MULTIHITMEAS_O)
+PROGRAMS += $(EFFICIENCY_MULTIHITMEAS_A)
+
+EFFICIENCY_FILTERCALIBRATION_S = ./src/efficiency_filterCalibration.$(SrcSuf)
+EFFICIENCY_FILTERCALIBRATION_O = ./obj/efficiency_filterCalibration.$(ObjSuf)
+EFFICIENCY_FILTERCALIBRATION_A = ./bin/efficiency_filterCalibration$(ExeSuf)
+OBJS     += $(EFFICIENCY_FILTERCALIBRATION_O)
+PROGRAMS += $(EFFICIENCY_FILTERCALIBRATION_A)
+
 all: $(PROGRAMS)
 
 # Executables
 
-$(EFFICIENCY_MAIN_A): $(EFFICIENCY_MAIN_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O)
+$(EFFICIENCY_MAIN_A): $(EFFICIENCY_MAIN_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O)
 	@printf "Compiling done, linking efficiency_main...\n"
 	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
 	$(MT_EXE)
 	@echo "Succesful make..."
 	@echo "...$@ is ready to use."
+
+$(EFFICIENCY_MULTIHITMEAS_A): $(EFFICIENCY_MULTIHITMEAS_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O)
+	@printf "Compiling done, linking efficiency_multiHitMeas...\n"
+	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
+	$(MT_EXE)
+	@echo "Succesful make..."
+	@echo "...$@ is ready to use."
+
+$(EFFICIENCY_FILTERCALIBRATION_A): $(EFFICIENCY_FILTERCALIBRATION_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O)
+	@printf "Compiling done, linking efficiency_filterCalibration...\n"
+	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
+	$(MT_EXE)
+	@echo "Succesful make..."
+	@echo "...$@ is ready to use."
+
 
 # Utility obj files
 
@@ -89,10 +120,25 @@ $(CANVASEXTRAS_O): $(CANVASEXTRAS_S)
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 
+$(EFFICIENCY_FILTERS_O): $(EFFICIENCY_FILTERS_S)
+	@printf "Compiling utility: \"PhaseITrackingEfficiencyFilters\"...\n"
+	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
+	@printf "Done.\n"
+
 ###
 
 $(EFFICIENCY_MAIN_O): $(EFFICIENCY_MAIN_S)  
 	@printf "Compiling program: \"efficiency_main\"...\n"
+	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
+	@printf "Done.\n"
+
+$(EFFICIENCY_MULTIHITMEAS_O): $(EFFICIENCY_MULTIHITMEAS_S)  
+	@printf "Compiling program: \"efficiency_multiHitMeas\"...\n"
+	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
+	@printf "Done.\n"
+
+$(EFFICIENCY_FILTERCALIBRATION_O): $(EFFICIENCY_FILTERCALIBRATION_S)  
+	@printf "Compiling program: \"efficiency_filterCalibration\"...\n"
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 

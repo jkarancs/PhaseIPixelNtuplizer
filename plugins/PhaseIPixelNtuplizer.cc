@@ -164,7 +164,7 @@ void PhaseIPixelNtuplizer::getEvtInfo(const edm::Event& iEvent, const edm::Handl
 	// Loop on vertices
 	evt_.nvtx    = 0;
 	evt_.vtxntrk = 0;
-	for(const auto &currentVertex : *vertexCollectionHandle)
+	for(const auto &currentVertex: *vertexCollectionHandle)
 	{
 		// Invalid vertex
 		if(!currentVertex.isValid()) continue;
@@ -350,7 +350,8 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackInfo(const edm
 			newTrackData.phi         = track -> phi();
 			newTrackData.d0          = track -> dxy(closestVtx -> position()) * -1.0;
 			newTrackData.dz          = track -> dz(closestVtx -> position());
-			newTrackData.fromVtxNtrk = NtuplizerHelpers::getTrackParentVtxNumTracks(vertexCollectionHandle, track);
+			// newTrackData.fromVtxNtrk = NtuplizerHelpers::getTrackParentVtxNumTracks(vertexCollectionHandle, track);
+			newTrackData.fromVtxNtrk = closestVtx -> tracksSize();
 			trackDataCollection.insert({track, std::move(newTrackData)});
 			trackField = &(trackDataCollection.at(track));
 		}
@@ -846,23 +847,25 @@ namespace NtuplizerHelpers
 		}
 		trajMeasurementDistance(measurement, *closestMeasurementIt, distance, dx, dy);
 	}
-	int getTrackParentVtxNumTracks(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const reco::TrackRef trackToFind)
-	{
-		for(const auto &currentVertex : *vertexCollectionHandle)
-		{
-			for(reco::Vertex::trackRef_iterator trackRefIt = currentVertex.tracks_begin(); trackRefIt != currentVertex.tracks_end(); ++trackRefIt)
-			{
-				// This is black magic. Don't touch this :D
-				const auto comparableVtxTrackRef = trackRefIt -> castTo<const reco::TrackRef>();
-				if(trackToFind == comparableVtxTrackRef)
-				{
-					return currentVertex.tracksSize();
-				}
-			}
-		}	
-		return 0;
-		// return reco::VertexRef(1);
-	} 
+	// THIS DOES NOT WORK !!!
+	// int getTrackParentVtxNumTracks(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const reco::TrackRef trackToFind)
+	// {
+	// 	const auto trackToFindAsPtr = trackToFind.get();
+	// 	std::cout << "Track ptr: " << trackToFindAsPtr << std::endl;
+	// 	for(const auto &currentVertex: *vertexCollectionHandle)
+	// 	{
+	// 		for(reco::Vertex::trackRef_iterator trackRefIt = currentVertex.tracks_begin(); trackRefIt != currentVertex.tracks_end(); ++trackRefIt)
+	// 		{
+	// 			const auto comparableVtxTrackPtr = trackRefIt -> get();
+	// 			std::cout << "Vertex track ptr: " << comparableVtxTrackPtr << std::endl;
+	// 			if(trackToFindAsPtr == comparableVtxTrackPtr)
+	// 			{
+	// 				return currentVertex.tracksSize();
+	// 			}
+	// 		}
+	// 	}	
+	// 	return NOVAL_I;
+	// } 
 } // NtuplizerHelpers
 
 DEFINE_FWK_MODULE(PhaseIPixelNtuplizer);

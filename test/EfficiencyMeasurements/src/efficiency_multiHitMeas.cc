@@ -44,18 +44,14 @@
 
 constexpr float HALF_PI = 0.5 * 3.141592653589793238462;
 
-const bool                                 CLUSTER_LOOP_REQUESTED = false;
-const bool                                 TRAJ_LOOP_REQUESTED    = true;
+const std::vector<int>                     NUMTRAJMEAS_NUM_BINS_ON_LAYERS = {10, 10, 10, 10};
+const std::vector<int>                     LX_NUM_BINS_ON_LAYERS          = {100, 100, 100, 100};
+const std::vector<int>                     LY_NUM_BINS_ON_LAYERS          = {100, 100, 100, 100};
 
-const std::vector<int>                     LADDER_NUM_BINS_ON_LAYERS = {13, 29, 45, 65};
-const std::vector<int>                     MODULE_NUM_BINS_ON_LAYERS = {9, 9, 9, 9};
-const std::vector<int>                     ALPHA_NUM_BINS_ON_LAYERS  = {100, 100, 100, 100};
-const std::vector<int>                     BETA_NUM_BINS_ON_LAYERS   = {100, 100, 100, 100};
+const std::vector<std::pair<float, float>> NUMTRAJMEAS_RANGE_ON_LAYERS    = {{0.0f, 10.0f}, {0.0f, 10.0f}, {0.0f, 10.0f}, {0.0f, 10.0f}};
+const std::vector<std::pair<float, float>> LX_RANGE_ON_LAYERS             = {{0.0f,  3.0f}, {0.0f,  3.0f}, {0.0f,  3.0f}, {0.0f,  3.0f}};
+const std::vector<std::pair<float, float>> LY_RANGE_ON_LAYERS             = {{0.0f,  4.5f}, {0.0f,  4.5f}, {0.0f,  4.5f}, {0.0f,  4.5f}};
 
-const std::vector<std::pair<float, float>> LADDER_RANGE_ON_LAYERS    = {{-6.0f, 7.0f }, {-14.0f, 15.0f }, {-22.0f, 23.0f }, {-32.0f, 33.0f }};
-const std::vector<std::pair<float, float>> MODULE_RANGE_ON_LAYERS    = {{-4.0f, 5.0f }, { -4.0f,  5.0f }, { -4.0f,  5.0f }, { -4.0f,  5.0f }};
-const std::vector<std::pair<float, float>> ALPHA_RANGE_ON_LAYERS     = {{ 0.0f, 3.14f}, {  0.0f,  3.14f}, {  0.0f,  3.14f}, {  0.0f,  3.14f}};
-const std::vector<std::pair<float, float>> BETA_RANGE_ON_LAYERS      = {{ 0.0f, 3.14f}, {  0.0f,  3.14f}, {  0.0f,  3.14f}, {  0.0f,  3.14f}};
 
 // const std::pair<float, float>  LAYER_MODULE_LABEL_POS      = std::make_pair(0.79f, 0.88f);
 
@@ -94,6 +90,36 @@ int main(int argc, char** argv) try
 	if(clustTreeNumEntries == 0) throw std::runtime_error("No entries found in tree: clustTree.");
 	std::cout << debug_prompt << "Total entries in the trajTree tree: " << trajTreeNumEntries << std::endl;
 	if(trajTreeNumEntries == 0 ) throw std::runtime_error("No entries found in tree: trajTree.");
+	// Separating the date into tracks with their associated trajectory measurements
+	timer.restart("Measuring the time required for separating the traj measurements by tracks...");
+	using UniqueTrackIdMap = std::map<int, std::map<int, std::vector<TrajMeasurement>>>;
+	UniqueTrackIdMap trackTrajMeasMap = [] (TTree* const trajTree, const TrajMeasurement& trajField, const EventData& eventField) -> UniqueTrackIdMap
+	{
+		UniqueTrackIdMap trackTrajMeasMap;
+		Int_t trajTreeNumEntries  = trajTree  -> GetEntries();
+		for(Int_t entryIndex = 0; entryIndex < trajTreeNumEntries; ++entryIndex) 
+		{
+			trajTree -> GetEntry(entryIndex);
+			int eventNum = eventField.evt;
+			auto eventTracksIt = trackTrajMeasMap.find(eventNum);
+			// If key does not exist yet: add key
+			if(eventTracksIt == trackTrajMeasMap.end())
+			{
+				eventTracksIt = trackTrajMeasMap.emplace(eventField.evt, std::map<int, std::vector<TrajMeasurement>>()).first;
+			}
+			int trackNum = trajField.trk.i;
+			auto& eventTracks = eventTracksIt -> second;
+			auto trackTrajMeasIt = eventTracks.find(trackNum);
+			// If key does not exist yet: add key
+			if(trackTrajMeasIt == eventTracks.end())
+			{
+				trackTrajMeasIt = eventTracks.emplace(trackNum, std::vector<TrajMeasurement>()).first;
+			}
+			trackTrajMeasIt -> second.push_back(trajField);
+		}
+		return trackTrajMeasMap;
+	}(trajTree, trajField, eventField);
+	timer.printSeconds("Loop done. Took about: ", " second(s).");
 	// Histogram definitions
 	std::vector<std::shared_ptr<TH1>> histograms;
 	auto histo1DForEachLayer = [&histograms] 
@@ -132,80 +158,59 @@ int main(int argc, char** argv) try
 		for(auto histo: histoForEachLayer) histograms.push_back(histo); 
 		return histoForEachLayer;
 	};
-	// Cluster occupancy
-	auto clusterOccupancyVsLadderVsModule = histo2DForEachLayer("clusterOccupancyVsLadderVsModule", "Cluster occupancy vs ladder vs module", "", "ladder", "module", "num. clusts.", LADDER_NUM_BINS_ON_LAYERS, LADDER_RANGE_ON_LAYERS, MODULE_NUM_BINS_ON_LAYERS, MODULE_RANGE_ON_LAYERS);
-	auto clusterOccupancyVsLadder         = histo1DForEachLayer("clusterOccupancyVsLadder",         "Cluster occupancy vs ladder", "", "module", "num. clusts.", LADDER_NUM_BINS_ON_LAYERS, LADDER_RANGE_ON_LAYERS);
-	auto clusterOccupancyVsModule         = histo1DForEachLayer("clusterOccupancyVsModule",         "Cluster occupancy vs module", "", "module", "num. clusts.", MODULE_NUM_BINS_ON_LAYERS, MODULE_RANGE_ON_LAYERS);
-	// Hit efficiency
-	auto hitEfficiencyVsLadderVsModule = histo2DForEachLayer("hitEfficiencyVsLadderVsModule", "Hit efficiency vs ladder vs module", "", "ladder", "module", "hit eff.", LADDER_NUM_BINS_ON_LAYERS, LADDER_RANGE_ON_LAYERS, MODULE_NUM_BINS_ON_LAYERS, MODULE_RANGE_ON_LAYERS);
-	auto hitEfficiencyVsLadder         = histo1DForEachLayer("hitEfficiencyVsLadder",         "Hit efficiency vs ladder", "", "module", "hit eff.", LADDER_NUM_BINS_ON_LAYERS, LADDER_RANGE_ON_LAYERS);
-	auto hitEfficiencyVsModule         = histo1DForEachLayer("hitEfficiencyVsModule",         "Hit efficiency vs module", "", "module", "hit eff.", MODULE_NUM_BINS_ON_LAYERS, MODULE_RANGE_ON_LAYERS);
-	auto hitEfficiencyVsAlpha          = histo1DForEachLayer("hitEfficiencyVsAlpha",          "Hit efficiency vs alpha",  "", "module", "hit eff.", ALPHA_NUM_BINS_ON_LAYERS , ALPHA_RANGE_ON_LAYERS );
-	auto hitEfficiencyVsBeta           = histo1DForEachLayer("hitEfficiencyVsBeta",           "Hit efficiency vs beta",   "", "module", "hit eff.", BETA_NUM_BINS_ON_LAYERS  , BETA_RANGE_ON_LAYERS  );
-	// Number of hits
-	auto totalHitsVsLadderVsModule = histo2DForEachLayer("totalHitsVsLadderVsModule", "Number of hits vs ladder vs module", "", "ladder", "module", "hit eff.", LADDER_NUM_BINS_ON_LAYERS, LADDER_RANGE_ON_LAYERS, MODULE_NUM_BINS_ON_LAYERS, MODULE_RANGE_ON_LAYERS);
-	auto totalHitsVsLadder         = histo1DForEachLayer("totalHitsVsLadder",         "Number of hits vs ladder", "", "module", "hit eff.", LADDER_NUM_BINS_ON_LAYERS, LADDER_RANGE_ON_LAYERS);
-	auto totalHitsVsModule         = histo1DForEachLayer("totalHitsVsModule",         "Number of hits vs module", "", "module", "hit eff.", MODULE_NUM_BINS_ON_LAYERS, MODULE_RANGE_ON_LAYERS);
-	auto totalHitsVsAlpha          = histo1DForEachLayer("totalHitsVsAlpha",          "Number of hits vs alpha",  "", "module", "hit eff.", ALPHA_NUM_BINS_ON_LAYERS,  ALPHA_RANGE_ON_LAYERS );
-	auto totalHitsVsBeta           = histo1DForEachLayer("totalHitsVsBeta",           "Number of hits vs beta",   "", "module", "hit eff.", BETA_NUM_BINS_ON_LAYERS ,  BETA_RANGE_ON_LAYERS  );
-	// Cluster loop, scoping local variables
-	if(CLUSTER_LOOP_REQUESTED)
-	{
-		timer.restart("Measuring the time required for looping on the clusters...");
-		const int& layer  = clusterField.mod_on.layer;
-		const int& ladder = clusterField.mod_on.ladder;
-		const int& module = clusterField.mod_on.module;
-		for(int entryIndex = 0; entryIndex < clustTreeNumEntries; ++entryIndex)
-		{
-			clustTree -> GetEntry(entryIndex);
-			// Checking the layer number
-			if(layer == NOVAL_I) continue;
-			if(layer < 1 || 5 < layer) { std::cout << error_prompt << "Bad layer number: " << layer << "." << std::endl; continue; }
-			clusterOccupancyVsLadderVsModule[layer - 1] -> Fill(ladder, module);
-			clusterOccupancyVsLadder        [layer - 1] -> Fill(ladder);
-			clusterOccupancyVsModule        [layer - 1] -> Fill(module);
-		}
-		timer.printSeconds("Loop done. Took about: ", " second(s).");
-	}
+	std::shared_ptr<TH1D> trajMeasNumberDist = std::make_shared<TH1D>("trajMeasNumberDist", "Num. traj measurements per track;num. traj. meas.;num. tracks", 10, 0, 10);
+	histograms.push_back(trajMeasNumberDist);
+	std::shared_ptr<TH2D> trajMeasOnBarrelGlXGlY                 = std::make_shared<TH2D>("trajMeasOnBarrelGlXGlY",                 "traj meas | det == 0 gly:glx;glx;gly",                             1000, -20.0, 20.0, 1000, -20.0, 20.0);
+	std::shared_ptr<TH2D> trajMeasOnBarrelWithMultiplicityGlXGlY = std::make_shared<TH2D>("trajMeasOnBarrelWithMultiplicityGlXGlY", "trajMeas gly:glx | det == 0 && 1 < trajMeas multiplicity;glx;gly", 1000, -20.0, 20.0, 1000, -20.0, 20.0);
+	// Histograms for each layer
+	auto trajMeasNumberDistOnLayers        = histo1DForEachLayer("trajMeasNumberDist",            "Num. traj measurements per track",        "", "num. traj. meas.", "num. tracks", NUMTRAJMEAS_NUM_BINS_ON_LAYERS, NUMTRAJMEAS_RANGE_ON_LAYERS);
+	auto lxForTrajMeasWithMultiplicity     = histo1DForEachLayer("lxForTrajMeasWithMultiplicity", "trajMeas lx | 1 < trajMeas multiplicity", "", "lx",               "num. tracks", LX_NUM_BINS_ON_LAYERS,          LX_RANGE_ON_LAYERS);
+	auto lyForTrajMeasWithMultiplicity     = histo1DForEachLayer("lyForTrajMeasWithMultiplicity", "trajMeas ly | 1 < trajMeas multiplicity", "", "ly",               "num. tracks", LY_NUM_BINS_ON_LAYERS,          LY_RANGE_ON_LAYERS);
+	auto lyVsLxForTrajMeasWithMultiplicity = histo2DForEachLayer("lyVsLxForTrajMeasWithMultiplicity", "trajMeas ly:lx | 1 < trajMeas multiplicity", "", "ly", "lx", "num. tracks", LX_NUM_BINS_ON_LAYERS, LX_RANGE_ON_LAYERS, LY_NUM_BINS_ON_LAYERS, LY_RANGE_ON_LAYERS);
+	timer.restart("Measuring the time required for looping on the tracks...");
 	// Trajector measurement loop, scoping local variables
-	if(TRAJ_LOOP_REQUESTED)
 	{
-		timer.restart("Measuring the time required for looping on the trajectory measurements...");
-		const int&       layer  = trajField.mod_on.layer;
-		const int&       ladder = trajField.mod_on.ladder;
-		const int&       module = trajField.mod_on.module;
-		const float&     alpha  = trajField.alpha;
-		const float&     beta   = trajField.beta;
-		// const int&   validhit = trajField.validhit;
-		const int&   missing  = trajField.missing;
-		for(int entryIndex = 0; entryIndex < trajTreeNumEntries; ++entryIndex)
+		for(const auto& eventTrackPair: trackTrajMeasMap)
 		{
-			trajTree -> GetEntry(entryIndex);
-			// printTrajFieldInfo(trajField);
-			// std::cout << "quality_1:      "  << (&trajField) -> trk.quality << "." << std::endl;
-			// std::cout << "Ptr trajField: " << &trajField << std::endl;
-			PhaseITrackingEfficiencyFilters efficiencyFilters(&eventField, &trajField, &(trajField.trk));
-			// std::cin.get();
-			// Checking the layer number
-			if(layer == NOVAL_I) continue;
-			if(layer < 1 || 5 < layer) { std::cout << error_prompt << "Bad layer number: " << layer << "." << std::endl; continue; }
-			if(efficiencyFilters.performAllEfficiencyCuts() == false) continue;
-			// Efficiency denominators
-			totalHitsVsLadderVsModule[layer - 1] -> Fill(ladder, module);
-			totalHitsVsLadder        [layer - 1] -> Fill(ladder);
-			totalHitsVsModule        [layer - 1] -> Fill(module);
-			totalHitsVsAlpha         [layer - 1] -> Fill(alpha);
-			totalHitsVsBeta          [layer - 1] -> Fill(beta);
-			// Efficiency numerators
-			if(missing && !trajField.hit_near) continue;
-			hitEfficiencyVsLadderVsModule[layer - 1] -> Fill(ladder, module);
-			hitEfficiencyVsLadder        [layer - 1] -> Fill(ladder);
-			hitEfficiencyVsModule        [layer - 1] -> Fill(module);
-			hitEfficiencyVsAlpha         [layer - 1] -> Fill(alpha);
-			hitEfficiencyVsBeta          [layer - 1] -> Fill(beta);
+			const auto& eventTracks = eventTrackPair.second;
+			for(const auto& trackTrajMeasPair: eventTracks)
+			{
+				const auto& currentTrackTrajMeasurements = trackTrajMeasPair.second;
+				// std::cout << currentTrackTrajMeasurements.size() << std::endl;
+				trajMeasNumberDist -> Fill(currentTrackTrajMeasurements.size());
+				std::map<int, std::vector<TrajMeasurement const*>> hitsOnLayers;
+				for(int i: range(1, 5)) hitsOnLayers.emplace(std::pair<int, std::vector<TrajMeasurement const*>>(i, {}));
+				for(const auto& trajMeas: currentTrackTrajMeasurements)
+				{
+					const int& layer = trajMeas.mod_on.layer;
+					if(trajMeas.mod_on.det == 0)
+					{
+						trajMeasOnBarrelGlXGlY -> Fill(trajMeas.glx, trajMeas.gly);
+						if(layer == NOVAL_I) continue;
+						hitsOnLayers.at(layer).push_back(&trajMeas);
+					}
+				}
+				for(auto layerNum: range(1, 5))
+				{
+					const auto& hitsOnCurrentLayer    = hitsOnLayers.at(layerNum);
+					const int&  numHitsOnCurrentLayer = hitsOnCurrentLayer.size();
+					trajMeasNumberDistOnLayers[layerNum - 1] -> Fill(numHitsOnCurrentLayer);
+					if(1 < numHitsOnCurrentLayer)
+					{
+						for(const auto hitPtr: hitsOnCurrentLayer)
+						{
+							trajMeasOnBarrelWithMultiplicityGlXGlY -> Fill(hitPtr -> glx, hitPtr -> gly);
+							lxForTrajMeasWithMultiplicity[layerNum - 1] -> Fill(hitPtr -> lx);
+							lyForTrajMeasWithMultiplicity[layerNum - 1] -> Fill(hitPtr -> ly);
+							lyVsLxForTrajMeasWithMultiplicity[layerNum - 1] -> Fill(hitPtr -> lx, hitPtr -> ly);
+						}
+						
+					}
+				}
+			}
 		}
-		timer.printSeconds("Loop done. Took about: ", " second(s).");
 	}
+	timer.printSeconds("Loop done. Took about: ", " second(s).");
 	// CanvasExtras::setMulticolorColzPalette();
 	gStyle -> SetPalette(1);
 	gStyle -> SetNumberContours(999);
@@ -217,6 +222,7 @@ int main(int argc, char** argv) try
 		canvases.emplace_back(std::make_shared<TCanvas>(("canvas_" + std::to_string(i)).c_str(), histogram.GetTitle(), 50 + i * 403, 50, 400, 300));
 		canvases.back() -> cd();
 		CanvasExtras::redesignCanvas(canvases.back().get(), &histogram);
+		gStyle->SetOptStat(1);
 		histogram.SetTitleSize(22);
 		std::string histoTitle(histogram.GetTitle());
 		std::string newTitle(histogram.GetTitle());
@@ -240,10 +246,20 @@ int main(int argc, char** argv) try
 			canvas -> SaveAs(("results/" + epsFilename).c_str());
 		}
 	}
+	TCanvas glXGlYCanvas("canvas_glyglx", "trajMeas gly:glx | det == 0 && 1 < trajMeas multiplicity;glx;gly", 200, 450, 400, 400);
+	glXGlYCanvas.cd();
+	CanvasExtras::redesignCanvas(&glXGlYCanvas, static_cast<TH1*>((trajMeasOnBarrelWithMultiplicityGlXGlY.get())));
+	trajMeasOnBarrelGlXGlY -> SetMarkerColor(kGray + 1);
+	trajMeasOnBarrelWithMultiplicityGlXGlY -> SetMarkerColor(kRed);
+	// trajMeasOnBarrelWithMultiplicityGlXGlY -> SetMarkerStyle(20);
+	// trajMeasOnBarrelWithMultiplicityGlXGlY -> SetMarkerSize(0.15);
+	trajMeasOnBarrelGlXGlY -> Draw();
+	trajMeasOnBarrelWithMultiplicityGlXGlY -> Draw("SAME");
+	glXGlYCanvas.SaveAs("results/trajMeas_gly:glx_|_det_==_0_&&_1_<_trajMeas_multiplicity.eps");
 	inputFile -> Close();
 	std::cout << process_prompt << inputFileName << " has been processed succesfully." << std::endl;
 	std::cout << process_prompt << argv[0] << " terminated succesfully." << std::endl;
-	theApp -> Run();
+	// theApp -> Run();
 	return 0;
 }
 catch(const std::exception& e)

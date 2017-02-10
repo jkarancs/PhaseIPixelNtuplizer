@@ -416,7 +416,7 @@ class TrackData
 		int   validfpix[3]; // valid recHits in Diks1,2,3
 		int   validbpix[4]; // valid recHits in Layer 1,2,3,4
 
-		const std::string list = "pt/F:eta:phi:theta:p:d0:dz:fromVtxNtrk:strip/I:quality:i:pix:pixhit[2]:validpixhit[2]:fpix[3]:bpix[4]:validfpix[3]:validbpix[4]";
+		const std::string list = "pt/F:eta:phi:theta:p:d0:dz:fromVtxNtrk/I:strip:quality:i:pix:pixhit[2]:validpixhit[2]:fpix[3]:bpix[4]:validfpix[3]:validbpix[4]";
 
 		TrackData() { init(); }
 		TrackData(const TrackData& other)
