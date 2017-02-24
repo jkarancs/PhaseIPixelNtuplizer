@@ -1,6 +1,15 @@
 #ifndef PHASEIPIXELNTUPLIZER_H
 #define PHASEIPIXELNTUPLIZER_H
 
+#define ADD_CHECK_PLOTS_TO_NTUPLE
+
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+#pragma message("ADD_CHECK_PLOTS_TO_NTUPLE defined. Ignore this message if this is the intended behaviour (or if you don't know what this means).")
+#include "../interface/common_functions.h"
+#else
+#pragma message("ADD_CHECK_PLOTS_TO_NTUPLE is NOT defined. No cluster occupancy plots will be generated in the ntuple file.")
+#endif
+
 // CMSSW code
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -48,7 +57,7 @@
 #include <TFile.h>
 #include <TTree.h>
 // #include <TH1D.h>
-// #include <TH2D.h>
+#include <TH2D.h>
 #include <TRandom3.h>
 
 // C++
@@ -112,6 +121,14 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		const PixelClusterParameterEstimator* pixelClusterParameterEstimator_;
 		const TrackerTopology*                trackerTopology_;
 		const TrackerGeometry*                trackerGeometry_;
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+		// Check plots
+		TH2D* onTrkCluOccupancy_fwd;
+		TH2D* onTrkCluOccupancy_l1;
+		TH2D* onTrkCluOccupancy_l2;
+		TH2D* onTrkCluOccupancy_l3;
+		TH2D* onTrkCluOccupancy_l4;
+#endif
 		// Private methods
 		void                                getEvtInfo(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
 		void                                getClustInfo(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const std::map<uint32_t, int>& federrors);

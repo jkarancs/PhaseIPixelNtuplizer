@@ -2,6 +2,14 @@
 
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
   ntupleOutputFilename_(iConfig.getUntrackedParameter<std::string>("outputFileName", "Ntuple.root"))
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+	,
+	onTrkCluOccupancy_fwd(new TH2D("cluOccupancy_fwd", "Cluster Occupancy forward", 112, -3.5, 3.5, 140, -17.5, 17.5)),
+	onTrkCluOccupancy_l1 (new TH2D("cluOccupancy_l1",  "Cluster Occupancy layer 1", 72,  -4.5, 4.5, 26,  -6.5,  6.5)),
+	onTrkCluOccupancy_l2 (new TH2D("cluOccupancy_l2",  "Cluster Occupancy layer 2", 72,  -4.5, 4.5, 58,  -14.5, 14.5)),
+	onTrkCluOccupancy_l3 (new TH2D("cluOccupancy_l3",  "Cluster Occupancy layer 3", 72,  -4.5, 4.5, 90,  -22.5, 22.5)),
+	onTrkCluOccupancy_l4 (new TH2D("cluOccupancy_l4",  "Cluster Occupancy layer 4", 72,  -4.5, 4.5, 130, -32.5, 32.5))
+#endif
 {
 	iConfig_                = iConfig;
 	clusterSaveDownscaling_ = 1;
@@ -75,6 +83,26 @@ void PhaseIPixelNtuplizer::beginJob()
 void PhaseIPixelNtuplizer::endJob() 
 {
 	LogDebug("file_operations") << "Writing plots to file: \"" << ntupleOutputFilename_ << "\"." << std::endl;
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+	constexpr int PHASE_SCENARIO = 1;
+	gStyle -> SetPalette(1);
+	const std::array<TH2D*, 5> histogramsToSave = 
+	{{
+		onTrkCluOccupancy_fwd,
+		onTrkCluOccupancy_l1,
+		onTrkCluOccupancy_l2,
+		onTrkCluOccupancy_l3,
+		onTrkCluOccupancy_l4
+	}};
+	for(auto histoIt = histogramsToSave.begin(); histoIt != histogramsToSave.end(); ++histoIt)
+	{
+		TCanvas* canvas = custom_can_((*histoIt), std::string((*histoIt) -> GetTitle()) + "_canvas", 0, 0, 800, 800, 80, 140); 
+		(*histoIt) -> Draw("COLZ");
+		canvas -> cd();
+		dress_occup_plot((*histoIt), std::distance(histogramsToSave.begin(), histoIt), PHASE_SCENARIO);
+		canvas -> Write();
+	}
+#endif
 	ntupleOutputFile_ -> Write();
 	ntupleOutputFile_ -> Close();
 }
@@ -174,9 +202,9 @@ void PhaseIPixelNtuplizer::getEvtInfo(const edm::Event& iEvent, const edm::Handl
 		if(!currentVertex.isValid()) continue;
 		// Check if it is the best vertex (largest trk number, preferably in the middle
 		if(
-		    (currentVertex.tracksSize() > static_cast<size_t>(evt_.vtxntrk)) ||
-		    (currentVertex.tracksSize() == static_cast<size_t>(evt_.vtxntrk) &&
-		     std::abs(currentVertex.z()) < std::abs(evt_.vtxZ)))
+			(currentVertex.tracksSize() > static_cast<size_t>(evt_.vtxntrk)) ||
+			(currentVertex.tracksSize() == static_cast<size_t>(evt_.vtxntrk) &&
+			 std::abs(currentVertex.z()) < std::abs(evt_.vtxZ)))
 		{
 			evt_.vtxntrk = currentVertex.tracksSize();
 			evt_.vtxD0   = currentVertex.position().rho();
@@ -189,9 +217,9 @@ void PhaseIPixelNtuplizer::getEvtInfo(const edm::Event& iEvent, const edm::Handl
 		}
 		// Counting the good vertices
 		if(
-		    std::abs(currentVertex.z()) < 24.0 &&
-		    std::abs(currentVertex.position().rho()) < 2.0 &&
-		    currentVertex.ndof() >= 4)
+			std::abs(currentVertex.z()) < 24.0 &&
+			std::abs(currentVertex.position().rho()) < 2.0 &&
+			currentVertex.ndof() >= 4)
 		{
 			evt_.nvtx++;
 		}
@@ -295,6 +323,24 @@ void PhaseIPixelNtuplizer::getClustInfo(const edm::Handle<edmNew::DetSetVector<S
 			getModuleData(clu_.mod_on, 1, detId, federrors);
 			getRocData   (clu_.mod,    0, detId, &currentCluster);
 			getRocData   (clu_.mod_on, 1, detId, &currentCluster);
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+			if(clu_.mod_on.det == 0) switch(clu_.mod_on.layer)
+			{
+				case 1:
+					onTrkCluOccupancy_l1 -> Fill(clu_.mod_on.module_coord, clu_.mod_on.ladder_coord);
+					break;
+				case 2:
+					onTrkCluOccupancy_l2 -> Fill(clu_.mod_on.module_coord, clu_.mod_on.ladder_coord);
+					break;
+				case 3:
+					onTrkCluOccupancy_l3 -> Fill(clu_.mod_on.module_coord, clu_.mod_on.ladder_coord);
+					break;
+				case 4:
+					onTrkCluOccupancy_l4 -> Fill(clu_.mod_on.module_coord, clu_.mod_on.ladder_coord);
+					break;
+			}
+			if(clu_.mod_on.det == 1) onTrkCluOccupancy_fwd -> Fill(clu_.mod_on.disk_ring_coord, clu_.mod_on.blade_panel_coord);
+#endif
 			// Position and size
 			clu_.x     = currentCluster.x();
 			clu_.y     = currentCluster.y();
@@ -578,9 +624,9 @@ void PhaseIPixelNtuplizer::handleDefaultError(const std::string& exception_type,
 void PhaseIPixelNtuplizer::printEvtInfo(const std::string& streamType)
 {
 	edm::LogError(streamType.c_str())
-	    << "\03334[m"
-	    << "Run: " << evt_.run << " Ls: " << evt_.ls << " Evt:" << evt_.evt
-	    << "\03339[m" << std::endl;
+		<< "\03334[m"
+		<< "Run: " << evt_.run << " Ls: " << evt_.ls << " Evt:" << evt_.evt
+		<< "\03339[m" << std::endl;
 }
 
 void PhaseIPixelNtuplizer::getModuleData(ModuleData &mod, bool online, const DetId &detId, const std::map<uint32_t, int> &federrors)
@@ -626,7 +672,7 @@ void PhaseIPixelNtuplizer::getModuleData(ModuleData &mod, bool online, const Det
 	mod.fedid = coord_.fedid(detId);
 	// FED error
 	std::map<uint32_t, int>::const_iterator federrors_it =
-	    federrors.find(detId.rawId());
+		federrors.find(detId.rawId());
 	mod.federr = (federrors_it != federrors.end()) ? federrors_it->second : 0;
 }
 void PhaseIPixelNtuplizer::getRocData(ModuleData &mod, bool online, const DetId &detId, const PixelDigi *digi)
