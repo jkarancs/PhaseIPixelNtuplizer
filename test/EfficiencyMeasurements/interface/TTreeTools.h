@@ -4,6 +4,7 @@
 #include "../interface/CommonActors.h"
 
 #include <TROOT.h>
+#include <TChain.h>
 #include <TFile.h>
 #include <TTree.h>
 
@@ -13,8 +14,11 @@ class TTreeTools
 {
 	public:
 		static int treeCheck(TTree* tree, std::string errorMessage, bool stopExecution = false);
+		static int treeCheck(TChain* tree, std::string errorMessage, bool stopExecution = false);
 		static void branchCheck(TTree* tree, const std::string& branchName);
+		static void branchCheck(TChain* tree, const std::string& branchName);
 		static TBranch* checkGetBranch(TTree* tree, const std::string& branchName);
+		static TBranch* checkGetBranch(TChain* tree, const std::string& branchName);
 };
 
 #endif

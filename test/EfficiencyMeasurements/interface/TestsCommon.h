@@ -1,6 +1,10 @@
 #ifndef TESTS_COMMON_H
 #define TESTS_COMMON_H
 
+#include <TH2D.h>
+
+#include <memory>
+
 void printUsage(int& argc, char** argv, bool killProcess, int argsType = 2)
 {
 	switch(argsType)
@@ -110,5 +114,36 @@ void printTrajFieldInfo(const TrajMeasurement& trajField)
 	std::cout << "charge:       " << trajField.clu.charge        << "." << std::endl;
 	std::cout << "--- End traj field info ---" << std::endl;
 }
+
+void downscale1DHistogram(TH1D* toDownscale, const TH1D* downscaleFactors)
+{
+	const auto& nBins = toDownscale -> GetNbinsX();
+	if(nBins != downscaleFactors -> GetNbinsX()) throw std::runtime_error("Error downscaling histograms: bin numbers do not match.");
+	for(int binNum = 0; binNum < nBins; ++binNum)
+	{
+		const auto& binDownscaleFactor = downscaleFactors -> GetBinContent(binNum);
+		const auto& originalBinContent = toDownscale      -> GetBinContent(binNum);
+		if(binDownscaleFactor == 0) continue;
+		// std::cout << "Efficiency bin content before scaling: " << originalBinContent << std::endl;
+		toDownscale -> SetBinContent(binNum, originalBinContent / binDownscaleFactor);
+		// std::cout << "Efficiency bin content after scaling : " << toDownscale -> GetBinContent(binNum) << std::endl;
+	}
+};
+void downscale2DHistogram(TH2D* toDownscale, const TH2D* downscaleFactors)
+{
+	const auto& nBinsX = toDownscale -> GetNbinsX();
+	const auto& nBinsY = toDownscale -> GetNbinsY();
+	if(nBinsX != downscaleFactors -> GetNbinsX() || nBinsY != downscaleFactors -> GetNbinsX()) throw std::runtime_error("Error downscaling histograms: bin numbers do not match.");
+	for(int binXNum = 0; binXNum < nBinsX; ++binXNum)
+	{
+		for(int binYNum = 0; binYNum < nBinsY; ++binYNum)
+		{
+			const auto& binDownscaleFactor = downscaleFactors -> GetBinContent(binXNum, binYNum);
+			const auto& originalBinContent = toDownscale      -> GetBinContent(binXNum, binYNum);
+			if(binDownscaleFactor == 0) continue;
+			toDownscale -> SetBinContent(binXNum, binYNum, originalBinContent / binDownscaleFactor);
+		}
+	}
+};
 
 #endif // TESTS_COMMON_H

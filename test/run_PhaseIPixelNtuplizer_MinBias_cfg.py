@@ -35,9 +35,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
 # Input source
 process.source = cms.Source("EmptySource")
 
-process.options = cms.untracked.PSet(
-    allowUnscheduled = cms.untracked.bool(True)
-)
+process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True))
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
@@ -116,7 +114,17 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
 
 # Schedule definition
-process.schedule = cms.Schedule(process.generation_step,process.genfiltersummary_step,process.simulation_step,process.digitisation_step,process.L1simulation_step,process.digi2raw_step,process.raw2digi_step,process.reconstruction_step,process.endjob_step,process.RECOSIMoutput_step)
+process.schedule = cms.Schedule(
+	process.generation_step,
+	process.genfiltersummary_step,
+	process.simulation_step,
+	process.digitisation_step,
+	process.L1simulation_step,
+	process.digi2raw_step,
+	process.raw2digi_step,
+	process.reconstruction_step,
+	process.endjob_step,
+	process.RECOSIMoutput_step)
 # filter all path with the production filter sequence
 for path in process.paths:
 	getattr(process,path)._seq = process.ProductionFilterSequence * getattr(process,path)._seq 

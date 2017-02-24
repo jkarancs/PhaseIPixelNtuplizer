@@ -1,7 +1,8 @@
 include Makefile.arch
 SrcSuf = cc
 
-CXX += -std=c++14 -fdiagnostics-color=always -Wall
+CXX  += -std=c++14 -fdiagnostics-color=always -Wall
+LIBS += -lboost_system -lboost_filesystem
 
 # Utility
 

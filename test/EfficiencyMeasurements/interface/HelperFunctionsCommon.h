@@ -1,6 +1,7 @@
 #ifndef HELPER_FUNCTIONS_COMMON_H
 #define HELPER_FUNCTIONS_COMMON_H
 
+#include <fstream>
 #include <vector>
 #include <stdexcept>
 #include <exception>
@@ -119,6 +120,14 @@ std::pair<R, R> deref_minmax_element(Iter first, Iter last)
 {
     auto iters = std::minmax_element(first, last);
     return std::pair<R, R>{*iters.first, *iters.second};
+}
+
+std::string fileToString(const std::string& filename) 
+{
+	std::ifstream file(filename);
+	std::string result = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+	file.close(); 
+	return result;
 }
 
 #endif

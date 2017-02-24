@@ -118,6 +118,10 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	edm::ESHandle<TrackerGeometry> trackerGeometryHandle;
 	iSetup.get<TrackerDigiGeometryRecord>().get(trackerGeometryHandle);
 	trackerGeometry_ = trackerGeometryHandle.product();
+	// Pixel Parameter estimator
+	edm::ESHandle<PixelClusterParameterEstimator> pixelClusterParameterEstimatorHandle;
+	iSetup.get<TkPixelCPERecord>().get("PixelCPEGeneric", pixelClusterParameterEstimatorHandle);
+	pixelClusterParameterEstimator_ = pixelClusterParameterEstimatorHandle.product();
 	coord_.init(iSetup);
 	getEvtInfo(iEvent, vertexCollectionHandle, triggerResultsHandle, clusterCollectionHandle, trajTrackCollectionHandle);
 	getClustInfo(clusterCollectionHandle, federrors);
@@ -339,7 +343,7 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackInfo(const edm
 			std::fill(newTrackData.validbpix,   newTrackData.validbpix   + 4, 0);
 			newTrackData.strip          = 0;
 			// FIXME: use best vertex selection instead of closest vertex selection
-			reco::VertexCollection::const_iterator closestVtx = NtuplizerHelpers::findClosestVertexToTrack(track, vertexCollectionHandle);
+			reco::VertexCollection::const_iterator closestVtx = NtuplizerHelpers::findClosestVertexToTrack(track, vertexCollectionHandle, 10);
 			// Basic track quantities
 			newTrackData.i           = trackIndex++;
 			newTrackData.quality     = track -> qualityMask();
@@ -348,6 +352,7 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackInfo(const edm
 			newTrackData.eta         = track -> eta();
 			newTrackData.theta       = track -> theta();
 			newTrackData.phi         = track -> phi();
+			// newTrackData.d0          = track -> d0(closestVtx -> position());
 			newTrackData.d0          = track -> dxy(closestVtx -> position()) * -1.0;
 			newTrackData.dz          = track -> dz(closestVtx -> position());
 			// newTrackData.fromVtxNtrk = NtuplizerHelpers::getTrackParentVtxNumTracks(vertexCollectionHandle, track);
@@ -464,6 +469,7 @@ void PhaseIPixelNtuplizer::getTrajTrackInfo(const edm::Handle<reco::VertexCollec
 			getRocData   (traj_.mod,    0, static_cast<const SiPixelRecHit*>(recHit->hit()));
 			getRocData   (traj_.mod_on, 1, static_cast<const SiPixelRecHit*>(recHit->hit()));
 			// Position measurements
+			const GeomDetUnit* geomDetUnit = recHit -> detUnit();
 			static TrajectoryStateCombiner trajStateComb; // operator () should be const, so this is fine as a static variable
 			TrajectoryStateOnSurface trajStateOnSurface = trajStateComb(measurement.forwardPredictedState(), measurement.backwardPredictedState());
 			GlobalPoint globalPosition     = trajStateOnSurface.globalPosition();
@@ -492,6 +498,8 @@ void PhaseIPixelNtuplizer::getTrajTrackInfo(const edm::Handle<reco::VertexCollec
 				SiPixelRecHit::ClusterRef const& clust = hit -> cluster();
 				if(clust.isNonnull())
 				{
+					LocalPoint clustLocalCoordinates;
+					std::tie(clustLocalCoordinates, std::ignore, std::ignore) = pixelClusterParameterEstimator_ -> getParameters(*clust, *geomDetUnit);
 					traj_.clu.charge = clust -> charge() / 1000.0f;
 					traj_.clu.size   = clust -> size();
 					traj_.clu.edge   = hit -> isOnEdge() ? 1 : 0;
@@ -508,8 +516,8 @@ void PhaseIPixelNtuplizer::getTrajTrackInfo(const edm::Handle<reco::VertexCollec
 						traj_.clu.pix[i][1] = ((clust -> pixels())[i]).y;
 					}
 					traj_.norm_charge = traj_.clu.charge * sqrt(1.0f / (1.0f / pow(tan(traj_.alpha), 2) + 1.0f / pow(tan(traj_.beta), 2) + 1.0f));
-					traj_.dx_cl       = std::abs(clust -> x() - traj_.lx);
-					traj_.dy_cl       = std::abs(clust -> y() - traj_.ly);
+					traj_.dx_cl       = std::abs(clustLocalCoordinates.x() - traj_.lx);
+					traj_.dy_cl       = std::abs(clustLocalCoordinates.y() - traj_.ly);
 					traj_.d_cl        = sqrt(traj_.dx_cl * traj_.dx_cl + traj_.dy_cl * traj_.dy_cl);
 				}
 			}
@@ -766,23 +774,29 @@ namespace NtuplizerHelpers
 		}
 		return 0;
 	}
-	reco::VertexCollection::const_iterator findClosestVertexToTrack(const reco::TrackRef& track, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle)
+	reco::VertexCollection::const_iterator findClosestVertexToTrack(const reco::TrackRef& track, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const unsigned int& minTracks)
 	{
-		reco::VertexCollection::const_iterator closestVtx = vertexCollectionHandle -> end();
-		// FIXME: This is awkward, change the minDistance to the distance of the first valid vertex
-		double minDistance = 9999;
-		for(reco::VertexCollection::const_iterator it = vertexCollectionHandle -> begin() ; it != vertexCollectionHandle -> end() ; ++it)
+		auto isVertexGood        = [&] (const auto& vertex) { return vertex.isValid() && minTracks <= vertex.tracksSize(); };
+		auto trackVertexDistance = [&] (const reco::VertexCollection::const_iterator& vertexIt)
+		{
+			double trkVtxD0 = track -> dxy(vertexIt -> position()) * -1.0;
+			double trkVtxDz = track -> dz (vertexIt -> position());
+			return sqrt(trkVtxD0 * trkVtxD0 + trkVtxDz * trkVtxDz);
+		};
+		reco::VertexCollection::const_iterator closestVtx = 
+			std::find_if(vertexCollectionHandle -> begin(), vertexCollectionHandle -> end(), [&] (const auto& vertex) { return isVertexGood(vertex); });
+		if(closestVtx == vertexCollectionHandle -> end()) return closestVtx;
+		double minDistance = trackVertexDistance(closestVtx);
+		for(reco::VertexCollection::const_iterator it = closestVtx; it != vertexCollectionHandle -> end(); ++it)
 		{
 			// Filter out invalid vertices
-			if(!it -> isValid()) continue;
-			double trkVtxD0 = track -> dxy(it -> position()) * -1.0;
-			double trkVtxDz = track -> dz (it -> position());
+			if(!isVertexGood(*it)) continue;
 			// Comparing squareroots should be quick enough, if required, change this to a comparison of squares
-			double trkVtxDB = sqrt(trkVtxD0 * trkVtxD0 + trkVtxDz * trkVtxDz);
+			double trkVtxDB = trackVertexDistance(it);
 			if(trkVtxDB < minDistance)
 			{
-				minDistance = trkVtxDB;
-				closestVtx=it;
+				minDistance = std::move(trkVtxDB);
+				closestVtx  = it;
 			}
 		}
 		return closestVtx;

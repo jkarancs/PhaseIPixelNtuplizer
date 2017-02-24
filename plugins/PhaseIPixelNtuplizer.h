@@ -32,6 +32,8 @@
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
 #include "TrackingTools/TransientTrackingRecHit/interface/TransientTrackingRecHit.h"
+#include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
+#include "RecoLocalTracker/Records/interface/TkPixelCPERecord.h"
 
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
@@ -107,8 +109,9 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken_;
 		// Tools
 		SiPixelCoordinates coord_;
-		const TrackerTopology* trackerTopology_;
-		const TrackerGeometry* trackerGeometry_;
+		const PixelClusterParameterEstimator* pixelClusterParameterEstimator_;
+		const TrackerTopology*                trackerTopology_;
+		const TrackerGeometry*                trackerGeometry_;
 		// Private methods
 		void                                getEvtInfo(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
 		void                                getClustInfo(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const std::map<uint32_t, int>& federrors);
@@ -128,7 +131,7 @@ namespace NtuplizerHelpers
 	std::map<uint32_t, int> getFedErrors(const edm::Event& iEvent, const edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>>& rawDataErrorToken);
 	bool detidIsOnPixel(const DetId& detid);
 	int trajectoryHasPixelHit(const edm::Ref<std::vector<Trajectory>>& trajectory);
-	reco::VertexCollection::const_iterator findClosestVertexToTrack(const reco::TrackRef& track, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle);
+	reco::VertexCollection::const_iterator findClosestVertexToTrack(const reco::TrackRef& track, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const unsigned int& minTracks = 0);
 	std::pair<float, float> getLocalXY(const TrajectoryMeasurement& measurement);
 	float trajMeasurementDistanceSquared(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs);
 	void trajMeasurementDistanceSquared(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs, float& distanceSquared, float& dxSquared, float& dySquared);

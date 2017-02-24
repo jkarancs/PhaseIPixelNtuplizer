@@ -18,6 +18,7 @@
 #include "../interface/HelperFunctionsCommon.h"
 #include "../interface/CanvasExtras.h"
 #include "../interface/TimerColored.h"
+#include "../interface/common_functions_jkarancs.h"
 
 // #include "../../../interface/CanvasExtras.h"
 
@@ -25,6 +26,7 @@
 #include <TROOT.h>
 #include <TApplication.h>
 #include <TStyle.h>
+#include <TChain.h>
 #include <TFile.h>
 #include <TTree.h>
 #include <TCanvas.h>
@@ -34,6 +36,7 @@
 // #include <TRandom3.h>
 
 // C++ libraries
+#include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -41,6 +44,9 @@
 #include <exception>
 #include <functional>
 #include <algorithm>
+
+#include "../interface/json.hpp"
+using JSON = nlohmann::json;
 
 constexpr float HALF_PI = 0.5 * 3.141592653589793238462;
 
@@ -53,173 +59,99 @@ constexpr float                TRACK_PT_CUT_N_MINUS_1_VAL         = 1.0f;
 constexpr int                  TRACK_NSTRIP_CUT_N_MINUS_1_VAL     = 10;
 constexpr std::array<float, 4> TRACK_D0_CUT_BARREL_N_MINUS_1_VAL  = {0.01f, 0.02f, 0.02f, 0.02f};
 constexpr float                TRACK_D0_CUT_FORWARD_N_MINUS_1_VAL = 0.05f;
-constexpr float                TRACK_DZ_CUT_BARREL_N_MINUS_1_VAL  = 0.0f;
+constexpr float                TRACK_DZ_CUT_BARREL_N_MINUS_1_VAL  = 0.01f;
 constexpr float                TRACK_DZ_CUT_FORWARD_N_MINUS_1_VAL = 0.5f;
-constexpr float                MEAS_HITSEP_CUT_N_MINUS_1_VAL     = 0.5f;
-constexpr float                HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL = 0.05f;
+constexpr float                MEAS_HITSEP_CUT_N_MINUS_1_VAL      = 0.5f;
+constexpr float                HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL   = 0.05f;
+constexpr auto                 PLOTS_SAVE_DIRECTORY               = "./results";
 
-const bool                                 TRAJ_LOOP_REQUESTED    = true;
+constexpr std::array<int, 4>   LAYER_NUM_LADDERS{ 6, 14, 22, 32 };
 
 // const std::pair<float, float>  LAYER_MODULE_LABEL_POS      = std::make_pair(0.79f, 0.88f);
+constexpr auto                     CONFIG_FILE_PATH            = "./config_main.json"; 
+
+const bool TRAJ_LOOP_REQUESTED    = true;
+
+void                                        testSaveFolders();
+void                                        readInFilesAndAddToChain(const JSON& config, const std::string& configKey, const std::string& innerKey, TChain* chain);
+std::map<std::string, std::shared_ptr<TH1>> processHistogramDefinitions(const JSON& config, const std::string& configKey, const std::string& innerKey);
 
 int main(int argc, char** argv) try
 {
-	int savePlots = 0;
-	std::string inputFileName;
-	processArgs(argc, argv, inputFileName, savePlots);
 	std::cout << process_prompt << argv[0] << " started..." << std::endl;
+	testSaveFolders();
+	std::cout << process_prompt << "Loading config file... ";
+	JSON config = JSON::parse(fileToString(CONFIG_FILE_PATH));
+	std::cout << "Done." << std::endl;
 	TimerColored timer(timer_prompt);
 	TApplication* theApp = new TApplication("App", &argc, argv);
-	TFile* inputFile = new TFile(inputFileName.c_str());
-	TTree* trajTree  = (TTree*)(inputFile -> Get("trajTree" ));
-	TTreeTools::treeCheck(trajTree, "Tree missing: trajTree.", true);
+	gROOT->SetBatch(kFALSE);
+	TChain* trajTreeChain = new TChain("trajTree", "List of the trajectory measurements.");
+	readInFilesAndAddToChain(config, "input_files_list", "input_files", trajTreeChain);
 	TrajMeasurement trajField;
 	EventData       eventField;
 	// Trajectory measurement tree
-	TTreeTools::checkGetBranch(trajTree, "event")   -> SetAddress(&eventField);
-	TTreeTools::checkGetBranch(trajTree, "mod")     -> SetAddress(&(trajField.mod));
-	TTreeTools::checkGetBranch(trajTree, "mod_on")  -> SetAddress(&(trajField.mod_on));
-	TTreeTools::checkGetBranch(trajTree, "clust")   -> SetAddress(&(trajField.clu));
-	TTreeTools::checkGetBranch(trajTree, "track")   -> SetAddress(&(trajField.trk));
-	TTreeTools::checkGetBranch(trajTree, "traj")    -> SetAddress(&trajField);
-	Int_t trajTreeNumEntries  = trajTree  -> GetEntries();
+	trajTreeChain -> SetBranchAddress("event",  &eventField);
+	trajTreeChain -> SetBranchAddress("mod",    &(trajField.mod));
+	trajTreeChain -> SetBranchAddress("mod_on", &(trajField.mod_on));
+	trajTreeChain -> SetBranchAddress("clust",  &(trajField.clu));
+	trajTreeChain -> SetBranchAddress("track",  &(trajField.trk));
+	trajTreeChain -> SetBranchAddress("traj",   &trajField);
+	// trajTreeChain -> Draw("d_cl >> hsqrt(1000, 0.0, 500.0)");
+	// std::cout << "Running the app." << std::endl;
+	// theApp -> Run();
+	Long64_t trajTreeNumEntries  = trajTreeChain  -> GetEntries();
 	// Check if data is present
 	std::cout << debug_prompt << "Total entries in the trajTree tree: " << trajTreeNumEntries << std::endl;
 	if(trajTreeNumEntries == 0 ) throw std::runtime_error("No entries found in tree: trajTree.");
 	// Histogram definitions
-	std::vector<std::shared_ptr<TH1>> histograms;
-	// N-1 cut tuning
-	using Efficiency1DHistoPair = std::pair<std::shared_ptr<TH1D>, std::shared_ptr<TH1D>>;
-	using Efficiency2DHistoPair = std::pair<std::shared_ptr<TH2D>, std::shared_ptr<TH2D>>;
-	Efficiency1DHistoPair nMinus1Pt =  
-	{
-		std::make_shared<TH1D>("nMinus1PtNumhits",       "pt [with other effcuts]",                   100, 0.0, 10.0),
-		std::make_shared<TH1D>("nMinus1PtEfficiency",    "eff. vs pt [with other effcuts]",           100, 0.0, 10.0)
-	};
-	Efficiency1DHistoPair nMinus1Striphits = 
-	{
-		std::make_shared<TH1D>("nMinus1stripNumhits",    "striphits [with other effcuts]",            100, 0.0, 10.0),
-		std::make_shared<TH1D>("nMinus1stripEfficiency", "eff. vs n. striphits [with other effcuts]", 100, 0.0, 10.0)
-	};
-	std::array<Efficiency1DHistoPair, 2> nMinus1D0 = 
-	{{
-		{
-			std::make_shared<TH1D>("nMinus1D0BarrelNumhits",    "d0 of barrel hits [with other effcuts]",  200, 0.0, 3.0),
-			std::make_shared<TH1D>("nMinus1D0BarrelEfficiency",  "eff. vs d0 of barrel hits [with other effcuts]" , 200, 0.0, 3.0)
-		},
-		{
-			std::make_shared<TH1D>("nMinus1D0ForwardNumhits",    "d0 of forward hits [with other effcuts]", 200, 0.0, 3.0),
-			std::make_shared<TH1D>("nMinus1D0ForwardEfficiency", "eff. vs d0 of forward hits [with other effcuts]", 200, 0.0, 3.0)
-		}
-	}};
-	std::array<Efficiency1DHistoPair, 2> nMinus1DZ = 
-	{{
-		{
-			std::make_shared<TH1D>("nMinus1DZBarrelNumhits",     "dz of barrel hits [with other effcuts]",  200, 0.0, 1.0),
-			std::make_shared<TH1D>("nMinus1DZBarrelEfficiency",  "eff. vs dz of barrel hits [with other effcuts]",  200, 0.0, 1.0)
-		},
-		{
-			std::make_shared<TH1D>("nMinus1DZForwardNumhits",    "dz of forward hits [with other effcuts]", 200, 0.0, 50.0),
-			std::make_shared<TH1D>("nMinus1DZForwardEfficiency", "eff. vs dz of forward hits [with other effcuts]", 200, 0.0, 50.0)
-		}
-	}};
-	Efficiency1DHistoPair nMinus1LX =
-	{
-		std::make_shared<TH1D>("nMinus1LXNumhits",         "lx [with other effcuts]",                                              100, 0.0, 10.0),
-		std::make_shared<TH1D>("nMinus1LXEfficiency",      "eff. vs lx [with other effcuts]",                                      100, 0.0, 10.0)
-	};
-	Efficiency1DHistoPair nMinus1LY =
-	{
-		std::make_shared<TH1D>("nMinus1LyNumhits",         "ly [with other effcuts]",                                              100, 0.0, 10.0),
-		std::make_shared<TH1D>("nMinus1LyEfficiency",      "eff. vs ly [with other effcuts]",                                      100, 0.0, 10.0)
-	};
-	std::array<Efficiency2DHistoPair, 8> nMinus1LocalPosDist = 
-	{{
-		{
-			std::make_shared<TH2D>("nMinus1LocalPosNumhitsLay1",         "Num. of hits vs hit position lay1 [with other effcuts]",     200, -1.0, 1.0, 200, -4.0, 4.0),
-			std::make_shared<TH2D>("nMinus1LocalPosEfficiencyLay1",      "Eff. vs hit position lay1 [with other effcuts]",             200, -1.0, 1.0, 200, -4.0, 4.0) },
-		{
-			std::make_shared<TH2D>("nMinus1LocalPosNumhitsLay2",         "Num. of hits vs hit position lay2 [with other effcuts]",     200, -1.0, 1.0, 200, -4.0, 4.0),
-			std::make_shared<TH2D>("nMinus1LocalPosEfficiencyLay2",      "Eff. vs hit position lay2 [with other effcuts]",             200, -1.0, 1.0, 200, -4.0, 4.0)
-		},
-		{
-			std::make_shared<TH2D>("nMinus1LocalPosNumhitsLay3",         "Num. of hits vs hit position lay3 [with other effcuts]",     200, -1.0, 1.0, 200, -4.0, 4.0),
-			std::make_shared<TH2D>("nMinus1LocalPosEfficiencyLay3",      "Eff. vs hit position lay3 [with other effcuts]",             200, -1.0, 1.0, 200, -4.0, 4.0)
-		},
-		{
-			std::make_shared<TH2D>("nMinus1LocalPosNumhitsLay4",         "Num. of hits vs hit position lay4 [with other effcuts]",     200, -1.0, 1.0, 200, -4.0, 4.0),
-			std::make_shared<TH2D>("nMinus1LocalPosEfficiencyLay4",      "Eff. vs hit position lay4 [with other effcuts]",             200, -1.0, 1.0, 200, -4.0, 4.0)
-		},
-		{
-			std::make_shared<TH2D>("nMinus1LocalPosNumhitsForward1",     "Num. of hits vs hit position endcap 1 [with other effcuts]", 200, -1.0, 1.0, 200, -4.0, 4.0),
-			std::make_shared<TH2D>("nMinus1LocalPosEfficiencyForward1",  "Eff. vs hit position endcap 1 [with other effcuts]",         200, -1.0, 1.0, 200, -4.0, 4.0)
-		},
-		{
-			std::make_shared<TH2D>("nMinus1LocalPosNumhitsForward2",     "Num. of hits vs hit position endcap 2 [with other effcuts]", 200, -1.0, 1.0, 200, -4.0, 4.0),
-			std::make_shared<TH2D>("nMinus1LocalPosEfficiencyForward2",  "Eff. vs hit position endcap 2 [with other effcuts]",         200, -1.0, 1.0, 200, -4.0, 4.0)
-		},
-		{
-			std::make_shared<TH2D>("nMinus1LocalPosNumhitsForward3",     "Num. of hits vs hit position endcap 3 [with other effcuts]", 200, -1.0, 1.0, 200, -4.0, 4.0),
-			std::make_shared<TH2D>("nMinus1LocalPosEfficiencyForward3",  "Eff. vs hit position endcap 3 [with other effcuts]",         200, -1.0, 1.0, 200, -4.0, 4.0)
-		},
-		{
-			std::make_shared<TH2D>("nMinus1LocalPosNumhitsForward4",     "Num. of hits vs hit position endcap 4 [with other effcuts]", 200, -1.0, 1.0, 200, -4.0, 4.0),
-			std::make_shared<TH2D>("nMinus1LocalPosEfficiencyForward4",  "Eff. vs hit position endcap 4 [with other effcuts]",         200, -1.0, 1.0, 200, -4.0, 4.0)
-		}
-	}};
-	Efficiency1DHistoPair nMinus1HitDist = 
-	{
-		std::make_shared<TH1D>("nMinus1HitDistNumhits",    "Closest hit distance to track [with other effcuts]",                   100, 0.0, 10.0),
-		std::make_shared<TH1D>("nMinus1HitDistEfficiency", "eff. vs Closest hit distance to track [with other effcuts]",           100, 0.0, 10.0)
-	};
-	Efficiency1DHistoPair nMinus1CluDist = 
-	{
-		std::make_shared<TH1D>("nMinus1CluDistNumhits",    "Closest cluster distance to traj. meas. [with other effcuts]",         100, 0.0, 10.0),
-		std::make_shared<TH1D>("nMinus1CluDistEfficiency", "eff. vs Closest cluster distance to traj. meas. [with other effcuts]", 100, 0.0, 10.0)
-	};
-	histograms.push_back(nMinus1Pt.first);
-	histograms.push_back(nMinus1Pt.second);
-	histograms.push_back(nMinus1Striphits.first);
-	histograms.push_back(nMinus1Striphits.second);
-	histograms.push_back(nMinus1D0[0].first);
-	histograms.push_back(nMinus1D0[1].second);
-	histograms.push_back(nMinus1D0[0].first);
-	histograms.push_back(nMinus1D0[1].second);
-	histograms.push_back(nMinus1DZ[0].first);
-	histograms.push_back(nMinus1DZ[1].second);
-	histograms.push_back(nMinus1DZ[0].first);
-	histograms.push_back(nMinus1DZ[1].second);
-	histograms.push_back(nMinus1LX.first);
-	histograms.push_back(nMinus1LX.second);
-	histograms.push_back(nMinus1LY.first);
-	histograms.push_back(nMinus1LY.second);
-	std::for_each(nMinus1LocalPosDist.begin(), nMinus1LocalPosDist.end(), [&] (auto histoPair) { histograms.push_back(histoPair.first ); });
-	std::for_each(nMinus1LocalPosDist.begin(), nMinus1LocalPosDist.end(), [&] (auto histoPair) { histograms.push_back(histoPair.second); });
-	histograms.push_back(nMinus1HitDist.first);
-	histograms.push_back(nMinus1HitDist.second);
-	histograms.push_back(nMinus1CluDist.first);
-	histograms.push_back(nMinus1CluDist.second);
-	// Trajector measurement loop, scoping local variables
-	if(TRAJ_LOOP_REQUESTED)
+	std::map<std::string, std::shared_ptr<TH1>> histograms(processHistogramDefinitions(config, "histogram_definition_list", "histogram_definitions"));
+	////////////////////////////////
+	// Trajector measurement loop //
+	////////////////////////////////
+	try
 	{
 		timer.restart("Measuring the time required for looping on the trajectory measurements...");
-		const int& det       = trajField.mod_on.det;
-		const int& layer     = trajField.mod_on.layer;
-		const int& flipped   = trajField.mod_on.flipped;
-		const int& disk      = trajField.mod_on.disk;
-		const int& blade     = trajField.mod_on.blade;
-		const int& panel     = trajField.mod_on.panel;
-		const int& ring      = trajField.mod_on.ring;
-		const int& missing   = trajField.missing;
-		const TrackData& trk = trajField.trk;
+		const int&   det             = trajField.mod_on.det;
+		const int&   layer           = trajField.mod_on.layer;
+		const int&   flipped         = trajField.mod_on.flipped;
+		const int&   disk            = trajField.mod_on.disk;
+		const int&   blade           = trajField.mod_on.blade;
+		const int&   panel           = trajField.mod_on.panel;
+		const int&   ring            = trajField.mod_on.ring;
+		const int&   missing         = trajField.missing;
+		const float& ladderCoord     = trajField.mod_on.ladder_coord;
+		const float& moduleCoord     = trajField.mod_on.module_coord;
+		const float& bladePanelCoord = trajField.mod_on.blade_panel_coord;
+		const float& diskRingCoord   = trajField.mod_on.disk_ring_coord;
+		const TrackData& trk         = trajField.trk;
 		int nvtxCut_counter = 0, zerobiasCut_counter = 0, federrCut_counter = 0, hpCut_counter = 0, ptCut_counter = 0, nstripCut_counter = 0, d0Cut_counter = 0, dzCut_counter = 0, pixhitCut_counter = 0, lxFidCut_counter = 0, lyFidCut_counter = 0, valmisCut_counter = 0, hitsepCut_counter = 0;
-		for(int entryIndex = 0; entryIndex < trajTreeNumEntries; ++entryIndex)
+		for(Long64_t entryIndex = 0; entryIndex < trajTreeNumEntries; ++entryIndex)
 		{
-			trajTree -> GetEntry(entryIndex);
+			trajTreeChain -> GetEntry(entryIndex);
+			if(det == 0) switch(layer)
+			{
+				case 1:
+					histograms.at("OnTrkCluOccupancy_l1")  -> Fill(moduleCoord, ladderCoord);
+					break;
+				case 2:
+					histograms.at("OnTrkCluOccupancy_l2")  -> Fill(moduleCoord, ladderCoord);
+					break;
+				case 3:
+					histograms.at("OnTrkCluOccupancy_l3")  -> Fill(moduleCoord, ladderCoord);
+					break;
+				case 4:
+					histograms.at("OnTrkCluOccupancy_l4")  -> Fill(moduleCoord, ladderCoord);
+					break;
+				default:
+					std::cout << error_prompt << "Wrong layer number on barrel. Check the code source!" << std::endl; 
+			}
+			if(det == 1) histograms.at("OnTrkCluOccupancy_fwd") -> Fill(diskRingCoord, bladePanelCoord);
 			int nvtxCut = 0, zerobiasCut = 0, federrCut = 0, hpCut = 0, ptCut = 0, nstripCut = 0, d0Cut = 0, dzCut = 0, pixhitCut = 0, lxFidCut = 0, lyFidCut = 0, valmisCut = 0, hitsepCut = 0;
 			// Nvtx cut
 			// nvtxCut = 0 <= eventField.nvtx;
-			nvtxCut = trk.fromVtxNtrk <= VERTEX_NUMTRACK_CUT_N_MINUS_1_VAL;
+			// nvtxCut = trk.fromVtxNtrk <= VERTEX_NUMTRACK_CUT_N_MINUS_1_VAL;
+			nvtxCut = VERTEX_NUMTRACK_CUT_N_MINUS_1_VAL < trk.fromVtxNtrk;
 			// Zerobias cut
 			zerobiasCut = eventField.trig & ZEROBIAS_BITMASK >> ZEROBIAS_TRIGGER_BIT;
 			// Federr cut
@@ -231,11 +163,11 @@ int main(int argc, char** argv) try
 			// Nstrip cut
 			nstripCut = TRACK_NSTRIP_CUT_N_MINUS_1_VAL < trk.strip;
 			// D0 cut
-			if(det == 0) d0Cut = std::abs(trk.d0) < TRACK_D0_CUT_BARREL_N_MINUS_1_VAL[layer - 1];
-			if(det == 1) d0Cut = std::abs(trk.d0) < TRACK_D0_CUT_FORWARD_N_MINUS_1_VAL;
+			if(det == 0) d0Cut = TRACK_D0_CUT_BARREL_N_MINUS_1_VAL[layer - 1] < std::abs(trk.d0);
+			if(det == 1) d0Cut = TRACK_D0_CUT_FORWARD_N_MINUS_1_VAL           < std::abs(trk.d0);
 			// Dz cut
-			if(det == 0) dzCut = std::abs(trk.dz) < TRACK_DZ_CUT_BARREL_N_MINUS_1_VAL;
-			if(det == 1) dzCut = std::abs(trk.dz) < TRACK_DZ_CUT_FORWARD_N_MINUS_1_VAL;
+			if(det == 0) dzCut = TRACK_DZ_CUT_BARREL_N_MINUS_1_VAL  < std::abs(trk.dz);
+			if(det == 1) dzCut = TRACK_DZ_CUT_FORWARD_N_MINUS_1_VAL < std::abs(trk.dz);
 			// Pixhit cut
 			if(det == 0)
 			{
@@ -243,20 +175,20 @@ int main(int argc, char** argv) try
 				{
 					case 1:
 						pixhitCut =
-							(trk.validbpix[1] > 0 && trk.validbpix[2] > 0 && trk.validbpix[3] > 0) || 
+							(trk.validbpix[1] > 0 && trk.validbpix[2] > 0 && trk.validbpix[3] > 0) ||
 							(trk.validbpix[1] > 0 && trk.validbpix[2] > 0 && trk.validfpix[0] > 0) ||
 							(trk.validbpix[1] > 0 && trk.validfpix[0] > 0 && trk.validfpix[1] > 0) ||
 							(trk.validfpix[0] > 0 && trk.validfpix[2] > 0 && trk.validfpix[2] > 0);
 						break;
 					case 2:
 						pixhitCut =
-							(trk.validbpix[0] > 0 && trk.validbpix[2] > 0 && trk.validbpix[3] > 0) || 
-							(trk.validbpix[0] > 0 && trk.validbpix[2] > 0 && trk.validfpix[0] > 0) || 
+							(trk.validbpix[0] > 0 && trk.validbpix[2] > 0 && trk.validbpix[3] > 0) ||
+							(trk.validbpix[0] > 0 && trk.validbpix[2] > 0 && trk.validfpix[0] > 0) ||
 							(trk.validbpix[0] > 0 && trk.validfpix[0] > 0 && trk.validfpix[1] > 0);
 						break;
 					case 3:
 						pixhitCut =
-							(trk.validbpix[0] > 0 && trk.validbpix[1] > 0 && trk.validbpix[3] > 0) || 
+							(trk.validbpix[0] > 0 && trk.validbpix[1] > 0 && trk.validbpix[3] > 0) ||
 							(trk.validbpix[0] > 0 && trk.validbpix[1] > 0 && trk.validfpix[0] > 0);
 						break;
 					case 4:
@@ -308,87 +240,103 @@ int main(int argc, char** argv) try
 			// std::cout << "valmisCut:   " << valmisCut   << std::endl;
 			// std::cout << "hitsepCut:   " << hitsepCut   << std::endl;
 			// std::cout << " --- End cut values --- " << std::endl;
-			// std::cout << "d0: " << std::abs(trk.d0);
-			// std::cout << "dz: " << std::abs(trk.dz);
+			// std::cout << "qulatity:    " << trk.quality       << std::endl;
+			// std::cout << "fromVtxNtrk: " << trk.fromVtxNtrk   << std::endl;
+			// std::cout << "d0:          "  << std::abs(trk.d0) << std::endl;
+			// std::cout << "dz:          "  << std::abs(trk.dz) << std::endl;
 			// std::cin.get();
-			if(nvtxCut && zerobiasCut && federrCut && hpCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
+			if(zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
 			{
-				nMinus1Pt.first -> Fill(trk.pt);
+				histograms.at("nMinus1VtxNtrkNumhits") -> Fill(trk.fromVtxNtrk);
 				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
 				{
-					nMinus1Pt.second -> Fill(trk.pt);
+					histograms.at("nMinus1VtxNtrkEfficiency") -> Fill(trk.fromVtxNtrk);
+				}
+			}
+			if(nvtxCut && zerobiasCut && federrCut && hpCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
+			{
+				histograms.at("nMinus1PtNumhits") -> Fill(trk.pt);
+				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
+				{
+					histograms.at("nMinus1PtEfficiency") -> Fill(trk.pt);
 				}
 			}
 			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
 			{
-				nMinus1Striphits.first -> Fill(trk.strip);
+				histograms.at("nMinus1stripNumhits") -> Fill(trk.strip);
 				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
 				{
-					nMinus1Striphits.second -> Fill(trk.strip);
+					histograms.at("nMinus1stripEfficiency") -> Fill(trk.strip);
 				}
 			}
 			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
 			{
-				nMinus1D0[det].first -> Fill(trk.d0);
+				static const std::array<std::string, 4> names = {"nMinus1D0BarrelNumhits", "nMinus1D0BarrelEfficiency", "nMinus1D0ForwardNumhits", "nMinus1D0ForwardEfficiency"};
+				histograms.at(names[det * 2]) -> Fill(trk.d0);
 				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
 				{
-					nMinus1D0[det].second -> Fill(trk.d0);
+					histograms.at(names[det * 2 + 1]) -> Fill(trk.d0);
 				}
 			}
 			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
 			{
-				nMinus1DZ[det].first -> Fill(trk.dz);
+				static const std::array<std::string, 4> names = {"nMinus1DZBarrelNumhits", "nMinus1DZBarrelEfficiency", "nMinus1DZForwardNumhits", "nMinus1DZForwardEfficiency"};
+				histograms.at(names[det * 2]) -> Fill(trk.dz);
 				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
 				{
-					nMinus1DZ[det].second -> Fill(trk.dz);
+					histograms.at(names[det * 2]) -> Fill(trk.dz);
 				}
 			}
 			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && valmisCut && hitsepCut)
 			{
-				nMinus1LX.first -> Fill(trajField.lx);
-				nMinus1LY.first -> Fill(trajField.ly);
+				histograms.at("nMinus1LXNumhits") -> Fill(trajField.lx);
+				histograms.at("nMinus1LyNumhits") -> Fill(trajField.ly);
 				if(det == 0 && !flipped)
 				{
-					nMinus1LocalPosDist[layer - 1].first -> Fill(trajField.lx, trajField.ly);
+					static const std::array<std::string, 4> names = {"nMinus1LocalPosNumhitsLay1", "nMinus1LocalPosNumhitsLay2", "nMinus1LocalPosNumhitsLay3", "nMinus1LocalPosNumhitsLay4"};
+					histograms.at(names[layer - 1]) -> Fill(trajField.lx, trajField.ly);
 				}
 				if(det == 1)
 				{
-					if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 0) nMinus1LocalPosDist[4].first -> Fill(trajField.lx, trajField.ly);
-					if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 1) nMinus1LocalPosDist[5].first -> Fill(trajField.lx, trajField.ly);
-					if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 0) nMinus1LocalPosDist[6].first -> Fill(trajField.lx, trajField.ly);
-					if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 1) nMinus1LocalPosDist[7].first -> Fill(trajField.lx, trajField.ly);
+					static const std::array<std::string, 4> names = {"nMinus1LocalPosNumhitsForward1", "nMinus1LocalPosNumhitsForward2", "nMinus1LocalPosNumhitsForward3", "nMinus1LocalPosNumhitsForward4"};
+					if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 0) histograms.at(names[0]) -> Fill(trajField.lx, trajField.ly);
+					if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 1) histograms.at(names[1]) -> Fill(trajField.lx, trajField.ly);
+					if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 0) histograms.at(names[2]) -> Fill(trajField.lx, trajField.ly);
+					if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 1) histograms.at(names[3]) -> Fill(trajField.lx, trajField.ly);
 				}
 				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
 				{
-					nMinus1LX.second -> Fill(trajField.lx);
-					nMinus1LY.second -> Fill(trajField.ly);
+					histograms.at("nMinus1LXEfficiency") -> Fill(trajField.lx);
+					histograms.at("nMinus1LyEfficiency") -> Fill(trajField.ly);
 					if(det == 0 && !flipped)
 					{
-						nMinus1LocalPosDist[layer - 1].second -> Fill(trajField.lx, trajField.ly);
+						static const std::array<std::string, 4> names = {"nMinus1LocalPosEfficiencyLay1", "nMinus1LocalPosEfficiencyLay2", "nMinus1LocalPosEfficiencyLay3", "nMinus1LocalPosEfficiencyLay4"};
+						histograms[names[layer - 1]] -> Fill(trajField.lx, trajField.ly);
 					}
 					if(det == 1)
 					{
-						if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 0) nMinus1LocalPosDist[4].first -> Fill(trajField.lx, trajField.ly);
-						if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 1) nMinus1LocalPosDist[5].first -> Fill(trajField.lx, trajField.ly);
-						if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 0) nMinus1LocalPosDist[6].first -> Fill(trajField.lx, trajField.ly);
-						if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 1) nMinus1LocalPosDist[7].first -> Fill(trajField.lx, trajField.ly);
+						static const std::array<std::string, 4> names = {"nMinus1LocalPosEfficiencyForward1", "nMinus1LocalPosEfficiencyForward2", "nMinus1LocalPosEfficiencyForward3", "nMinus1LocalPosEfficiencyForward4"};
+						if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 0) histograms.at(names[0]) -> Fill(trajField.lx, trajField.ly);
+						if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 1) histograms.at(names[1]) -> Fill(trajField.lx, trajField.ly);
+						if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 0) histograms.at(names[2]) -> Fill(trajField.lx, trajField.ly);
+						if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 1) histograms.at(names[3]) -> Fill(trajField.lx, trajField.ly);
 					}
 				}
 			}
 			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut)
 			{
-				nMinus1HitDist.first -> Fill(trajField.d_tr);
+				histograms.at("nMinus1HitDistNumhits") -> Fill(trajField.d_tr);
 				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
 				{
-					nMinus1HitDist.second -> Fill(trajField.d_tr);
+					histograms.at("nMinus1HitDistEfficiency") -> Fill(trajField.d_tr);
 				}
 			}
 			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
 			{
-				nMinus1CluDist.first -> Fill(trajField.d_cl);
-				if(!missing) 
+				histograms.at("nMinus1CluDistNumhits") -> Fill(trajField.d_cl);
+				if(!missing)
 				{
-					nMinus1CluDist.second -> Fill(trajField.d_cl);
+					histograms.at("nMinus1CluDistEfficiency") -> Fill(trajField.d_cl);
 				}
 			}
 			nvtxCut_counter     += nvtxCut;
@@ -420,108 +368,234 @@ int main(int argc, char** argv) try
 			// if(hitsepCut)   continue;
 		}
 		std::cout << " --- Start counter counters values --- " << std::endl;
-		std::cout << "nvtxCut:     " << nvtxCut_counter     << std::endl;
-		std::cout << "zerobiasCut: " << zerobiasCut_counter << std::endl;
-		std::cout << "federrCut:   " << federrCut_counter   << std::endl;
-		std::cout << "hpCut:       " << hpCut_counter       << std::endl;
-		std::cout << "ptCut:       " << ptCut_counter       << std::endl;
-		std::cout << "nstripCut:   " << nstripCut_counter   << std::endl;
-		std::cout << "d0Cut:       " << d0Cut_counter       << std::endl;
-		std::cout << "dzCut:       " << dzCut_counter       << std::endl;
-		std::cout << "pixhitCut:   " << pixhitCut_counter   << std::endl;
-		std::cout << "lxFidCut:    " << lxFidCut_counter    << std::endl;
-		std::cout << "lyFidCut:    " << lyFidCut_counter    << std::endl;
-		std::cout << "valmisCut:   " << valmisCut_counter   << std::endl;
-		std::cout << "hitsepCut:   " << hitsepCut_counter   << std::endl;
+		std::cout << "nvtxCut:     " << std::setw(12) << nvtxCut_counter     << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << nvtxCut_counter     * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "zerobiasCut: " << std::setw(12) << zerobiasCut_counter << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << zerobiasCut_counter * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "federrCut:   " << std::setw(12) << federrCut_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << federrCut_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "hpCut:       " << std::setw(12) << hpCut_counter       << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << hpCut_counter       * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "ptCut:       " << std::setw(12) << ptCut_counter       << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << ptCut_counter       * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "nstripCut:   " << std::setw(12) << nstripCut_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << nstripCut_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "d0Cut:       " << std::setw(12) << d0Cut_counter       << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << d0Cut_counter       * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "dzCut:       " << std::setw(12) << dzCut_counter       << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << dzCut_counter       * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "pixhitCut:   " << std::setw(12) << pixhitCut_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << pixhitCut_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "lxFidCut:    " << std::setw(12) << lxFidCut_counter    << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << lxFidCut_counter    * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "lyFidCut:    " << std::setw(12) << lyFidCut_counter    << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << lyFidCut_counter    * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "valmisCut:   " << std::setw(12) << valmisCut_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << valmisCut_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		std::cout << "hitsepCut:   " << std::setw(12) << hitsepCut_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << hitsepCut_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
 		std::cout << " --- End cut counter values --- " << std::endl;
 		timer.printSeconds("Loop done. Took about: ", " second(s).");
 	}
-	// Downscaling efficiency histograms
-	auto downscale1DHistogram = [] (const std::shared_ptr<TH1D>& toDownscale, const std::shared_ptr<TH1D>& downscaleFactors)
+	catch(const std::exception& e)
 	{
-		const auto& nBins = toDownscale -> GetNbinsX();
-		if(nBins != downscaleFactors -> GetNbinsX()) throw std::runtime_error("Error downscaling histograms: bin numbers do not match.");
-		for(int binNum = 0; binNum < nBins; ++binNum)
-		{
-			const auto& binDownscaleFactor = downscaleFactors -> GetBinContent(binNum); 
-			const auto& originalBinContent = toDownscale      -> GetBinContent(binNum);
-			if(binDownscaleFactor == 0) continue;
-			std::cout << "Efficiency bin content before scaling: " << originalBinContent << std::endl;
-			toDownscale -> SetBinContent(binNum, originalBinContent / binDownscaleFactor); 
-			std::cout << "Efficiency bin content after scaling : " << toDownscale -> GetBinContent(binNum) << std::endl;
-		}
-	};
-	auto downscale2DHistogram = [] (std::shared_ptr<TH2D>& toDownscale, std::shared_ptr<TH2D>& downscaleFactors)
+		std::cout << error_prompt << "In the traj meas loop: " << e.what() << " exception occured." << std::endl;
+		exit(-1);
+	}
+	////////////////////////////
+	// Scale Efficiency plots //
+	////////////////////////////
 	{
-		const auto& nBinsX = toDownscale -> GetNbinsX();
-		const auto& nBinsY = toDownscale -> GetNbinsY();
-		if(nBinsX != downscaleFactors -> GetNbinsX() || nBinsY != downscaleFactors -> GetNbinsX()) throw std::runtime_error("Error downscaling histograms: bin numbers do not match.");
-		for(int binXNum = 0; binXNum < nBinsX; ++binXNum)
+		static const std::string efficiencyPlotIdentifier      = "Efficiency";
+		static const std::string efficiencyNumeratorIdentifier = "NumHits";
+		for(const auto& histogramPair: histograms)
 		{
-			for(int binYNum = 0; binYNum < nBinsY; ++binYNum)
+			std::string efficiencyHistoName = histogramPair.first;
+			size_t      effPos              = efficiencyHistoName.find(efficiencyPlotIdentifier);
+			if(effPos == std::string::npos)      continue;
+			std::string numeratorHistoName  = efficiencyHistoName.replace(effPos, efficiencyPlotIdentifier.size(), efficiencyNumeratorIdentifier);
+			auto numHitsHisto               = histograms.find(numeratorHistoName);
+			if(numHitsHisto == histograms.end()) continue;
+			auto efficiencyHisto2DPtrConversionResult = dynamic_cast<TH2D*>(histogramPair.second.get());
+			if(efficiencyHisto2DPtrConversionResult)
 			{
-				const auto& binDownscaleFactor = downscaleFactors -> GetBinContent(binXNum, binYNum); 
-				const auto& originalBinContent = toDownscale      -> GetBinContent(binXNum, binYNum);
-				if(binDownscaleFactor == 0) continue;
-				toDownscale -> SetBinContent(binXNum, binYNum, originalBinContent / binDownscaleFactor);
+				downscale2DHistogram(efficiencyHisto2DPtrConversionResult, dynamic_cast<TH2D*>(numHitsHisto -> second.get()));
+				continue;
+			}
+			downscale1DHistogram(dynamic_cast<TH1D*>(histogramPair.second.get()), dynamic_cast<TH1D*>(numHitsHisto -> second.get()));
+		}
+	}
+	///////////////////////
+	// Load plot options //
+	///////////////////////
+	struct PlotOptions
+	{
+		int dressPlot = 0;
+		int layer     = -1;
+	};
+	std::map<std::string, PlotOptions> plotOptionsMap;
+	try
+	{
+		std::string histogramDefinitionListPath = config["histogram_definition_list"];
+		JSON inputListJSON = JSON::parse(fileToString(histogramDefinitionListPath));
+		std::vector<JSON> histogramDefinitionList = inputListJSON["histogram_definitions"];
+		for(const auto& definition: histogramDefinitionList)
+		{
+			PlotOptions plotExtras;
+			std::string name = definition.at("name");
+			if(definition.count("plot_extras") == 0) 
+			{
+				plotOptionsMap.emplace(name, std::move(plotExtras));
+				continue; 
+			}
+			// std::cout << debug_prompt << name << " has a key for dress_plot: " << (definition.count("dress_plot") ? "true" : "false") << std::endl;
+			if(definition.count("dress_plot") != 0)
+			{
+				// std::cout << debug_prompt << definition.at("dress_plot") << std::endl;
+				plotExtras.dressPlot = definition.at("dress_plot");
+			}
+			if(definition.count("layer"     ) != 0)
+			{
+				// std::cout << debug_prompt << definition.at("layer") << std::endl;
+				plotExtras.layer     = definition.at("layer");
+			}
+			plotOptionsMap.emplace(name, std::move(plotExtras));
+		}
+	}
+	catch(const std::exception& e)
+	{
+		std::cout << error_prompt << "While loading plot options: " << e.what() << " exception occured." << std::endl;
+		exit(-1);
+	}
+	////////////////
+	// Save plots //
+	////////////////
+	try
+	{
+		constexpr int PHASE_SCENARIO = 1;
+		gStyle -> SetPalette(1);
+		gStyle -> SetNumberContours(999);
+		gROOT->SetBatch(kTRUE); // Uncomment to check the plots on-the fly
+		gStyle->SetOptStat(1111);
+		gErrorIgnoreLevel = kError;
+		// histogram.SetTitleSize(22);
+		// histogram.GetYaxis() -> SetNdivisions(507);
+		for(const auto& histogramPair: histograms)
+		{
+			const std::string& histogramName = histogramPair.first;
+			TH1*               histogram     = histogramPair.second.get();
+			const PlotOptions& plotOptions   = plotOptionsMap.at(histogramName);
+			TCanvas* canvas = custom_can_(histogram, histogramName + "_canvas", 0, 0, 800, 800, 80, 140);
+			canvas -> cd();
+			// histogram.SetFillColor(38);
+			// std::cout << "Histogram name: "    << histogramName << std::endl;
+			// std::cout << "Number of entries: " << histogram -> GetEntries() << std::endl; 
+			TH2D* histo2D = dynamic_cast<TH2D*>(histogram);
+			if(histo2D != nullptr)
+			{
+				// std::cout << debug_prompt << "2D plot found, name: " << histogramName << " dressPlot value: " << plotOptions.dressPlot << std::endl;
+				histo2D -> Draw("COLZ");
+				if(plotOptions.dressPlot)
+				{
+					dress_occup_plot(histo2D, plotOptions.layer, PHASE_SCENARIO);
+					// std::cout << debug_prompt << "Dress occup plot called with layer: " << plotOptions.layer << " and phase scenario: " << PHASE_SCENARIO << "." << std::endl;
+				}
+			}
+			else dynamic_cast<TH1D*>(histogram) -> Draw("BHIST");
+			// TText label;
+			// CanvasExtras::setLabelStyleNote(label);
+			canvas -> Update();
+			{
+				std::string epsFilename = (std::string(canvas -> GetTitle()) + ".eps");
+				std::transform(epsFilename.begin(), epsFilename.end(), epsFilename.begin(), [] (char ch) { return ch == ' ' ? '_' : ch; });
+				canvas -> SaveAs((std::string(PLOTS_SAVE_DIRECTORY) + "/" + epsFilename).c_str());
 			}
 		}
-	};
-	auto downscale1DEfficiencyPair = [&] (Efficiency1DHistoPair& efficiencyPair) { downscale1DHistogram(efficiencyPair.second, efficiencyPair.first); };
-	auto downscale2DEfficiencyPair = [&] (Efficiency2DHistoPair& efficiencyPair) { downscale2DHistogram(efficiencyPair.second, efficiencyPair.first); };
-	downscale1DEfficiencyPair(nMinus1Pt);
-	downscale1DEfficiencyPair(nMinus1Striphits);
-	downscale1DEfficiencyPair(nMinus1D0[0]);
-	downscale1DEfficiencyPair(nMinus1D0[1]);
-	downscale1DEfficiencyPair(nMinus1DZ[0]);
-	downscale1DEfficiencyPair(nMinus1DZ[1]);
-	std::for_each(nMinus1LocalPosDist.begin(), nMinus1LocalPosDist.end(), [&] (auto histoPair) { downscale2DEfficiencyPair(histoPair); });
-	downscale1DEfficiencyPair(nMinus1LX);
-	downscale1DEfficiencyPair(nMinus1LY);
-	downscale1DEfficiencyPair(nMinus1HitDist);
-	downscale1DEfficiencyPair(nMinus1CluDist);
-	// CanvasExtras::setMulticolorColzPalette();
-	gStyle -> SetPalette(1);
-	gStyle -> SetNumberContours(999);
-	gROOT->SetBatch(kTRUE);
-	std::vector<std::shared_ptr<TCanvas>> canvases;
-	for(const auto& i: range(histograms.size()))
-	{
-		auto& histogram = *(histograms[i]);
-		canvases.emplace_back(std::make_shared<TCanvas>(("canvas_" + std::to_string(i)).c_str(), histogram.GetTitle(), 50 + i * 403, 50, 400, 300));
-		canvases.back() -> cd();
-		CanvasExtras::redesignCanvas(canvases.back().get(), &histogram);
-		histogram.SetTitleSize(22);
-		std::string histoTitle(histogram.GetTitle());
-		std::string newTitle(histogram.GetTitle());
-		canvases.back() -> SetRightMargin(0.15);
-		// histogram.GetYaxis() -> SetNdivisions(507);
-		histogram.SetFillColor(38);
-		if(dynamic_cast<TH2D*>(histograms[i].get())) histogram.Draw("COLZ");
-		// if(dynamic_cast<TH2D*>(*histograms[i])) histogram.Draw("CONTZ");
-		else                                    histogram.Draw("BHIST");
-		histogram.SetTitle(histoTitle.c_str());
-		TText label;
-		CanvasExtras::setLabelStyleNote(label);		
+		gErrorIgnoreLevel = kPrint;
 	}
-	for(const auto& canvas: canvases)
+	catch(const std::exception& e)
 	{
-		canvas -> Update();
-		if(savePlots)
-		{
-			std::string epsFilename = (std::string(canvas -> GetTitle()) + ".eps");
-			std::transform(epsFilename.begin(), epsFilename.end(), epsFilename.begin(), [] (char ch) { return ch == ' ' ? '_' : ch; });
-			canvas -> SaveAs(("results/" + epsFilename).c_str());
-		}
+		std::cout << error_prompt << "While saving histograms: " << e.what() << " exception occured." << std::endl;
+		exit(-1);
 	}
-	inputFile -> Close();
-	std::cout << process_prompt << inputFileName << " has been processed succesfully." << std::endl;
 	std::cout << process_prompt << argv[0] << " terminated succesfully." << std::endl;
-	theApp -> Run();
+	theApp->Run();
 	return 0;
 }
 catch(const std::exception& e)
 {
 	std::cout << error_prompt << "Exception thrown: " << e.what() << std::endl;
 	return -1;
+}
+
+void testSaveFolders()
+{
+	auto checkDirectory = [] (const char* directoryName)
+	{
+		try 
+		{
+			boost::filesystem::path        filePath   = directoryName; 
+			boost::filesystem::file_status fileStatus = boost::filesystem::status(filePath);
+			if(!boost::filesystem::is_directory(fileStatus))
+			{
+				std::cerr << "Error: Missing directory: " << directoryName << std::endl;
+				std::cout << "Do you want to automatically create this missing directory: " << directoryName << "? (y/n): ";
+				char answer = std::cin.get();
+				if(answer == 'y')
+				{
+					boost::filesystem::create_directory(filePath);
+					std::cout << "Directory created succesfully." << std::endl;
+				}
+				else
+				{
+					exit(-1);
+				}
+			}
+		}
+		catch(boost::filesystem::filesystem_error &e)
+		{
+			std::cerr << e.what() << std::endl;
+		}
+	}; 
+	// Directories to check
+	checkDirectory(PLOTS_SAVE_DIRECTORY);
+}
+
+void readInFilesAndAddToChain(const JSON& config, const std::string& configKey, const std::string& innerKey, TChain* chain)
+{
+	std::string inputFilesListPath = config[configKey];
+	JSON inputListJSON = JSON::parse(fileToString(inputFilesListPath));
+	std::vector<std::string> inputFiles = inputListJSON[innerKey];
+	std::for_each(inputFiles.begin(), inputFiles.end(), [&] (const std::string& fileName) { chain  -> Add(fileName.c_str()); });
+}
+
+template <typename T>
+T checkGetElement(const JSON& definition, const std::string& propertyName)
+{
+	auto propertyIt = definition.find(propertyName);
+	if(propertyIt == definition.end())
+	{
+		if(definition.count("name") == 0) 
+		{
+			std::cout << error_prompt << "Element of unknown name has one or more missing properties..." << std::endl;
+			exit(-1);
+		}
+		std::string name = definition["name"];
+		std::cout << error_prompt << "Cant find property: " << propertyName << " for " << name << "." << std::endl;
+		exit(-1);
+	}
+	return propertyIt.value();
+}
+
+std::map<std::string, std::shared_ptr<TH1>> processHistogramDefinitions(const JSON& config, const std::string& configKey, const std::string& innerKey)
+{
+	std::map<std::string, std::shared_ptr<TH1>> histograms;
+	std::string histogramDefinitionListPath = config[configKey];
+	JSON inputListJSON = JSON::parse(fileToString(histogramDefinitionListPath));
+	std::vector<JSON> histogramDefinitionList = inputListJSON[innerKey];
+	for(const auto& definition: histogramDefinitionList)
+	{
+		std::string name  = checkGetElement<std::string>(definition, "name");
+		std::string title = checkGetElement<std::string>(definition, "title");
+		std::string type  = checkGetElement<std::string>(definition, "type");
+		int nbinsx        = checkGetElement<int>(definition, "nbinsx");
+		float xMin        = checkGetElement<float>(definition, "xMin");
+		float xMax        = checkGetElement<float>(definition, "xMax");
+		if(type == "TH1D") histograms.insert({name, std::make_shared<TH1D>(name.c_str(),  title.c_str(),  nbinsx, xMin, xMax)});
+		if(type == "TH2D")
+		{
+			int nbinsy        = checkGetElement<int>(definition, "nbinsy");
+			float yMin        = checkGetElement<float>(definition, "yMin");
+			float yMax        = checkGetElement<float>(definition, "yMax");
+			histograms.insert({name, std::make_shared<TH2D>(name.c_str(),  title.c_str(),  nbinsx, xMin, xMax, nbinsy, yMin, yMax)});
+		}
+	}
+	return histograms;
 }

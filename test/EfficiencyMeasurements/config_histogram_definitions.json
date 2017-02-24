@@ -1,0 +1,427 @@
+{
+	"histogram_definitions":
+	[
+		{
+			"type": "TH1D",
+			"name": "nMinus1VtxNtrkNumhits",
+			"title": "parent vertex n. tracks [with other effcuts]",
+			"nbinsx": 30,
+			"xMin": 0.0,
+			"xMax": 100.0
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1VtxNtrkEfficiency",
+			"title": "eff. vs parent vertex n. tracks [with other effcuts]",
+			"nbinsx": 30,
+			"xMin": 0.0,
+			"xMax": 100.0
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1PtNumhits",
+			"title": "pt [with other effcuts]",
+			"nbinsx": 30,
+			"xMin": 0.0,
+			"xMax": 10.0
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1PtEfficiency",
+			"title": "eff. vs pt [with other effcuts]",
+			"nbinsx": 30,
+			"xMin": 0.0,
+			"xMax": 10.0
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1stripNumhits",
+			"title": "striphits [with other effcuts]",
+			"nbinsx": 30,
+			"xMin": 0.0,
+			"xMax": 30.0
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1stripEfficiency",
+			"title": "eff. vs n. striphits [with other effcuts]",
+			"nbinsx": 30,
+			"xMin": 0.0,
+			"xMax": 30.0
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1D0BarrelNumhits",
+			"title": "d0 of barrel hits [with other effcuts]",
+			"nbinsx": 120,
+			"xMin": 0.0,
+			"xMax": 0.15
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1D0BarrelEfficiency",
+			"title": "eff. vs d0 of barrel hits [with other effcuts]",
+			"nbinsx": 120,
+			"xMin": 0.0,
+			"xMax": 0.15
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1D0ForwardNumhits",
+			"title": "d0 of forward hits [with other effcuts]",
+			"nbinsx": 120,
+			"xMin": 0.0,
+			"xMax": 0.15
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1D0ForwardEfficiency",
+			"title": "eff. vs d0 of forward hits [with other effcuts]",
+			"nbinsx": 120,
+			"xMin": 0.0,
+			"xMax": 0.15
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1DZBarrelNumhits",
+			"title": "dz of barrel hits [with other effcuts]",
+			"nbinsx": 100,
+			"xMin": 0.0,
+			"xMax": 0.5
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1DZBarrelEfficiency",
+			"title": "eff. vs dz of barrel hits [with other effcuts]",
+			"nbinsx": 100,
+			"xMin": 0.0,
+			"xMax": 0.5
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1DZForwardNumhits",
+			"title": "dz of forward hits [with other effcuts]",
+			"nbinsx": 100,
+			"xMin": 0.0,
+			"xMax": 1.0
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1DZForwardEfficiency",
+			"title": "eff. vs dz of forward hits [with other effcuts]",
+			"nbinsx": 100,
+			"xMin": 0.0,
+			"xMax": 1.0
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LXNumhits",
+			"title": "lx [with other effcuts]",
+			"nbinsx": 100,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LXEfficiency",
+			"title": "eff. vs lx [with other effcuts]",
+			"nbinsx": 100,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhits",
+			"title": "ly [with other effcuts]",
+			"nbinsx": 100,
+			"xMin": -3.5,
+			"xMax": 3.5
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiency",
+			"title": "eff. vs ly [with other effcuts]",
+			"nbinsx": 100,
+			"xMin": -3.5,
+			"xMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsLay1",
+			"title": "Num. of hits vs hit position lay1 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyLay1",
+			"title": "Num. of hits vs hit position lay1 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsLay2",
+			"title": "Num. of hits vs hit position lay2 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyLay2",
+			"title": "Eff. vs hit position lay2 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsLay3",
+			"title": "Num. of hits vs hit position lay3 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyLay3",
+			"title": "Eff. vs hit position lay3 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsLay4",
+			"title": "Num. of hits vs hit position lay4 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyLay4",
+			"title": "Eff. vs hit position lay4 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsForward1",
+			"title": "Num. of hits vs hit position endcap 1 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyForward1",
+			"title": "Eff. vs hit position endcap 1 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsForward2",
+			"title": "Num. of hits vs hit position endcap 2 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyForward2",
+			"title": "Eff. vs hit position endcap 2 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsForward3",
+			"title": "Num. of hits vs hit position endcap 3 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyForward3",
+			"title": "Eff. vs hit position endcap 3 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsForward4",
+			"title": "Num. of hits vs hit position endcap 4 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyForward4",
+			"title": "Eff. vs hit position endcap 4 [with other effcuts]",
+			"nbinsx": 50,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 50,
+			"yMin": -3.5,
+			"yMax": 3.5
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1HitDistNumhits",
+			"title": "Closest hit distance to track [with other effcuts]",
+			"nbinsx": 100,
+			"xMin": 0.0,
+			"xMax": 0.05
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1HitDistEfficiency",
+			"title": "eff. vs Closest hit distance to track [with other effcuts]",
+			"nbinsx": 100,
+			"xMin": 0.0,
+			"xMax": 0.05
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1CluDistNumhits",
+			"title": "Closest cluster distance to traj. meas. [with other effcuts]",
+			"nbinsx": 90,
+			"xMin": 0.0,
+			"xMax": 450.0
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1CluDistEfficiency",
+			"title": "eff. vs Closest cluster distance to traj. meas. [with other effcuts]",
+			"nbinsx": 90,
+			"xMin": 0.0,
+			"xMax": 450.0
+		},
+		{
+			"type": "TH2D",
+			"name": "OnTrkCluOccupancy_fwd",
+			"title": "On-track Cluster Occupancy forward",
+			"nbinsx": 112,
+			"xMin": -3.5,
+			"xMax": 3.5,
+			"nbinsy": 140,
+			"yMin": -17.5,
+			"yMax": 17.5,
+			"plot_extras": 1,
+			"dress_plot": 1,
+			"layer": 0
+		},
+		{
+			"type": "TH2D",
+			"name": "OnTrkCluOccupancy_l1",
+			"title": "On-track Cluster Occupancy layer 1",
+			"nbinsx": 72,
+			"xMin": -4.5,
+			"xMax": 4.5,
+			"nbinsy": 26,
+			"yMin": -6.5,
+			"yMax": 6.5,
+			"plot_extras": 1,
+			"dress_plot": 1,
+			"layer": 1
+		},
+		{
+			"type": "TH2D",
+			"name": "OnTrkCluOccupancy_l2",
+			"title": "On-track Cluster Occupancy layer 2",
+			"nbinsx": 72,
+			"xMin": -4.5,
+			"xMax": 4.5,
+			"nbinsy": 58,
+			"yMin": -14.5,
+			"yMax": 14.5,
+			"plot_extras": 1,
+			"dress_plot": 1,
+			"layer": 2
+		},
+		{
+			"type": "TH2D",
+			"name": "OnTrkCluOccupancy_l3",
+			"title": "On-track Cluster Occupancy layer 3",
+			"nbinsx": 72,
+			"xMin": -4.5,
+			"xMax": 4.5,
+			"nbinsy": 90,
+			"yMin": -22.5,
+			"yMax": 22.5,
+			"plot_extras": 1,
+			"dress_plot": 1,
+			"layer": 3
+		},
+		{
+			"type": "TH2D",
+			"name": "OnTrkCluOccupancy_l4",
+			"title": "On-track Cluster Occupancy layer 4",
+			"nbinsx": 72,
+			"xMin": -4.5,
+			"xMax": 4.5,
+			"nbinsy": 130,
+			"yMin": -32.5,
+			"yMax": 32.5,
+			"plot_extras": 1,
+			"dress_plot": 1,
+			"layer": 4
+		}
+	]
+}
