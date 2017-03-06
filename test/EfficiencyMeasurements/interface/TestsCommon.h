@@ -59,6 +59,37 @@ void printClusterFieldInfo(const Cluster& clusterField)
 	std::cout << "--- End cluster field info ---" << std::endl;
 }
 
+void printTrajFieldInfoTrajOnly(const TrajMeasurement& trajField)
+{
+	std::cout << "--- Begin traj field info ---" << std::endl;
+	std::cout << "validhit:     " << trajField.validhit     << std::endl;;
+	std::cout << "missing:      " << trajField.missing      << std::endl;;
+	std::cout << "lx:           " << trajField.lx           << std::endl;;
+	std::cout << "ly:           " << trajField.ly           << std::endl;;
+	std::cout << "lz:           " << trajField.lz           << std::endl;;
+	std::cout << "glx:          " << trajField.glx          << std::endl;;
+	std::cout << "gly:          " << trajField.gly          << std::endl;;
+	std::cout << "glz:          " << trajField.glz          << std::endl;;
+	std::cout << "clust_near:   " << trajField.clust_near   << std::endl;;
+	std::cout << "hit_near:     " << trajField.hit_near     << std::endl;;
+	std::cout << "pass_effcuts: " << trajField.pass_effcuts << std::endl;;
+	std::cout << "alpha:        " << trajField.alpha        << std::endl;;
+	std::cout << "beta:         " << trajField.beta         << std::endl;;
+	std::cout << "norm_charge:  " << trajField.norm_charge  << std::endl;;
+	std::cout << "d_tr:         " << trajField.d_tr         << std::endl;;
+	std::cout << "dx_tr:        " << trajField.dx_tr        << std::endl;;
+	std::cout << "dy_tr:        " << trajField.dy_tr        << std::endl;;
+	std::cout << "d_cl:         " << trajField.d_cl         << std::endl;;
+	std::cout << "dx_cl:        " << trajField.dx_cl        << std::endl;;
+	std::cout << "dy_cl:        " << trajField.dy_cl        << std::endl;;
+	std::cout << "dx_hit:       " << trajField.dx_hit       << std::endl;;
+	std::cout << "dy_hit:       " << trajField.dy_hit       << std::endl;;
+	std::cout << "onedge:       " << trajField.onedge       << std::endl;;
+	std::cout << "lx_err:       " << trajField.lx_err       << std::endl;;
+	std::cout << "ly_err:       " << trajField.ly_err       << std::endl;;
+	std::cout << "--- End traj field info ---"   << std::endl;
+}
+
 void printTrajFieldInfo(const TrajMeasurement& trajField)
 {
 	std::cout << "--- Begin traj field info ---" << std::endl;
@@ -118,8 +149,8 @@ void printTrajFieldInfo(const TrajMeasurement& trajField)
 void downscale1DHistogram(TH1D* toDownscale, const TH1D* downscaleFactors)
 {
 	const auto& nBins = toDownscale -> GetNbinsX();
-	if(nBins != downscaleFactors -> GetNbinsX()) throw std::runtime_error("Error downscaling histograms: bin numbers do not match.");
-	for(int binNum = 0; binNum < nBins; ++binNum)
+	if(nBins != downscaleFactors -> GetNbinsX()) throw std::runtime_error(std::string("Error downscaling histograms: ") + toDownscale -> GetName() + ", " + downscaleFactors -> GetName() + " bin numbers do not match.");
+	for(int binNum = 0; binNum <= nBins; ++binNum)
 	{
 		const auto& binDownscaleFactor = downscaleFactors -> GetBinContent(binNum);
 		const auto& originalBinContent = toDownscale      -> GetBinContent(binNum);
@@ -133,10 +164,11 @@ void downscale2DHistogram(TH2D* toDownscale, const TH2D* downscaleFactors)
 {
 	const auto& nBinsX = toDownscale -> GetNbinsX();
 	const auto& nBinsY = toDownscale -> GetNbinsY();
-	if(nBinsX != downscaleFactors -> GetNbinsX() || nBinsY != downscaleFactors -> GetNbinsX()) throw std::runtime_error("Error downscaling histograms: bin numbers do not match.");
-	for(int binXNum = 0; binXNum < nBinsX; ++binXNum)
+	if(nBinsX != downscaleFactors -> GetNbinsX()) throw std::runtime_error(std::string("Error downscaling histograms: ") + toDownscale -> GetName() + ", " + downscaleFactors -> GetName() + " x bin numbers do not match.");
+	if(nBinsY != downscaleFactors -> GetNbinsY()) throw std::runtime_error(std::string("Error downscaling histograms: ") + toDownscale -> GetName() + ", " + downscaleFactors -> GetName() + " y bin numbers do not match.");
+	for(int binXNum = 0; binXNum <= nBinsX; ++binXNum)
 	{
-		for(int binYNum = 0; binYNum < nBinsY; ++binYNum)
+		for(int binYNum = 0; binYNum <= nBinsY; ++binYNum)
 		{
 			const auto& binDownscaleFactor = downscaleFactors -> GetBinContent(binXNum, binYNum);
 			const auto& originalBinContent = toDownscale      -> GetBinContent(binXNum, binYNum);

@@ -19,6 +19,7 @@
 #include "../interface/CanvasExtras.h"
 #include "../interface/TimerColored.h"
 #include "../interface/common_functions_jkarancs.h"
+#include "../interface/FilterCalibrationModule.h"
 
 // #include "../../../interface/CanvasExtras.h"
 
@@ -44,25 +45,13 @@
 #include <exception>
 #include <functional>
 #include <algorithm>
+#include <initializer_list>
 
 #include "../interface/json.hpp"
 using JSON = nlohmann::json;
 
 constexpr float HALF_PI = 0.5 * 3.141592653589793238462;
 
-constexpr int                  ZEROBIAS_TRIGGER_BIT               = 0;
-constexpr int                  ZEROBIAS_BITMASK                   = 1 << ZEROBIAS_TRIGGER_BIT;
-constexpr int                  VERTEX_NUMTRACK_CUT_N_MINUS_1_VAL  = 10;
-constexpr int                  TRACK_QUALITY_HIGH_PURITY_BIT      = 2;
-constexpr int                  TRACK_QUALITY_HIGH_PURITY_MASK     = 1 << TRACK_QUALITY_HIGH_PURITY_BIT;
-constexpr float                TRACK_PT_CUT_N_MINUS_1_VAL         = 1.0f;
-constexpr int                  TRACK_NSTRIP_CUT_N_MINUS_1_VAL     = 10;
-constexpr std::array<float, 4> TRACK_D0_CUT_BARREL_N_MINUS_1_VAL  = {0.01f, 0.02f, 0.02f, 0.02f};
-constexpr float                TRACK_D0_CUT_FORWARD_N_MINUS_1_VAL = 0.05f;
-constexpr float                TRACK_DZ_CUT_BARREL_N_MINUS_1_VAL  = 0.01f;
-constexpr float                TRACK_DZ_CUT_FORWARD_N_MINUS_1_VAL = 0.5f;
-constexpr float                MEAS_HITSEP_CUT_N_MINUS_1_VAL      = 0.5f;
-constexpr float                HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL   = 0.05f;
 constexpr auto                 PLOTS_SAVE_DIRECTORY               = "./results";
 
 constexpr std::array<int, 4>   LAYER_NUM_LADDERS{ 6, 14, 22, 32 };
@@ -75,6 +64,8 @@ const bool TRAJ_LOOP_REQUESTED    = true;
 void                                        testSaveFolders();
 void                                        readInFilesAndAddToChain(const JSON& config, const std::string& configKey, const std::string& innerKey, TChain* chain);
 std::map<std::string, std::shared_ptr<TH1>> processHistogramDefinitions(const JSON& config, const std::string& configKey, const std::string& innerKey);
+void                                        fillPairs(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& numHitsHisto, const std::string& efficiencyHisto, const float& xFill,                     const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
+void                                        fillPairs(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& numHitsHisto, const std::string& efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
 
 int main(int argc, char** argv) try
 {
@@ -105,283 +96,28 @@ int main(int argc, char** argv) try
 	std::cout << debug_prompt << "Total entries in the trajTree tree: " << trajTreeNumEntries << std::endl;
 	if(trajTreeNumEntries == 0 ) throw std::runtime_error("No entries found in tree: trajTree.");
 	// Histogram definitions
+	std::cout << process_prompt << "Loading histogram definitions... ";
 	std::map<std::string, std::shared_ptr<TH1>> histograms(processHistogramDefinitions(config, "histogram_definition_list", "histogram_definitions"));
+	std::cout << process_prompt << "Done." << std::endl;
+	FilterCalibrationModule filterCalibrationModule(histograms, eventField, trajField);
+	filterCalibrationModule.checkHistogramDependencies();
 	////////////////////////////////
 	// Trajector measurement loop //
 	////////////////////////////////
 	try
 	{
 		timer.restart("Measuring the time required for looping on the trajectory measurements...");
-		const int&   det             = trajField.mod_on.det;
-		const int&   layer           = trajField.mod_on.layer;
-		const int&   flipped         = trajField.mod_on.flipped;
-		const int&   disk            = trajField.mod_on.disk;
-		const int&   blade           = trajField.mod_on.blade;
-		const int&   panel           = trajField.mod_on.panel;
-		const int&   ring            = trajField.mod_on.ring;
-		const int&   missing         = trajField.missing;
-		const float& ladderCoord     = trajField.mod_on.ladder_coord;
-		const float& moduleCoord     = trajField.mod_on.module_coord;
-		const float& bladePanelCoord = trajField.mod_on.blade_panel_coord;
-		const float& diskRingCoord   = trajField.mod_on.disk_ring_coord;
-		const TrackData& trk         = trajField.trk;
-		int nvtxCut_counter = 0, zerobiasCut_counter = 0, federrCut_counter = 0, hpCut_counter = 0, ptCut_counter = 0, nstripCut_counter = 0, d0Cut_counter = 0, dzCut_counter = 0, pixhitCut_counter = 0, lxFidCut_counter = 0, lyFidCut_counter = 0, valmisCut_counter = 0, hitsepCut_counter = 0;
 		for(Long64_t entryIndex = 0; entryIndex < trajTreeNumEntries; ++entryIndex)
 		{
 			trajTreeChain -> GetEntry(entryIndex);
-			if(det == 0) switch(layer)
-			{
-				case 1:
-					histograms.at("OnTrkCluOccupancy_l1")  -> Fill(moduleCoord, ladderCoord);
-					break;
-				case 2:
-					histograms.at("OnTrkCluOccupancy_l2")  -> Fill(moduleCoord, ladderCoord);
-					break;
-				case 3:
-					histograms.at("OnTrkCluOccupancy_l3")  -> Fill(moduleCoord, ladderCoord);
-					break;
-				case 4:
-					histograms.at("OnTrkCluOccupancy_l4")  -> Fill(moduleCoord, ladderCoord);
-					break;
-				default:
-					std::cout << error_prompt << "Wrong layer number on barrel. Check the code source!" << std::endl; 
-			}
-			if(det == 1) histograms.at("OnTrkCluOccupancy_fwd") -> Fill(diskRingCoord, bladePanelCoord);
-			int nvtxCut = 0, zerobiasCut = 0, federrCut = 0, hpCut = 0, ptCut = 0, nstripCut = 0, d0Cut = 0, dzCut = 0, pixhitCut = 0, lxFidCut = 0, lyFidCut = 0, valmisCut = 0, hitsepCut = 0;
-			// Nvtx cut
-			// nvtxCut = 0 <= eventField.nvtx;
-			// nvtxCut = trk.fromVtxNtrk <= VERTEX_NUMTRACK_CUT_N_MINUS_1_VAL;
-			nvtxCut = VERTEX_NUMTRACK_CUT_N_MINUS_1_VAL < trk.fromVtxNtrk;
-			// Zerobias cut
-			zerobiasCut = eventField.trig & ZEROBIAS_BITMASK >> ZEROBIAS_TRIGGER_BIT;
-			// Federr cut
-			federrCut = eventField.federrs_size == 0;
-			// Hp cut
-			hpCut = (trk.quality & TRACK_QUALITY_HIGH_PURITY_MASK) >> TRACK_QUALITY_HIGH_PURITY_BIT;
-			// Pt cut
-			ptCut = TRACK_PT_CUT_N_MINUS_1_VAL < trk.pt;
-			// Nstrip cut
-			nstripCut = TRACK_NSTRIP_CUT_N_MINUS_1_VAL < trk.strip;
-			// D0 cut
-			if(det == 0) d0Cut = TRACK_D0_CUT_BARREL_N_MINUS_1_VAL[layer - 1] < std::abs(trk.d0);
-			if(det == 1) d0Cut = TRACK_D0_CUT_FORWARD_N_MINUS_1_VAL           < std::abs(trk.d0);
-			// Dz cut
-			if(det == 0) dzCut = TRACK_DZ_CUT_BARREL_N_MINUS_1_VAL  < std::abs(trk.dz);
-			if(det == 1) dzCut = TRACK_DZ_CUT_FORWARD_N_MINUS_1_VAL < std::abs(trk.dz);
-			// Pixhit cut
-			if(det == 0)
-			{
-				switch(layer)
-				{
-					case 1:
-						pixhitCut =
-							(trk.validbpix[1] > 0 && trk.validbpix[2] > 0 && trk.validbpix[3] > 0) ||
-							(trk.validbpix[1] > 0 && trk.validbpix[2] > 0 && trk.validfpix[0] > 0) ||
-							(trk.validbpix[1] > 0 && trk.validfpix[0] > 0 && trk.validfpix[1] > 0) ||
-							(trk.validfpix[0] > 0 && trk.validfpix[2] > 0 && trk.validfpix[2] > 0);
-						break;
-					case 2:
-						pixhitCut =
-							(trk.validbpix[0] > 0 && trk.validbpix[2] > 0 && trk.validbpix[3] > 0) ||
-							(trk.validbpix[0] > 0 && trk.validbpix[2] > 0 && trk.validfpix[0] > 0) ||
-							(trk.validbpix[0] > 0 && trk.validfpix[0] > 0 && trk.validfpix[1] > 0);
-						break;
-					case 3:
-						pixhitCut =
-							(trk.validbpix[0] > 0 && trk.validbpix[1] > 0 && trk.validbpix[3] > 0) ||
-							(trk.validbpix[0] > 0 && trk.validbpix[1] > 0 && trk.validfpix[0] > 0);
-						break;
-					case 4:
-						pixhitCut =
-							(trk.validbpix[0] > 0 && trk.validbpix[1] > 0 && trk.validbpix[2] > 0);
-						break;
-				}
-			}
-			if(det == 1)
-			{
-				switch(disk)
-				{
-					case 1:
-						pixhitCut =
-							(trk.validbpix[0] > 0 && trk.validbpix[1] > 0 && trk.validbpix[2] > 0) ||
-							(trk.validbpix[0] > 0 && trk.validbpix[1] > 0 && trk.validfpix[1] > 0) ||
-							(trk.validbpix[0] > 0 && trk.validfpix[1] > 0 && trk.validfpix[2] > 0);
-						break;
-					case 2:
-						pixhitCut =
-							(trk.validbpix[0] > 0 && trk.validbpix[1] > 0 && trk.validfpix[0] > 0) ||
-							(trk.validbpix[0] > 0 && trk.validfpix[0] > 0 && trk.validfpix[2] > 0);
-						break;
-					case 3:
-						pixhitCut =
-							(trk.validbpix[0] > 0 && trk.validfpix[0] > 0 && trk.validfpix[1] > 0);
-						break;
-				}
-			}
-			// Fidicual cuts
-			lxFidCut = 1;
-			lyFidCut = 1;
-			// Valmis cut
-			valmisCut = trajField.validhit || trajField.missing;
-			// Hitsep cut
-			hitsepCut = trajField.d_tr < MEAS_HITSEP_CUT_N_MINUS_1_VAL;
-			// std::cout << " --- Start cut values --- " << std::endl;
-			// std::cout << "nvtxCut:     " << nvtxCut     << std::endl;
-			// std::cout << "zerobiasCut: " << zerobiasCut << std::endl;
-			// std::cout << "federrCut:   " << federrCut   << std::endl;
-			// std::cout << "hpCut:       " << hpCut       << std::endl;
-			// std::cout << "ptCut:       " << ptCut       << std::endl;
-			// std::cout << "nstripCut:   " << nstripCut   << std::endl;
-			// std::cout << "d0Cut:       " << d0Cut       << std::endl;
-			// std::cout << "dzCut:       " << dzCut       << std::endl;
-			// std::cout << "pixhitCut:   " << pixhitCut   << std::endl;
-			// std::cout << "lxFidCut:    " << lxFidCut    << std::endl;
-			// std::cout << "lyFidCut:    " << lyFidCut    << std::endl;
-			// std::cout << "valmisCut:   " << valmisCut   << std::endl;
-			// std::cout << "hitsepCut:   " << hitsepCut   << std::endl;
-			// std::cout << " --- End cut values --- " << std::endl;
-			// std::cout << "qulatity:    " << trk.quality       << std::endl;
-			// std::cout << "fromVtxNtrk: " << trk.fromVtxNtrk   << std::endl;
-			// std::cout << "d0:          "  << std::abs(trk.d0) << std::endl;
-			// std::cout << "dz:          "  << std::abs(trk.dz) << std::endl;
-			// std::cin.get();
-			if(zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
-			{
-				histograms.at("nMinus1VtxNtrkNumhits") -> Fill(trk.fromVtxNtrk);
-				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
-				{
-					histograms.at("nMinus1VtxNtrkEfficiency") -> Fill(trk.fromVtxNtrk);
-				}
-			}
-			if(nvtxCut && zerobiasCut && federrCut && hpCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
-			{
-				histograms.at("nMinus1PtNumhits") -> Fill(trk.pt);
-				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
-				{
-					histograms.at("nMinus1PtEfficiency") -> Fill(trk.pt);
-				}
-			}
-			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
-			{
-				histograms.at("nMinus1stripNumhits") -> Fill(trk.strip);
-				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
-				{
-					histograms.at("nMinus1stripEfficiency") -> Fill(trk.strip);
-				}
-			}
-			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
-			{
-				static const std::array<std::string, 4> names = {"nMinus1D0BarrelNumhits", "nMinus1D0BarrelEfficiency", "nMinus1D0ForwardNumhits", "nMinus1D0ForwardEfficiency"};
-				histograms.at(names[det * 2]) -> Fill(trk.d0);
-				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
-				{
-					histograms.at(names[det * 2 + 1]) -> Fill(trk.d0);
-				}
-			}
-			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
-			{
-				static const std::array<std::string, 4> names = {"nMinus1DZBarrelNumhits", "nMinus1DZBarrelEfficiency", "nMinus1DZForwardNumhits", "nMinus1DZForwardEfficiency"};
-				histograms.at(names[det * 2]) -> Fill(trk.dz);
-				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
-				{
-					histograms.at(names[det * 2]) -> Fill(trk.dz);
-				}
-			}
-			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && valmisCut && hitsepCut)
-			{
-				histograms.at("nMinus1LXNumhits") -> Fill(trajField.lx);
-				histograms.at("nMinus1LyNumhits") -> Fill(trajField.ly);
-				if(det == 0 && !flipped)
-				{
-					static const std::array<std::string, 4> names = {"nMinus1LocalPosNumhitsLay1", "nMinus1LocalPosNumhitsLay2", "nMinus1LocalPosNumhitsLay3", "nMinus1LocalPosNumhitsLay4"};
-					histograms.at(names[layer - 1]) -> Fill(trajField.lx, trajField.ly);
-				}
-				if(det == 1)
-				{
-					static const std::array<std::string, 4> names = {"nMinus1LocalPosNumhitsForward1", "nMinus1LocalPosNumhitsForward2", "nMinus1LocalPosNumhitsForward3", "nMinus1LocalPosNumhitsForward4"};
-					if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 0) histograms.at(names[0]) -> Fill(trajField.lx, trajField.ly);
-					if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 1) histograms.at(names[1]) -> Fill(trajField.lx, trajField.ly);
-					if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 0) histograms.at(names[2]) -> Fill(trajField.lx, trajField.ly);
-					if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 1) histograms.at(names[3]) -> Fill(trajField.lx, trajField.ly);
-				}
-				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
-				{
-					histograms.at("nMinus1LXEfficiency") -> Fill(trajField.lx);
-					histograms.at("nMinus1LyEfficiency") -> Fill(trajField.ly);
-					if(det == 0 && !flipped)
-					{
-						static const std::array<std::string, 4> names = {"nMinus1LocalPosEfficiencyLay1", "nMinus1LocalPosEfficiencyLay2", "nMinus1LocalPosEfficiencyLay3", "nMinus1LocalPosEfficiencyLay4"};
-						histograms[names[layer - 1]] -> Fill(trajField.lx, trajField.ly);
-					}
-					if(det == 1)
-					{
-						static const std::array<std::string, 4> names = {"nMinus1LocalPosEfficiencyForward1", "nMinus1LocalPosEfficiencyForward2", "nMinus1LocalPosEfficiencyForward3", "nMinus1LocalPosEfficiencyForward4"};
-						if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 0) histograms.at(names[0]) -> Fill(trajField.lx, trajField.ly);
-						if(ring == 1 && std::abs(blade % 2) == 0 && panel % 2 == 1) histograms.at(names[1]) -> Fill(trajField.lx, trajField.ly);
-						if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 0) histograms.at(names[2]) -> Fill(trajField.lx, trajField.ly);
-						if(ring == 1 && std::abs(blade % 2) == 1 && panel % 2 == 1) histograms.at(names[3]) -> Fill(trajField.lx, trajField.ly);
-					}
-				}
-			}
-			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut)
-			{
-				histograms.at("nMinus1HitDistNumhits") -> Fill(trajField.d_tr);
-				if(!(missing && HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL < trajField.d_cl))
-				{
-					histograms.at("nMinus1HitDistEfficiency") -> Fill(trajField.d_tr);
-				}
-			}
-			if(nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut)
-			{
-				histograms.at("nMinus1CluDistNumhits") -> Fill(trajField.d_cl);
-				if(!missing)
-				{
-					histograms.at("nMinus1CluDistEfficiency") -> Fill(trajField.d_cl);
-				}
-			}
-			nvtxCut_counter     += nvtxCut;
-			zerobiasCut_counter += zerobiasCut;
-			federrCut_counter   += federrCut;
-			hpCut_counter       += hpCut;
-			ptCut_counter       += ptCut;
-			nstripCut_counter   += nstripCut;
-			d0Cut_counter       += d0Cut;
-			dzCut_counter       += dzCut;
-			pixhitCut_counter   += pixhitCut;
-			lxFidCut_counter    += lxFidCut;
-			lyFidCut_counter    += lyFidCut;
-			valmisCut_counter   += valmisCut;
-			hitsepCut_counter   += hitsepCut;
-			// Perform cuts
-			// if(nvtxCut)     continue;
-			// if(zerobiasCut) continue;
-			// if(federrCut)   continue;
-			// if(hpCut)       continue;
-			// if(ptCut)       continue;
-			// if(nstripCut)   continue;
-			// if(d0Cut)       continue;
-			// if(dzCut)       continue;
-			// if(pixhitCut)   continue;
-			// if(lxFidCut)    continue;
-			// if(lyFidCut)    continue;
-			// if(valmisCut)   continue;
-			// if(hitsepCut)   continue;
+			filterCalibrationModule.fillFilterHistograms();
+			// printTrajFieldInfoTrajOnly(trajField);
 		}
-		std::cout << " --- Start counter counters values --- " << std::endl;
-		std::cout << "nvtxCut:     " << std::setw(12) << nvtxCut_counter     << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << nvtxCut_counter     * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "zerobiasCut: " << std::setw(12) << zerobiasCut_counter << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << zerobiasCut_counter * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "federrCut:   " << std::setw(12) << federrCut_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << federrCut_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "hpCut:       " << std::setw(12) << hpCut_counter       << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << hpCut_counter       * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "ptCut:       " << std::setw(12) << ptCut_counter       << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << ptCut_counter       * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "nstripCut:   " << std::setw(12) << nstripCut_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << nstripCut_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "d0Cut:       " << std::setw(12) << d0Cut_counter       << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << d0Cut_counter       * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "dzCut:       " << std::setw(12) << dzCut_counter       << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << dzCut_counter       * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "pixhitCut:   " << std::setw(12) << pixhitCut_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << pixhitCut_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "lxFidCut:    " << std::setw(12) << lxFidCut_counter    << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << lxFidCut_counter    * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "lyFidCut:    " << std::setw(12) << lyFidCut_counter    << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << lyFidCut_counter    * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "valmisCut:   " << std::setw(12) << valmisCut_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << valmisCut_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << "hitsepCut:   " << std::setw(12) << hitsepCut_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << hitsepCut_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		std::cout << " --- End cut counter values --- " << std::endl;
+		filterCalibrationModule.printCounters();
+		// std::cout << "Number of validhits:                                           " << std::setw(12) << validhit_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << validhit_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		// std::cout << "Number of hits inside the increased search range:              " << std::setw(12) << clust_near_counter << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << clust_near_counter * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		// std::cout << "Number of missing hits:                                        " << std::setw(12) << missing_counter    << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << missing_counter    * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
+		// std::cout << "Number of missing hits with increased cluster search range:    " << std::setw(12) << missing_counter    << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << missing_counter    * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
 		timer.printSeconds("Loop done. Took about: ", " second(s).");
 	}
 	catch(const std::exception& e)
@@ -394,22 +130,28 @@ int main(int argc, char** argv) try
 	////////////////////////////
 	{
 		static const std::string efficiencyPlotIdentifier      = "Efficiency";
-		static const std::string efficiencyNumeratorIdentifier = "NumHits";
+		static const std::string efficiencyNumeratorIdentifier = "Numhits";
 		for(const auto& histogramPair: histograms)
 		{
 			std::string efficiencyHistoName = histogramPair.first;
 			size_t      effPos              = efficiencyHistoName.find(efficiencyPlotIdentifier);
 			if(effPos == std::string::npos)      continue;
-			std::string numeratorHistoName  = efficiencyHistoName.replace(effPos, efficiencyPlotIdentifier.size(), efficiencyNumeratorIdentifier);
+			std::string numeratorHistoName  = std::string(efficiencyHistoName).replace(effPos, efficiencyPlotIdentifier.size(), efficiencyNumeratorIdentifier);
 			auto numHitsHisto               = histograms.find(numeratorHistoName);
-			if(numHitsHisto == histograms.end()) continue;
+			if(numHitsHisto == histograms.end())
+			{
+				std::cout << error_prompt << "Efficiency histo: " << efficiencyHistoName << " exist, but there is no histogram called: " << numeratorHistoName << std::endl;
+				continue;
+			}
 			auto efficiencyHisto2DPtrConversionResult = dynamic_cast<TH2D*>(histogramPair.second.get());
 			if(efficiencyHisto2DPtrConversionResult)
 			{
 				downscale2DHistogram(efficiencyHisto2DPtrConversionResult, dynamic_cast<TH2D*>(numHitsHisto -> second.get()));
+				efficiencyHisto2DPtrConversionResult -> GetZaxis() -> SetRangeUser(0.98, 1.01);
 				continue;
 			}
 			downscale1DHistogram(dynamic_cast<TH1D*>(histogramPair.second.get()), dynamic_cast<TH1D*>(numHitsHisto -> second.get()));
+			dynamic_cast<TH1D*>(histogramPair.second.get()) -> GetYaxis() -> SetRangeUser(0.98, 1.01);
 		}
 	}
 	///////////////////////
@@ -474,7 +216,6 @@ int main(int argc, char** argv) try
 			const PlotOptions& plotOptions   = plotOptionsMap.at(histogramName);
 			TCanvas* canvas = custom_can_(histogram, histogramName + "_canvas", 0, 0, 800, 800, 80, 140);
 			canvas -> cd();
-			// histogram.SetFillColor(38);
 			// std::cout << "Histogram name: "    << histogramName << std::endl;
 			// std::cout << "Number of entries: " << histogram -> GetEntries() << std::endl; 
 			TH2D* histo2D = dynamic_cast<TH2D*>(histogram);
@@ -488,7 +229,19 @@ int main(int argc, char** argv) try
 					// std::cout << debug_prompt << "Dress occup plot called with layer: " << plotOptions.layer << " and phase scenario: " << PHASE_SCENARIO << "." << std::endl;
 				}
 			}
-			else dynamic_cast<TH1D*>(histogram) -> Draw("BHIST");
+			else 
+			{
+				histogram -> SetFillColor(38);
+				if(dynamic_cast<TH1D*>(histogram) == nullptr)
+				{
+					std::cout << error_prompt << " error while typecasting for drawing." << std::endl;
+				}
+				// else
+				// {
+					// std::cout << "Drawn with entries: " << dynamic_cast<TH1D*>(histogram) -> GetEntries() << std::endl;
+				// }
+				dynamic_cast<TH1D*>(histogram) -> Draw("HIST");
+			}
 			// TText label;
 			// CanvasExtras::setLabelStyleNote(label);
 			canvas -> Update();

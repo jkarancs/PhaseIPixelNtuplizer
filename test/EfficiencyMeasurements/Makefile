@@ -1,7 +1,7 @@
 include Makefile.arch
 SrcSuf = cc
 
-CXX  += -std=c++14 -fdiagnostics-color=always -Wall
+CXX  += -std=c++1z -fdiagnostics-color=always -Wall
 LIBS += -lboost_system -lboost_filesystem
 
 # Utility
@@ -37,6 +37,10 @@ OBJS     += $(CANVASEXTRAS_O)
 EFFICIENCY_FILTERS_S = ../../src/PhaseITrackingEfficiencyFilters.$(SrcSuf)
 EFFICIENCY_FILTERS_O = ./obj/PhaseITrackingEfficiencyFilters.$(ObjSuf)
 OBJS     += $(EFFICIENCY_FILTERS_O)
+
+FILTERCALIBRATION_MODULE_S = ./src/FilterCalibrationModule.$(SrcSuf)
+FILTERCALIBRATION_MODULE_O = ./obj/FilterCalibrationModule.$(ObjSuf)
+OBJS     += $(FILTERCALIBRATION_MODULE_O)
 
 # PROGRAMS
 
@@ -76,7 +80,7 @@ $(EFFICIENCY_MULTIHITMEAS_A): $(EFFICIENCY_MULTIHITMEAS_O) $(CONSOLECOLORS_O) $(
 	@echo "Succesful make..."
 	@echo "...$@ is ready to use."
 
-$(EFFICIENCY_FILTERCALIBRATION_A): $(EFFICIENCY_FILTERCALIBRATION_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O)
+$(EFFICIENCY_FILTERCALIBRATION_A): $(EFFICIENCY_FILTERCALIBRATION_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O) $(FILTERCALIBRATION_MODULE_O)
 	@printf "Compiling done, linking efficiency_filterCalibration...\n"
 	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
 	$(MT_EXE)
@@ -126,6 +130,11 @@ $(EFFICIENCY_FILTERS_O): $(EFFICIENCY_FILTERS_S)
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 
+$(FILTERCALIBRATION_MODULE_O): $(FILTERCALIBRATION_MODULE_S)
+	@printf "Compiling utility: \"FilterCalibrationModule\"...\n"
+	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
+	@printf "Done.\n"
+
 ###
 
 $(EFFICIENCY_MAIN_O): $(EFFICIENCY_MAIN_S)  
@@ -138,7 +147,7 @@ $(EFFICIENCY_MULTIHITMEAS_O): $(EFFICIENCY_MULTIHITMEAS_S)
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 
-$(EFFICIENCY_FILTERCALIBRATION_O): $(EFFICIENCY_FILTERCALIBRATION_S)  
+$(EFFICIENCY_FILTERCALIBRATION_O): $(EFFICIENCY_FILTERCALIBRATION_S)
 	@printf "Compiling program: \"efficiency_filterCalibration\"...\n"
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"

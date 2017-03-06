@@ -1,5 +1,5 @@
 {
-	"input_files_list": "config_input_files.json",
+	"input_files_list": "config_input_files_test.json",
 	"histogram_definition_list": "config_histogram_definitions.json",
 	"save_plots": true
 }

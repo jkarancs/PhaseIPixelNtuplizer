@@ -86,6 +86,7 @@ void PhaseIPixelNtuplizer::endJob()
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	constexpr int PHASE_SCENARIO = 1;
 	gStyle -> SetPalette(1);
+	gStyle -> SetNumberContours(999);
 	const std::array<TH2D*, 5> histogramsToSave = 
 	{{
 		onTrkCluOccupancy_fwd,
@@ -874,7 +875,7 @@ namespace NtuplizerHelpers
 		float dyHit = lhsLocalXY.second - rhsLocalXY.second;
 		dxSquared = dxHit * dxHit;
 		dySquared = dyHit * dyHit;
-		distanceSquared = dxSquared * dySquared;
+		distanceSquared = dxSquared + dySquared;
 	}
 	void trajMeasurementDistance(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs, float& distance, float& dx, float& dy)
 	{
