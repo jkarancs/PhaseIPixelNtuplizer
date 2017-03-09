@@ -342,9 +342,18 @@ void PhaseIPixelNtuplizer::getClustInfo(const edm::Handle<edmNew::DetSetVector<S
 			}
 			if(clu_.mod_on.det == 1) onTrkCluOccupancy_fwd -> Fill(clu_.mod_on.disk_ring_coord, clu_.mod_on.blade_panel_coord);
 #endif
+			const GeomDetUnit* geomDetUnit = trackerGeometry_ -> idToDetUnit(detId);
+			LocalPoint clustLocalCoordinates;
+			std::tie(clustLocalCoordinates, std::ignore, std::ignore) = pixelClusterParameterEstimator_ -> getParameters(currentCluster, *geomDetUnit);
+			GlobalPoint clustGlobalCoordinates = geomDetUnit -> toGlobal(clustLocalCoordinates);
 			// Position and size
 			clu_.x     = currentCluster.x();
 			clu_.y     = currentCluster.y();
+			clu_.lx    = clustLocalCoordinates.x();
+			clu_.lx    = clustLocalCoordinates.y();
+			clu_.glx   = clustGlobalCoordinates.x();
+			clu_.gly   = clustGlobalCoordinates.y();
+			clu_.glz   = clustGlobalCoordinates.z();
 			clu_.sizeX = currentCluster.sizeX();
 			clu_.sizeY = currentCluster.sizeY();
 			clu_.size  = currentCluster.size();
@@ -389,8 +398,11 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackInfo(const edm
 			std::fill(newTrackData.validfpix,   newTrackData.validfpix   + 3, 0);
 			std::fill(newTrackData.validbpix,   newTrackData.validbpix   + 4, 0);
 			newTrackData.strip          = 0;
-			// FIXME: use best vertex selection instead of closest vertex selection
+			// Closest vertex			
+			int hasGoodParentVertex = 1;
+			// TODO: This might be better off limited to search with a maximum distance
 			reco::VertexCollection::const_iterator closestVtx = NtuplizerHelpers::findClosestVertexToTrack(track, vertexCollectionHandle, 10);
+			if(closestVtx != vertexCollectionHandle -> end()) hasGoodParentVertex = 0;
 			// Basic track quantities
 			newTrackData.i           = trackIndex++;
 			newTrackData.quality     = track -> qualityMask();
@@ -400,10 +412,10 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackInfo(const edm
 			newTrackData.theta       = track -> theta();
 			newTrackData.phi         = track -> phi();
 			// newTrackData.d0          = track -> d0(closestVtx -> position());
-			newTrackData.d0          = track -> dxy(closestVtx -> position()) * -1.0;
-			newTrackData.dz          = track -> dz(closestVtx -> position());
+			if(hasGoodParentVertex) newTrackData.d0          = track -> dxy(closestVtx -> position()) * -1.0;
+			if(hasGoodParentVertex) newTrackData.dz          = track -> dz(closestVtx -> position());
 			// newTrackData.fromVtxNtrk = NtuplizerHelpers::getTrackParentVtxNumTracks(vertexCollectionHandle, track);
-			newTrackData.fromVtxNtrk = closestVtx -> tracksSize();
+			if(hasGoodParentVertex) newTrackData.fromVtxNtrk = closestVtx -> tracksSize();
 			trackDataCollection.insert({track, std::move(newTrackData)});
 			trackField = &(trackDataCollection.at(track));
 		}
@@ -547,6 +559,7 @@ void PhaseIPixelNtuplizer::getTrajTrackInfo(const edm::Handle<reco::VertexCollec
 				{
 					LocalPoint clustLocalCoordinates;
 					std::tie(clustLocalCoordinates, std::ignore, std::ignore) = pixelClusterParameterEstimator_ -> getParameters(*clust, *geomDetUnit);
+					GlobalPoint clustGlobalCoordinates = geomDetUnit -> toGlobal(clustLocalCoordinates);
 					traj_.clu.charge = clust -> charge() / 1000.0f;
 					traj_.clu.size   = clust -> size();
 					traj_.clu.edge   = hit -> isOnEdge() ? 1 : 0;
@@ -556,6 +569,11 @@ void PhaseIPixelNtuplizer::getTrajTrackInfo(const edm::Handle<reco::VertexCollec
 					traj_.clu.sizeY  = clust -> sizeY();
 					traj_.clu.x      = clust -> x();
 					traj_.clu.y      = clust -> y();
+					traj_.clu.lx     = clustLocalCoordinates.x();
+					traj_.clu.lx     = clustLocalCoordinates.y();
+					traj_.clu.glx    = clustGlobalCoordinates.x();
+					traj_.clu.gly    = clustGlobalCoordinates.y();
+					traj_.clu.glz    = clustGlobalCoordinates.z();
 					for(int i = 0; i < clust -> size() && i < 1000; i++)
 					{
 						traj_.clu.adc[i]    = static_cast<float>(clust -> pixelADC()[i]) / 1000.0f;
@@ -839,10 +857,10 @@ namespace NtuplizerHelpers
 			// Filter out invalid vertices
 			if(!isVertexGood(*it)) continue;
 			// Comparing squareroots should be quick enough, if required, change this to a comparison of squares
-			double trkVtxDB = trackVertexDistance(it);
-			if(trkVtxDB < minDistance)
+			double trkVtxDist = trackVertexDistance(it);
+			if(trkVtxDist < minDistance)
 			{
-				minDistance = std::move(trkVtxDB);
+				minDistance = std::move(trkVtxDist);
 				closestVtx  = it;
 			}
 		}

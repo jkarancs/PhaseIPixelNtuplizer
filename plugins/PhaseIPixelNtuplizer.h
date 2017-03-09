@@ -47,7 +47,7 @@
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
-#include "../interface/DataStructures_v3.h" // 2016 Dec 16, CMSSW_8_1_0
+#include "../interface/DataStructures_v4.h" // 2017 Mar 9, CMSSW_9_0_0_pre6
 
 // New class for plotting Phase 0/1 Geometry (Will be added to DQM later)
 #include "../interface/SiPixelCoordinates.h"
