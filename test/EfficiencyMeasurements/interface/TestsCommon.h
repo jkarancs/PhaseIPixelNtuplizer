@@ -152,8 +152,8 @@ void downscale1DHistogram(TH1D* toDownscale, const TH1D* downscaleFactors)
 	if(nBins != downscaleFactors -> GetNbinsX()) throw std::runtime_error(std::string("Error downscaling histograms: ") + toDownscale -> GetName() + ", " + downscaleFactors -> GetName() + " bin numbers do not match.");
 	for(int binNum = 0; binNum <= nBins; ++binNum)
 	{
-		const auto& binDownscaleFactor = downscaleFactors -> GetBinContent(binNum);
-		const auto& originalBinContent = toDownscale      -> GetBinContent(binNum);
+		const auto originalBinContent = toDownscale      -> GetBinContent(binNum);
+		const auto binDownscaleFactor = downscaleFactors -> GetBinContent(binNum);
 		if(binDownscaleFactor == 0) continue;
 		// std::cout << "Efficiency bin content before scaling: " << originalBinContent << std::endl;
 		toDownscale -> SetBinContent(binNum, originalBinContent / binDownscaleFactor);
@@ -170,10 +170,20 @@ void downscale2DHistogram(TH2D* toDownscale, const TH2D* downscaleFactors)
 	{
 		for(int binYNum = 0; binYNum <= nBinsY; ++binYNum)
 		{
-			const auto& binDownscaleFactor = downscaleFactors -> GetBinContent(binXNum, binYNum);
-			const auto& originalBinContent = toDownscale      -> GetBinContent(binXNum, binYNum);
+			const auto originalBinContent = toDownscale      -> GetBinContent(binXNum, binYNum);
+			const auto binDownscaleFactor = downscaleFactors -> GetBinContent(binXNum, binYNum);
 			if(binDownscaleFactor == 0) continue;
 			toDownscale -> SetBinContent(binXNum, binYNum, originalBinContent / binDownscaleFactor);
+			if(1 < toDownscale -> GetBinContent(binXNum, binYNum))
+			{
+				std::cout << "--- Begin bad bin ---" << std::endl;
+				std::cout << "Histo to downscale: "         << toDownscale      -> GetName() << ", aka: " << toDownscale      -> GetTitle() << std::endl;
+				std::cout << "Downscale factor histogram: " << downscaleFactors -> GetName() << ", aka: " << downscaleFactors -> GetTitle() << std::endl;
+				std::cout << "Efficiency bin content before scaling: " << originalBinContent << std::endl;
+				std::cout << "Efficiency bin scale factor: "           << binDownscaleFactor << std::endl;
+				std::cout << "Efficiency bin content after scaling : " << toDownscale -> GetBinContent(binXNum, binYNum) << std::endl;
+				std::cout << "--- End bad bin ---"  << std::endl;
+			}
 		}
 	}
 };

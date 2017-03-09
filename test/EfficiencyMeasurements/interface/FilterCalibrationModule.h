@@ -32,14 +32,16 @@ class FilterCalibrationModule
 		static constexpr float                MEAS_HITSEP_CUT_N_MINUS_1_VAL      = 0.01f;
 		static constexpr float                HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL   = 0.005f;
 
-		HistoMapType&          histograms_;
 		const EventData&       eventField_;
 		const TrajMeasurement& trajField_;
+
+		int before = 0;
 
 		// Shortcuts
 		const int&       det_;
 		const int&       layer_;
 		const int&       flipped_;
+		const int&       side_;
 		const int&       disk_;
 		const int&       blade_;
 		const int&       panel_;
@@ -81,33 +83,47 @@ class FilterCalibrationModule
 		int valmisCut_counter_   = 0;
 		int hitsepCut_counter_   = 0;
 		int effCutAll_counter_   = 0;
-		// Key list (for checks)
-		const std::vector<std::string> histogramKeyList_ = 
-		{
-			"nMinus1VtxNtrkNumhits",             "nMinus1VtxNtrkEfficiency",         
-			"nMinus1PtNumhits",                  "nMinus1PtEfficiency",              
-			"nMinus1stripNumhits",               "nMinus1stripEfficiency",           
-			"nMinus1LxNumhits",                  "nMinus1LxEfficiency",              
-			"nMinus1LyNumhits",                  "nMinus1LyEfficiency",              
-			"nMinus1HitDistNumhits",             "nMinus1HitDistEfficiency",         
-			"nMinus1CluDistNumhits",             "nMinus1CluDistEfficiency",         
-			"nMinus1D0BarrelNumhits",            "nMinus1D0BarrelEfficiency",         "nMinus1D0ForwardNumhits",           "nMinus1D0ForwardEfficiency",
-			"nMinus1DZBarrelNumhits",            "nMinus1DZBarrelEfficiency",         "nMinus1DZForwardNumhits",           "nMinus1DZForwardEfficiency",
-			"nMinus1LocalPosNumhitsLay1",        "nMinus1LocalPosNumhitsLay2",        "nMinus1LocalPosNumhitsLay3",        "nMinus1LocalPosNumhitsLay4",
-			"nMinus1LocalPosEfficiencyLay1",     "nMinus1LocalPosEfficiencyLay2",     "nMinus1LocalPosEfficiencyLay3",     "nMinus1LocalPosEfficiencyLay4",
-			"nMinus1LocalPosNumhitsForward1",    "nMinus1LocalPosNumhitsForward2",    "nMinus1LocalPosNumhitsForward3",    "nMinus1LocalPosNumhitsForward4",
-			"nMinus1LocalPosEfficiencyForward1", "nMinus1LocalPosEfficiencyForward2", "nMinus1LocalPosEfficiencyForward3", "nMinus1LocalPosEfficiencyForward4"
-		};
+		// Histograms
+		TH1* onTrkCluOccupancy_l1;              TH1* onTrkCluOccupancy_l2;              TH1* onTrkCluOccupancy_l3;              TH1* onTrkCluOccupancy_l4;              TH1* onTrkCluOccupancy_fwd;
+		TH1* rocNumhitsWithCuts_l1;             TH1* rocNumhitsWithCuts_l2;             TH1* rocNumhitsWithCuts_l3;             TH1* rocNumhitsWithCuts_l4;             TH1* rocNumhitsWithCuts_fwd;
+		TH1* rocEfficiencyWithCuts_l1;          TH1* rocEfficiencyWithCuts_l2;          TH1* rocEfficiencyWithCuts_l3;          TH1* rocEfficiencyWithCuts_l4;          TH1* rocEfficiencyWithCuts_fwd;
+		TH1* vtxNtrkNumhitsPreCuts;             TH1* vtxNtrkEfficiencyPreCuts;
+		TH1* nMinus1VtxNtrkNumhits;             TH1* nMinus1VtxNtrkEfficiency;
+		TH1* nMinus1PtNumhits;                  TH1* nMinus1PtEfficiency;
+		TH1* ptNumhitsPreCuts;                  TH1* ptEfficiencyPreCuts;
+		TH1* stripNumhitsPreCuts;               TH1* stripEfficiencyPreCuts;
+		TH1* nMinus1stripNumhits;               TH1* nMinus1stripEfficiency;
+		TH1* lxNumhitsPreCuts;                  TH1* lxEfficiencyPreCuts;
+		TH1* nMinus1LxNumhits;                  TH1* nMinus1LxEfficiency;
+		TH1* lyNumhitsPreCuts;                  TH1* lyEfficiencyPreCuts;
+		TH1* nMinus1LyNumhits;                  TH1* nMinus1LyEfficiency;
+		TH1* hitDistNumhitsPreCuts;             TH1* hitDistEfficiencyPreCuts;
+		TH1* nMinus1HitDistNumhits;             TH1* nMinus1HitDistEfficiency;
+		TH1* cluDistNumhitsPreCuts;             TH1* cluDistEfficiencyPreCuts;
+		TH1* nMinus1CluDistNumhits;             TH1* nMinus1CluDistEfficiency;
+		TH1* d0BarrelNumhitsPreCuts;            TH1* d0BarrelEfficiencyPreCuts;
+		TH1* nMinus1D0BarrelNumhits;            TH1* nMinus1D0BarrelEfficiency;
+		TH1* d0ForwardNumhitsPreCuts;           TH1* d0ForwardEfficiencyPreCuts;
+		TH1* nMinus1D0ForwardNumhits;           TH1* nMinus1D0ForwardEfficiency;
+		TH1* dZBarrelNumhitsPreCuts;            TH1* dZBarrelEfficiencyPreCuts;         TH1* dZForwardNumhitsPreCuts;           TH1* dZForwardEfficiencyPreCuts;
+		TH1* nMinus1DZBarrelNumhits;            TH1* nMinus1DZBarrelEfficiency;
+		TH1* localPosNumhitsLay1PreCuts;        TH1* localPosEfficiencyLay1PreCuts;     TH1* localPosNumhitsLay2PreCuts;        TH1* localPosEfficiencyLay2PreCuts;     TH1* localPosNumhitsLay3PreCuts;        TH1* localPosEfficiencyLay3PreCuts;     TH1* localPosNumhitsLay4PreCuts;        TH1* localPosEfficiencyLay4PreCuts;
+		TH1* localPosNumhitsForward1PreCuts;    TH1* localPosNumhitsForward2PreCuts;    TH1* localPosNumhitsForward3PreCuts;    TH1* localPosNumhitsForward4PreCuts;    TH1* localPosNumhitsForward5PreCuts;    TH1* localPosNumhitsForward6PreCuts;    TH1* localPosNumhitsForward7PreCuts;    TH1* localPosNumhitsForward8PreCuts;
+		TH1* localPosEfficiencyForward1PreCuts; TH1* localPosEfficiencyForward2PreCuts; TH1* localPosEfficiencyForward3PreCuts; TH1* localPosEfficiencyForward4PreCuts; TH1* localPosEfficiencyForward5PreCuts; TH1* localPosEfficiencyForward6PreCuts; TH1* localPosEfficiencyForward7PreCuts; TH1* localPosEfficiencyForward8PreCuts;
+		TH1* nMinus1DZForwardNumhits;           TH1* nMinus1DZForwardEfficiency;
+		TH1* nMinus1LocalPosNumhitsLay1;        TH1* nMinus1LocalPosNumhitsLay2;        TH1* nMinus1LocalPosNumhitsLay3;        TH1* nMinus1LocalPosNumhitsLay4;
+		TH1* nMinus1LocalPosEfficiencyLay1;     TH1* nMinus1LocalPosEfficiencyLay2;     TH1* nMinus1LocalPosEfficiencyLay3;     TH1* nMinus1LocalPosEfficiencyLay4;
+		TH1* nMinus1LocalPosNumhitsForward1;    TH1* nMinus1LocalPosNumhitsForward2;    TH1* nMinus1LocalPosNumhitsForward3;    TH1* nMinus1LocalPosNumhitsForward4;    TH1* nMinus1LocalPosNumhitsForward5;    TH1* nMinus1LocalPosNumhitsForward6;    TH1* nMinus1LocalPosNumhitsForward7;    TH1* nMinus1LocalPosNumhitsForward8;
+		TH1* nMinus1LocalPosEfficiencyForward1; TH1* nMinus1LocalPosEfficiencyForward2; TH1* nMinus1LocalPosEfficiencyForward3; TH1* nMinus1LocalPosEfficiencyForward4; TH1* nMinus1LocalPosEfficiencyForward5; TH1* nMinus1LocalPosEfficiencyForward6; TH1* nMinus1LocalPosEfficiencyForward7; TH1* nMinus1LocalPosEfficiencyForward8;
 	public:
 		FilterCalibrationModule(HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
 		~FilterCalibrationModule() = default;
-		void checkHistogramDependencies();
-		void fillFilterHistograms();
+		void fillHistograms();
 		void printCounters();
 		void printCutValues();
 	private:
-		void fillPairs(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& numHitsHisto, const std::string& efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
-		void fillPairs(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& numHitsHisto, const std::string& efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
+		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
+		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
 		void calculateCuts();
 		void incrementCounters();
 };

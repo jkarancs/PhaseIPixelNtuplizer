@@ -42,6 +42,10 @@ FILTERCALIBRATION_MODULE_S = ./src/FilterCalibrationModule.$(SrcSuf)
 FILTERCALIBRATION_MODULE_O = ./obj/FilterCalibrationModule.$(ObjSuf)
 OBJS     += $(FILTERCALIBRATION_MODULE_O)
 
+CLUSTEROCCUPANCY_MODULE_S = ./src/ClusterOccupancyModule.$(SrcSuf)
+CLUSTEROCCUPANCY_MODULE_O = ./obj/ClusterOccupancyModule.$(ObjSuf)
+OBJS     += $(CLUSTEROCCUPANCY_MODULE_O)
+
 # PROGRAMS
 
 EFFICIENCY_MAIN_S = ./src/efficiency_main.$(SrcSuf)
@@ -80,7 +84,7 @@ $(EFFICIENCY_MULTIHITMEAS_A): $(EFFICIENCY_MULTIHITMEAS_O) $(CONSOLECOLORS_O) $(
 	@echo "Succesful make..."
 	@echo "...$@ is ready to use."
 
-$(EFFICIENCY_FILTERCALIBRATION_A): $(EFFICIENCY_FILTERCALIBRATION_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O) $(FILTERCALIBRATION_MODULE_O)
+$(EFFICIENCY_FILTERCALIBRATION_A): $(EFFICIENCY_FILTERCALIBRATION_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
 	@printf "Compiling done, linking efficiency_filterCalibration...\n"
 	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
 	$(MT_EXE)
@@ -134,6 +138,12 @@ $(FILTERCALIBRATION_MODULE_O): $(FILTERCALIBRATION_MODULE_S)
 	@printf "Compiling utility: \"FilterCalibrationModule\"...\n"
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
+
+$(CLUSTEROCCUPANCY_MODULE_O): $(CLUSTEROCCUPANCY_MODULE_S)
+	@printf "Compiling utility: \"ClusterOccupancyModule\"...\n"
+	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
+	@printf "Done.\n"
+
 
 ###
 

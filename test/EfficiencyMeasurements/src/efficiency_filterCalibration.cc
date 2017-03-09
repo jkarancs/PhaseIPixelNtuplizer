@@ -20,6 +20,7 @@
 #include "../interface/TimerColored.h"
 #include "../interface/common_functions_jkarancs.h"
 #include "../interface/FilterCalibrationModule.h"
+#include "../interface/ClusterOccupancyModule.h"
 
 // #include "../../../interface/CanvasExtras.h"
 
@@ -52,14 +53,14 @@ using JSON = nlohmann::json;
 
 constexpr float HALF_PI = 0.5 * 3.141592653589793238462;
 
-constexpr auto                 PLOTS_SAVE_DIRECTORY               = "./results";
-
-constexpr std::array<int, 4>   LAYER_NUM_LADDERS{ 6, 14, 22, 32 };
+constexpr auto                    PLOTS_SAVE_DIRECTORY               = "./results";
+constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE              = {0.97, 1.01};
 
 // const std::pair<float, float>  LAYER_MODULE_LABEL_POS      = std::make_pair(0.79f, 0.88f);
 constexpr auto                     CONFIG_FILE_PATH            = "./config_main.json"; 
 
-const bool TRAJ_LOOP_REQUESTED    = true;
+const bool CLUST_LOOP_REQUESTED = false;
+const bool TRAJ_LOOP_REQUESTED  = true;
 
 void                                        testSaveFolders();
 void                                        readInFilesAndAddToChain(const JSON& config, const std::string& configKey, const std::string& innerKey, TChain* chain);
@@ -77,47 +78,75 @@ int main(int argc, char** argv) try
 	TimerColored timer(timer_prompt);
 	TApplication* theApp = new TApplication("App", &argc, argv);
 	gROOT->SetBatch(kFALSE);
-	TChain* trajTreeChain = new TChain("trajTree", "List of the trajectory measurements.");
-	readInFilesAndAddToChain(config, "input_files_list", "input_files", trajTreeChain);
-	TrajMeasurement trajField;
 	EventData       eventField;
-	// Trajectory measurement tree
-	trajTreeChain -> SetBranchAddress("event",  &eventField);
-	trajTreeChain -> SetBranchAddress("mod",    &(trajField.mod));
-	trajTreeChain -> SetBranchAddress("mod_on", &(trajField.mod_on));
-	trajTreeChain -> SetBranchAddress("clust",  &(trajField.clu));
-	trajTreeChain -> SetBranchAddress("track",  &(trajField.trk));
-	trajTreeChain -> SetBranchAddress("traj",   &trajField);
+	Cluster         clusterField;
+	TrajMeasurement trajField;
 	// trajTreeChain -> Draw("d_cl >> hsqrt(1000, 0.0, 500.0)");
 	// std::cout << "Running the app." << std::endl;
 	// theApp -> Run();
-	Long64_t trajTreeNumEntries  = trajTreeChain  -> GetEntries();
-	// Check if data is present
-	std::cout << debug_prompt << "Total entries in the trajTree tree: " << trajTreeNumEntries << std::endl;
-	if(trajTreeNumEntries == 0 ) throw std::runtime_error("No entries found in tree: trajTree.");
 	// Histogram definitions
 	std::cout << process_prompt << "Loading histogram definitions... ";
 	std::map<std::string, std::shared_ptr<TH1>> histograms(processHistogramDefinitions(config, "histogram_definition_list", "histogram_definitions"));
 	std::cout << process_prompt << "Done." << std::endl;
+	// Modules
+	ClusterOccupancyModule  clusterOccupancyModule (histograms, clusterField);
 	FilterCalibrationModule filterCalibrationModule(histograms, eventField, trajField);
-	filterCalibrationModule.checkHistogramDependencies();
+	// Checking if every histogram definition required is present
+	clusterOccupancyModule .checkHistogramDependencies();
+	//////////////////
+	// Cluster loop //
+	//////////////////
+	if(CLUST_LOOP_REQUESTED) try
+	{
+		TChain* clustTreeChain = new TChain("clustTree", "List of the clusters.");
+		readInFilesAndAddToChain(config, "input_files_list", "input_files", clustTreeChain);
+		clustTreeChain -> SetBranchAddress("event",  &eventField);
+		// clustTreeChain -> SetBranchAddress("mod",    &(clusterField.mod));
+		clustTreeChain -> SetBranchAddress("mod_on", &(clusterField.mod_on));
+		clustTreeChain -> SetBranchAddress("clust",  &clusterField);
+		// check if data is present
+		Long64_t clustTreeNumEntries  = clustTreeChain  -> GetEntries();
+		std::cout << debug_prompt << "total entries in the clustTree chain: " << clustTreeNumEntries << std::endl;
+		if(clustTreeNumEntries == 0 ) throw std::runtime_error("No entries found in tree: trajTree.");
+		timer.restart("Measuring the time required for looping on the clusters...");
+		for(Long64_t entryIndex = 0; entryIndex < clustTreeNumEntries; ++entryIndex)
+		{
+			clustTreeChain -> GetEntry(entryIndex);
+			clusterOccupancyModule.fillHistograms();
+		}
+		timer.printSeconds("Loop done. Took about: ", " second(s).");
+	}
+	catch(const std::exception& e)
+	{
+		std::cout << error_prompt << "In the clusters loop: " << e.what() << " exception occured." << std::endl;
+		exit(-1);
+	}
 	////////////////////////////////
 	// Trajector measurement loop //
 	////////////////////////////////
-	try
+	if(TRAJ_LOOP_REQUESTED) try
 	{
+		TChain* trajTreeChain  = new TChain("trajTree", "List of the trajectory measurements.");
+		readInFilesAndAddToChain(config, "input_files_list", "input_files", trajTreeChain);
+		// Trajectory measurement tree
+		trajTreeChain -> SetBranchAddress("event",  &eventField);
+		// trajTreeChain -> SetBranchAddress("mod",    &(trajField.mod));
+		trajTreeChain -> SetBranchAddress("mod_on", &(trajField.mod_on));
+		trajTreeChain -> SetBranchAddress("clust",  &(trajField.clu));
+		trajTreeChain -> SetBranchAddress("track",  &(trajField.trk));
+		trajTreeChain -> SetBranchAddress("traj",   &trajField);
+		// check if data is present
+		Long64_t trajTreeNumEntries  = trajTreeChain  -> GetEntries();
+		std::cout << debug_prompt << "total entries in the trajTree chain: " << trajTreeNumEntries << std::endl;
+		if(trajTreeNumEntries == 0 ) throw std::runtime_error("No entries found in tree: trajTree.");
 		timer.restart("Measuring the time required for looping on the trajectory measurements...");
 		for(Long64_t entryIndex = 0; entryIndex < trajTreeNumEntries; ++entryIndex)
 		{
 			trajTreeChain -> GetEntry(entryIndex);
-			filterCalibrationModule.fillFilterHistograms();
 			// printTrajFieldInfoTrajOnly(trajField);
+			filterCalibrationModule.fillHistograms();
 		}
 		filterCalibrationModule.printCounters();
-		// std::cout << "Number of validhits:                                           " << std::setw(12) << validhit_counter   << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << validhit_counter   * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		// std::cout << "Number of hits inside the increased search range:              " << std::setw(12) << clust_near_counter << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << clust_near_counter * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		// std::cout << "Number of missing hits:                                        " << std::setw(12) << missing_counter    << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << missing_counter    * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
-		// std::cout << "Number of missing hits with increased cluster search range:    " << std::setw(12) << missing_counter    << " / " << std::setw(12) << trajTreeNumEntries << " (" << std::setprecision(5) << missing_counter    * 100.0 / trajTreeNumEntries<< "%)" << std::endl;
 		timer.printSeconds("Loop done. Took about: ", " second(s).");
 	}
 	catch(const std::exception& e)
@@ -146,12 +175,13 @@ int main(int argc, char** argv) try
 			auto efficiencyHisto2DPtrConversionResult = dynamic_cast<TH2D*>(histogramPair.second.get());
 			if(efficiencyHisto2DPtrConversionResult)
 			{
+				// std::cout << "Downscaling histogram: " << efficiencyHistoName << std::endl;
 				downscale2DHistogram(efficiencyHisto2DPtrConversionResult, dynamic_cast<TH2D*>(numHitsHisto -> second.get()));
-				efficiencyHisto2DPtrConversionResult -> GetZaxis() -> SetRangeUser(0.98, 1.01);
+				efficiencyHisto2DPtrConversionResult -> GetZaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE.first, EFFICIENCY_ZOOM_RANGE.second);
 				continue;
 			}
 			downscale1DHistogram(dynamic_cast<TH1D*>(histogramPair.second.get()), dynamic_cast<TH1D*>(numHitsHisto -> second.get()));
-			dynamic_cast<TH1D*>(histogramPair.second.get()) -> GetYaxis() -> SetRangeUser(0.98, 1.01);
+			dynamic_cast<TH1D*>(histogramPair.second.get()) -> GetYaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE.first, EFFICIENCY_ZOOM_RANGE.second);
 		}
 	}
 	///////////////////////
@@ -161,6 +191,14 @@ int main(int argc, char** argv) try
 	{
 		int dressPlot = 0;
 		int layer     = -1;
+		int customCanvasDimensions = 0;
+		int histoSizeX = 800;
+		int histoSizeY = 800;
+		int customTicks = 0;
+		int xAxisDivisions = 510;
+		int yAxisDivisions = 510;
+		int logXAxis = 0;
+		int logYAxis = 0;
 	};
 	std::map<std::string, PlotOptions> plotOptionsMap;
 	try
@@ -170,24 +208,19 @@ int main(int argc, char** argv) try
 		std::vector<JSON> histogramDefinitionList = inputListJSON["histogram_definitions"];
 		for(const auto& definition: histogramDefinitionList)
 		{
-			PlotOptions plotExtras;
 			std::string name = definition.at("name");
-			if(definition.count("plot_extras") == 0) 
-			{
-				plotOptionsMap.emplace(name, std::move(plotExtras));
-				continue; 
-			}
+			PlotOptions plotExtras;
 			// std::cout << debug_prompt << name << " has a key for dress_plot: " << (definition.count("dress_plot") ? "true" : "false") << std::endl;
-			if(definition.count("dress_plot") != 0)
-			{
-				// std::cout << debug_prompt << definition.at("dress_plot") << std::endl;
-				plotExtras.dressPlot = definition.at("dress_plot");
-			}
-			if(definition.count("layer"     ) != 0)
-			{
-				// std::cout << debug_prompt << definition.at("layer") << std::endl;
-				plotExtras.layer     = definition.at("layer");
-			}
+			if(definition.count("dress_plot"              ) != 0) plotExtras.dressPlot              = definition.at("dress_plot");
+			if(definition.count("layer"                   ) != 0) plotExtras.layer                  = definition.at("layer");
+			if(definition.count("custom_canvas_dimensions") != 0) plotExtras.customCanvasDimensions = definition.at("custom_canvas_dimensions");
+			if(definition.count("histo_size_x"            ) != 0) plotExtras.histoSizeX             = definition.at("histo_size_x");
+			if(definition.count("histo_size_y"            ) != 0) plotExtras.histoSizeY             = definition.at("histo_size_y");
+			if(definition.count("custom_ticks"            ) != 0) plotExtras.customTicks            = definition.at("custom_ticks");
+			if(definition.count("x_axis_divisions"        ) != 0) plotExtras.xAxisDivisions         = definition.at("x_axis_divisions");
+			if(definition.count("y_axis_divisions"        ) != 0) plotExtras.yAxisDivisions         = definition.at("y_axis_divisions");
+			if(definition.count("log_x_axis"              ) != 0) plotExtras.logXAxis               = definition.at("log_x_axis");
+			if(definition.count("log_y_axis"              ) != 0) plotExtras.logYAxis               = definition.at("log_y_axis");
 			plotOptionsMap.emplace(name, std::move(plotExtras));
 		}
 	}
@@ -201,21 +234,43 @@ int main(int argc, char** argv) try
 	////////////////
 	try
 	{
+		gROOT  -> SetBatch(kTRUE); // Uncomment to check the plots on-the fly
 		constexpr int PHASE_SCENARIO = 1;
 		gStyle -> SetPalette(1);
 		gStyle -> SetNumberContours(999);
-		gROOT->SetBatch(kTRUE); // Uncomment to check the plots on-the fly
-		gStyle->SetOptStat(1111);
+		gStyle -> SetOptStat(1111);
 		gErrorIgnoreLevel = kError;
 		// histogram.SetTitleSize(22);
-		// histogram.GetYaxis() -> SetNdivisions(507);
 		for(const auto& histogramPair: histograms)
 		{
 			const std::string& histogramName = histogramPair.first;
 			TH1*               histogram     = histogramPair.second.get();
+			if(histogram -> GetEntries() == 0)
+			{
+				std::cout << process_prompt << histogramName << " has no entries. It will not be saved." << std::endl;
+				continue;
+			}
 			const PlotOptions& plotOptions   = plotOptionsMap.at(histogramName);
-			TCanvas* canvas = custom_can_(histogram, histogramName + "_canvas", 0, 0, 800, 800, 80, 140);
+			TCanvas* canvas;
+			int histoSizeX = 800;
+			int histoSizeY = 800;
+			if(plotOptions.customCanvasDimensions)
+			{
+				histoSizeX = plotOptions.histoSizeX;
+				histoSizeY = plotOptions.histoSizeY;
+			}
+			canvas = custom_can_(histogram, histogramName + "_canvas", 0, 0, histoSizeX, histoSizeY, 80, 140);
+			if(plotOptions.logXAxis) canvas -> SetLogx(1);
+			if(plotOptions.logYAxis) canvas -> SetLogy(1);
 			canvas -> cd();
+			// std::cout << "histogramName: " << histogramName << std::endl;
+			// std::cout << "plotOptionsMap.at(\"" << histogramName << "\").customTicks: " << plotOptionsMap.at(histogramName).customTicks << std::endl;
+			// std::cout << "plotOptions.customTicks: " << plotOptions.customTicks << std::endl;
+			if(plotOptions.customTicks)
+			{
+				histogram -> GetXaxis() -> SetNdivisions(plotOptions.xAxisDivisions);
+				histogram -> GetYaxis() -> SetNdivisions(plotOptions.yAxisDivisions);
+			}
 			// std::cout << "Histogram name: "    << histogramName << std::endl;
 			// std::cout << "Number of entries: " << histogram -> GetEntries() << std::endl; 
 			TH2D* histo2D = dynamic_cast<TH2D*>(histogram);
@@ -226,6 +281,10 @@ int main(int argc, char** argv) try
 				if(plotOptions.dressPlot)
 				{
 					dress_occup_plot(histo2D, plotOptions.layer, PHASE_SCENARIO);
+					canvas -> Update();
+					TPaveStats* stats = (TPaveStats*) histo2D -> GetListOfFunctions() -> FindObject("stats");
+					if(stats) stats -> Draw("SAME");
+					else std::cout << error_prompt << "Cannot redraw stats box for " << histo2D -> GetName() << ": no stats found. " << std::endl;
 					// std::cout << debug_prompt << "Dress occup plot called with layer: " << plotOptions.layer << " and phase scenario: " << PHASE_SCENARIO << "." << std::endl;
 				}
 			}

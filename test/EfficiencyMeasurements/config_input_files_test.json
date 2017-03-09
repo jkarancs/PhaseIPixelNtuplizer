@@ -1,6 +1,11 @@
 {
 	"input_files":
 	[
-		"/data_ssd_120gb/hunyadi/CMSSW/DataGeneration/CMSSW_9_0_0_pre6/src/FlatPu_1to50_eff_85_pure_evtnum_100k_GENSIMtoRECO/Ntuplizer_local_sandbox/Ntuple.root"
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_110.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_111.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_112.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_113.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_114.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_115.root"
 	]
 }

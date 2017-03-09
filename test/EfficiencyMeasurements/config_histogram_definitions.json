@@ -2,6 +2,72 @@
 	"histogram_definitions":
 	[
 		{
+			"type": "TH2D",
+			"name": "clusterOccupancy_fwd",
+			"title": "cluster occupancy on the ROCs - forward",
+			"nbinsx": 112,
+			"xMin": -3.5,
+			"xMax": 3.5,
+			"nbinsy": 140,
+			"yMin": -17.5,
+			"yMax": 17.5,
+			"dress_plot": 1,
+			"layer": 0
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterOccupancy_l1",
+			"title": "cluster occupancy on the ROCs - layer 1",
+			"nbinsx": 72,
+			"xMin": -4.5,
+			"xMax": 4.5,
+			"nbinsy": 26,
+			"yMin": -6.5,
+			"yMax": 6.5,
+			"dress_plot": 1,
+			"layer": 1
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterOccupancy_l2",
+			"title": "cluster occupancy on the ROCs - layer 2",
+			"nbinsx": 72,
+			"xMin": -4.5,
+			"xMax": 4.5,
+			"nbinsy": 58,
+			"yMin": -14.5,
+			"yMax": 14.5,
+			"dress_plot": 1,
+			"layer": 2
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterOccupancy_l3",
+			"title": "cluster occupancy on the ROCs - layer 3",
+			"nbinsx": 72,
+			"xMin": -4.5,
+			"xMax": 4.5,
+			"nbinsy": 90,
+			"yMin": -22.5,
+			"yMax": 22.5,
+			"dress_plot": 1,
+			"layer": 3
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterOccupancy_l4",
+			"title": "cluster occupancy on the ROCs - layer 4",
+			"nbinsx": 72,
+			"xMin": -4.5,
+			"xMax": 4.5,
+			"nbinsy": 130,
+			"yMin": -32.5,
+			"yMax": 32.5,
+			"dress_plot": 1,
+			"layer": 4
+		},
+
+		{
 			"type": "TH1D",
 			"name": "nMinus1VtxNtrkNumhits",
 			"title": "parent vertex n. tracks [with other effcuts]",
@@ -55,7 +121,8 @@
 			"title": "d0 of barrel hits [with other effcuts]",
 			"nbinsx": 120,
 			"xMin": 0.0,
-			"xMax": 0.15
+			"xMax": 0.15,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -63,7 +130,8 @@
 			"title": "eff. vs d0 of barrel hits [with other effcuts]",
 			"nbinsx": 120,
 			"xMin": 0.0,
-			"xMax": 0.15
+			"xMax": 0.15,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -71,7 +139,8 @@
 			"title": "d0 of forward hits [with other effcuts]",
 			"nbinsx": 120,
 			"xMin": 0.0,
-			"xMax": 0.15
+			"xMax": 0.15,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -79,7 +148,8 @@
 			"title": "eff. vs d0 of forward hits [with other effcuts]",
 			"nbinsx": 120,
 			"xMin": 0.0,
-			"xMax": 0.15
+			"xMax": 0.15,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -87,7 +157,8 @@
 			"title": "dz of barrel hits [with other effcuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
-			"xMax": 0.5
+			"xMax": 0.5,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -95,7 +166,8 @@
 			"title": "eff. vs dz of barrel hits [with other effcuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
-			"xMax": 0.5
+			"xMax": 0.5,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -103,7 +175,8 @@
 			"title": "dz of forward hits [with other effcuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
-			"xMax": 1.0
+			"xMax": 1.0,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -111,13 +184,14 @@
 			"title": "eff. vs dz of forward hits [with other effcuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
-			"xMax": 1.0
+			"xMax": 1.0,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
 			"name": "nMinus1LxNumhits",
 			"title": "lx [with other effcuts]",
-			"nbinsx": 100,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9
 		},
@@ -125,7 +199,7 @@
 			"type": "TH1D",
 			"name": "nMinus1LxEfficiency",
 			"title": "eff. vs lx [with other effcuts]",
-			"nbinsx": 100,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9
 		},
@@ -133,7 +207,7 @@
 			"type": "TH1D",
 			"name": "nMinus1LyNumhits",
 			"title": "ly [with other effcuts]",
-			"nbinsx": 100,
+			"nbinsx": 104,
 			"xMin": -3.5,
 			"xMax": 3.5
 		},
@@ -141,7 +215,7 @@
 			"type": "TH1D",
 			"name": "nMinus1LyEfficiency",
 			"title": "eff. vs ly [with other effcuts]",
-			"nbinsx": 100,
+			"nbinsx": 104,
 			"xMin": -3.5,
 			"xMax": 3.5
 		},
@@ -149,177 +223,386 @@
 			"type": "TH2D",
 			"name": "nMinus1LocalPosNumhitsLay1",
 			"title": "num. of hits vs hit position lay1 [with other effcuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosEfficiencyLay1",
 			"title": "eff. vs hit position lay1 [with other effcuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosNumhitsLay2",
 			"title": "num. of hits vs hit position lay2 [with other effcuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosEfficiencyLay2",
 			"title": "eff. vs hit position lay2 [with other effcuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosNumhitsLay3",
 			"title": "num. of hits vs hit position lay3 [with other effcuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosEfficiencyLay3",
 			"title": "eff. vs hit position lay3 [with other effcuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosNumhitsLay4",
 			"title": "num. of hits vs hit position lay4 [with other effcuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosEfficiencyLay4",
 			"title": "eff. vs hit position lay4 [with other effcuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosNumhitsForward1",
-			"title": "num. of hits vs hit position endcap 1 [with other effcuts]",
-			"nbinsx": 50,
+			"title": "num. of hits vs hit position - fwd, positive z, inner ring, panel 1 [with other effcuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosEfficiencyForward1",
-			"title": "eff. vs hit position endcap 1 [with other effcuts]",
-			"nbinsx": 50,
+			"title": "eff. vs hit position - fwd, positive z, inner ring, panel 1 [with other effcuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosNumhitsForward2",
-			"title": "num. of hits vs hit position endcap 2 [with other effcuts]",
-			"nbinsx": 50,
+			"title": "num. of hits vs hit position - fwd, positive z, inner ring, panel 2 [with other effcuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosEfficiencyForward2",
-			"title": "eff. vs hit position endcap 2 [with other effcuts]",
-			"nbinsx": 50,
+			"title": "eff. vs hit position - fwd, positive z, inner ring, panel 2 [with other effcuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosNumhitsForward3",
-			"title": "num. of hits vs hit position endcap 3 [with other effcuts]",
-			"nbinsx": 50,
+			"title": "num. of hits vs hit position - fwd, positive z, outer ring, panel 1 [with other effcuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosEfficiencyForward3",
-			"title": "eff. vs hit position endcap 3 [with other effcuts]",
-			"nbinsx": 50,
+			"title": "eff. vs hit position - fwd, positive z, outer ring, panel 1 [with other effcuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosNumhitsForward4",
-			"title": "num. of hits vs hit position endcap 4 [with other effcuts]",
-			"nbinsx": 50,
+			"title": "num. of hits vs hit position - fwd, positive z, outer ring, panel 2 [with other effcuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "nMinus1LocalPosEfficiencyForward4",
-			"title": "eff. vs hit position endcap 4 [with other effcuts]",
-			"nbinsx": 50,
+			"title": "eff. vs hit position - fwd, positive z, outer ring, panel 2 [with other effcuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsForward5",
+			"title": "num. of hits vs hit position - fwd, negative z, inner ring, panel 1 [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyForward5",
+			"title": "eff. vs hit position - fwd, negative z, inner ring, panel 1 [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsForward6",
+			"title": "num. of hits vs hit position - fwd, negative z, inner ring, panel 2 [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyForward6",
+			"title": "eff. vs hit position - fwd, negative z, inner ring, panel 2 [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsForward7",
+			"title": "num. of hits vs hit position - fwd, negative z, outer ring, panel 1 [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyForward7",
+			"title": "eff. vs hit position - fwd, negative z, outer ring, panel 1 [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosNumhitsForward8",
+			"title": "num. of hits vs hit position - fwd, negative z, outer ring, panel 2 [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "nMinus1LocalPosEfficiencyForward8",
+			"title": "eff. vs hit position - fwd, negative z, outer ring, panel 2 [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH1D",
@@ -327,15 +610,15 @@
 			"title": "closest hit distance to track [with other effcuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
-			"xMax": 0.002
+			"xMax": 0.12
 		},
 		{
 			"type": "TH1D",
 			"name": "nMinus1HitDistEfficiency",
-			"title": "eff. vs Closest hit distance to track [with other effcuts]",
+			"title": "eff. vs closest hit distance to track [with other effcuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
-			"xMax": 0.002
+			"xMax": 0.12
 		},
 		{
 			"type": "TH1D",
@@ -348,7 +631,7 @@
 		{
 			"type": "TH1D",
 			"name": "nMinus1CluDistEfficiency",
-			"title": "eff. vs Closest cluster distance to traj. meas. [with other effcuts]",
+			"title": "eff. vs closest cluster distance to traj. meas. [with other effcuts]",
 			"nbinsx": 90,
 			"xMin": 0.0,
 			"xMax": 0.25
@@ -366,7 +649,6 @@
 			"nbinsy": 140,
 			"yMin": -17.5,
 			"yMax": 17.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 0
 		},
@@ -380,7 +662,6 @@
 			"nbinsy": 26,
 			"yMin": -6.5,
 			"yMax": 6.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 1
 		},
@@ -394,7 +675,6 @@
 			"nbinsy": 58,
 			"yMin": -14.5,
 			"yMax": 14.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 2
 		},
@@ -408,7 +688,6 @@
 			"nbinsy": 90,
 			"yMin": -22.5,
 			"yMax": 22.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 3
 		},
@@ -422,7 +701,6 @@
 			"nbinsy": 130,
 			"yMin": -32.5,
 			"yMax": 32.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 4
 		},
@@ -437,7 +715,6 @@
 			"nbinsy": 140,
 			"yMin": -17.5,
 			"yMax": 17.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 0
 		},
@@ -451,7 +728,6 @@
 			"nbinsy": 26,
 			"yMin": -6.5,
 			"yMax": 6.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 1
 		},
@@ -465,7 +741,6 @@
 			"nbinsy": 58,
 			"yMin": -14.5,
 			"yMax": 14.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 2
 		},
@@ -479,7 +754,6 @@
 			"nbinsy": 90,
 			"yMin": -22.5,
 			"yMax": 22.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 3
 		},
@@ -493,7 +767,6 @@
 			"nbinsy": 130,
 			"yMin": -32.5,
 			"yMax": 32.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 4
 		},
@@ -508,7 +781,6 @@
 			"nbinsy": 140,
 			"yMin": -17.5,
 			"yMax": 17.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 0
 		},
@@ -522,7 +794,6 @@
 			"nbinsy": 26,
 			"yMin": -6.5,
 			"yMax": 6.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 1
 		},
@@ -536,7 +807,6 @@
 			"nbinsy": 58,
 			"yMin": -14.5,
 			"yMax": 14.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 2
 		},
@@ -550,7 +820,6 @@
 			"nbinsy": 90,
 			"yMin": -22.5,
 			"yMax": 22.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 3
 		},
@@ -564,7 +833,6 @@
 			"nbinsy": 130,
 			"yMin": -32.5,
 			"yMax": 32.5,
-			"plot_extras": 1,
 			"dress_plot": 1,
 			"layer": 4
 		},
@@ -625,7 +893,8 @@
 			"title": "d0 of barrel hits [no cuts]",
 			"nbinsx": 120,
 			"xMin": 0.0,
-			"xMax": 0.15
+			"xMax": 0.15,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -633,7 +902,8 @@
 			"title": "eff. vs d0 of barrel hits [no cuts]",
 			"nbinsx": 120,
 			"xMin": 0.0,
-			"xMax": 0.15
+			"xMax": 0.15,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -641,7 +911,8 @@
 			"title": "d0 of forward hits [no cuts]",
 			"nbinsx": 120,
 			"xMin": 0.0,
-			"xMax": 0.15
+			"xMax": 0.15,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -649,7 +920,8 @@
 			"title": "eff. vs d0 of forward hits [no cuts]",
 			"nbinsx": 120,
 			"xMin": 0.0,
-			"xMax": 0.15
+			"xMax": 0.15,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -657,7 +929,8 @@
 			"title": "dz of barrel hits [no cuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
-			"xMax": 0.5
+			"xMax": 0.5,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -665,7 +938,8 @@
 			"title": "eff. vs dz of barrel hits [no cuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
-			"xMax": 0.5
+			"xMax": 0.5,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -673,7 +947,8 @@
 			"title": "dz of forward hits [no cuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
-			"xMax": 1.0
+			"xMax": 1.0,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
@@ -681,13 +956,14 @@
 			"title": "eff. vs dz of forward hits [no cuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
-			"xMax": 1.0
+			"xMax": 1.0,
+			"log_x_axis": 1
 		},
 		{
 			"type": "TH1D",
 			"name": "lxNumhitsPreCuts",
 			"title": "lx [no cuts]",
-			"nbinsx": 100,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9
 		},
@@ -695,7 +971,7 @@
 			"type": "TH1D",
 			"name": "lxEfficiencyPreCuts",
 			"title": "eff. vs lx [no cuts]",
-			"nbinsx": 100,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9
 		},
@@ -703,7 +979,7 @@
 			"type": "TH1D",
 			"name": "lyNumhitsPreCuts",
 			"title": "ly [no cuts]",
-			"nbinsx": 100,
+			"nbinsx": 104,
 			"xMin": -3.5,
 			"xMax": 3.5
 		},
@@ -711,7 +987,7 @@
 			"type": "TH1D",
 			"name": "lyEfficiencyPreCuts",
 			"title": "eff. vs ly [no cuts]",
-			"nbinsx": 100,
+			"nbinsx": 104,
 			"xMin": -3.5,
 			"xMax": 3.5
 		},
@@ -719,177 +995,385 @@
 			"type": "TH2D",
 			"name": "localPosNumhitsLay1PreCuts",
 			"title": "num. of hits vs hit position lay1 [no cuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosEfficiencyLay1PreCuts",
 			"title": "eff. vs hit position lay1 [no cuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosNumhitsLay2PreCuts",
 			"title": "num. of hits vs hit position lay2 [no cuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosEfficiencyLay2PreCuts",
 			"title": "eff. vs hit position lay2 [no cuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosNumhitsLay3PreCuts",
 			"title": "num. of hits vs hit position lay3 [no cuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosEfficiencyLay3PreCuts",
 			"title": "eff. vs hit position lay3 [no cuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosNumhitsLay4PreCuts",
 			"title": "num. of hits vs hit position lay4 [no cuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosEfficiencyLay4PreCuts",
 			"title": "eff. vs hit position lay4 [no cuts]",
-			"nbinsx": 50,
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosNumhitsForward1PreCuts",
-			"title": "num. of hits vs hit position endcap 1 [no cuts]",
-			"nbinsx": 50,
+			"title": "num. of hits vs hit position - fwd, positive z, inner ring, panel 1 [no cuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosEfficiencyForward1PreCuts",
-			"title": "eff. vs hit position endcap 1 [no cuts]",
-			"nbinsx": 50,
+			"title": "eff. vs hit position - fwd, positive z, inner ring, panel 1 [no cuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosNumhitsForward2PreCuts",
-			"title": "num. of hits vs hit position endcap 2 [no cuts]",
-			"nbinsx": 50,
+			"title": "num. of hits vs hit position - fwd, positive z, inner ring, panel 2 [no cuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosEfficiencyForward2PreCuts",
-			"title": "eff. vs hit position endcap 2 [no cuts]",
-			"nbinsx": 50,
+			"title": "eff. vs hit position - fwd, positive z, inner ring, panel 2 [no cuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosNumhitsForward3PreCuts",
-			"title": "num. of hits vs hit position endcap 3 [no cuts]",
-			"nbinsx": 50,
+			"title": "num. of hits vs hit position - fwd, positive z, outer ring, panel 1 [no cuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosEfficiencyForward3PreCuts",
-			"title": "eff. vs hit position endcap 3 [no cuts]",
-			"nbinsx": 50,
+			"title": "eff. vs hit position - fwd, positive z, outer ring, panel 1 [no cuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosNumhitsForward4PreCuts",
-			"title": "num. of hits vs hit position endcap 4 [no cuts]",
-			"nbinsx": 50,
+			"title": "num. of hits vs hit position - fwd, positive z, outer ring, panel 2 [no cuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH2D",
 			"name": "localPosEfficiencyForward4PreCuts",
-			"title": "eff. vs hit position endcap 4 [no cuts]",
-			"nbinsx": 50,
+			"title": "eff. vs hit position - fwd, positive z, outer ring, panel 2 [no cuts]",
+			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9,
-			"nbinsy": 50,
+			"nbinsy": 104,
 			"yMin": -3.5,
-			"yMax": 3.5
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "localPosNumhitsForward5PreCuts",
+			"title": "num. of hits vs hit position - fwd, negative z, inner ring, panel 1 [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "localPosEfficiencyForward5PreCuts",
+			"title": "eff. vs hit position - fwd, negative z, inner ring, panel 1 [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "localPosNumhitsForward6PreCuts",
+			"title": "num. of hits vs hit position - fwd, negative z, inner ring, panel 2 [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "localPosEfficiencyForward6PreCuts",
+			"title": "eff. vs hit position - fwd, negative z, inner ring, panel 2 [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "localPosNumhitsForward7PreCuts",
+			"title": "num. of hits vs hit position - fwd, negative z, outer ring, panel 1 [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "localPosEfficiencyForward7PreCuts",
+			"title": "eff. vs hit position - fwd, negative z, outer ring, panel 1 [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "localPosNumhitsForward8PreCuts",
+			"title": "num. of hits vs hit position - fwd, negative z, outer ring, panel 2 [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH2D",
+			"name": "localPosEfficiencyForward8PreCuts",
+			"title": "eff. vs hit position - fwd, negative z, outer ring, panel 2 [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9,
+			"nbinsy": 104,
+			"yMin": -3.5,
+			"yMax": 3.5,
+			"custom_canvas_dimensions": 1,
+			"histo_size_x": 160,
+			"histo_size_y": 624,
+			"custom_ticks": 1,
+			"x_axis_divisions": -503
 		},
 		{
 			"type": "TH1D",
@@ -902,7 +1386,7 @@
 		{
 			"type": "TH1D",
 			"name": "hitDistEfficiencyPreCuts",
-			"title": "eff. vs Closest hit distance to track [no cuts]",
+			"title": "eff. vs closest hit distance to track [no cuts]",
 			"nbinsx": 100,
 			"xMin": 0.0,
 			"xMax": 0.12
@@ -918,7 +1402,7 @@
 		{
 			"type": "TH1D",
 			"name": "cluDistEfficiencyPreCuts",
-			"title": "eff. vs Closest cluster distance to traj. meas. [no cuts]",
+			"title": "eff. vs closest cluster distance to traj. meas. [no cuts]",
 			"nbinsx": 90,
 			"xMin": 0.0,
 			"xMax": 0.025
