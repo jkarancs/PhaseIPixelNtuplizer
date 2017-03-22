@@ -7,7 +7,7 @@
 //  - (nothing else yet...)
 
 // Data structure
-#include "../../../interface/DataStructures_v3.h"
+#include "../../../interface/DataStructures_v4.h"
 
 // Hitt efficiency calculation
 #include "../../../interface/PhaseITrackingEfficiencyFilters.h"
@@ -18,6 +18,7 @@
 #include "../interface/HelperFunctionsCommon.h"
 #include "../interface/CanvasExtras.h"
 #include "../interface/TimerColored.h"
+#include "../interface/ProgressBar.h"
 #include "../interface/common_functions_jkarancs.h"
 #include "../interface/FilterCalibrationModule.h"
 #include "../interface/ClusterOccupancyModule.h"
@@ -53,16 +54,16 @@ using JSON = nlohmann::json;
 
 constexpr float HALF_PI = 0.5 * 3.141592653589793238462;
 
-constexpr auto                    PLOTS_SAVE_DIRECTORY               = "./results";
 constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE              = {0.97, 1.01};
 
 // const std::pair<float, float>  LAYER_MODULE_LABEL_POS      = std::make_pair(0.79f, 0.88f);
 constexpr auto                     CONFIG_FILE_PATH            = "./config_main.json"; 
 
-const bool CLUST_LOOP_REQUESTED = false;
+const bool CLUST_LOOP_REQUESTED = true;
 const bool TRAJ_LOOP_REQUESTED  = true;
 
-void                                        testSaveFolders();
+void                                        testSaveFolders(const JSON& config);
+TFile*                                      generateOutputNtuple(const JSON& config);
 void                                        readInFilesAndAddToChain(const JSON& config, const std::string& configKey, const std::string& innerKey, TChain* chain);
 std::map<std::string, std::shared_ptr<TH1>> processHistogramDefinitions(const JSON& config, const std::string& configKey, const std::string& innerKey);
 void                                        fillPairs(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& numHitsHisto, const std::string& efficiencyHisto, const float& xFill,                     const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
@@ -71,12 +72,15 @@ void                                        fillPairs(const std::map<std::string
 int main(int argc, char** argv) try
 {
 	std::cout << process_prompt << argv[0] << " started..." << std::endl;
-	testSaveFolders();
+	std::time_t processStarted = std::time(nullptr);
+	std::cout << timer_prompt << "Time: " << std::asctime(std::localtime(&processStarted)) << std::flush;
 	std::cout << process_prompt << "Loading config file... ";
 	JSON config = JSON::parse(fileToString(CONFIG_FILE_PATH));
 	std::cout << "Done." << std::endl;
+	testSaveFolders(config);
 	TimerColored timer(timer_prompt);
-	TApplication* theApp = new TApplication("App", &argc, argv);
+	// TApplication* theApp = new TApplication("App", &argc, argv);
+	TFile* histogramsNtuple = generateOutputNtuple(config);
 	gROOT->SetBatch(kFALSE);
 	EventData       eventField;
 	Cluster         clusterField;
@@ -91,8 +95,6 @@ int main(int argc, char** argv) try
 	// Modules
 	ClusterOccupancyModule  clusterOccupancyModule (histograms, clusterField);
 	FilterCalibrationModule filterCalibrationModule(histograms, eventField, trajField);
-	// Checking if every histogram definition required is present
-	clusterOccupancyModule .checkHistogramDependencies();
 	//////////////////
 	// Cluster loop //
 	//////////////////
@@ -108,12 +110,22 @@ int main(int argc, char** argv) try
 		Long64_t clustTreeNumEntries  = clustTreeChain  -> GetEntries();
 		std::cout << debug_prompt << "total entries in the clustTree chain: " << clustTreeNumEntries << std::endl;
 		if(clustTreeNumEntries == 0 ) throw std::runtime_error("No entries found in tree: trajTree.");
+		ProgressBar progressBar;
+		const int    progressBarUpdateInterval = 10000;
+		const double progressBarUpdateBy       = progressBarUpdateInterval / static_cast<double>(clustTreeNumEntries) * 100;
 		timer.restart("Measuring the time required for looping on the clusters...");
 		for(Long64_t entryIndex = 0; entryIndex < clustTreeNumEntries; ++entryIndex)
 		{
 			clustTreeChain -> GetEntry(entryIndex);
 			clusterOccupancyModule.fillHistograms();
+			if(entryIndex % progressBarUpdateInterval == 0)
+			{
+				progressBar.update(progressBarUpdateBy);
+				progressBar.print();
+				std::cout << " -- Estimated time left: " << std::setw(6) << std::fixed << std::setprecision(1) << timer.getSecondsElapsed() * (1 / progressBar.getProgressionRate() - 1) << " second(s).";
+			}
 		}
+		std::cout << std::endl;
 		timer.printSeconds("Loop done. Took about: ", " second(s).");
 	}
 	catch(const std::exception& e)
@@ -139,15 +151,25 @@ int main(int argc, char** argv) try
 		Long64_t trajTreeNumEntries  = trajTreeChain  -> GetEntries();
 		std::cout << debug_prompt << "total entries in the trajTree chain: " << trajTreeNumEntries << std::endl;
 		if(trajTreeNumEntries == 0 ) throw std::runtime_error("No entries found in tree: trajTree.");
+		ProgressBar progressBar;
+		const int    progressBarUpdateInterval = 10000;
+		const double progressBarUpdateBy       = progressBarUpdateInterval / static_cast<double>(trajTreeNumEntries) * 100;
 		timer.restart("Measuring the time required for looping on the trajectory measurements...");
 		for(Long64_t entryIndex = 0; entryIndex < trajTreeNumEntries; ++entryIndex)
 		{
 			trajTreeChain -> GetEntry(entryIndex);
 			// printTrajFieldInfoTrajOnly(trajField);
 			filterCalibrationModule.fillHistograms();
+			if(entryIndex % progressBarUpdateInterval == 0)
+			{
+				progressBar.update(progressBarUpdateBy);
+				progressBar.print();
+				std::cout << " -- Estimated time left: " << std::setw(6) << std::fixed << std::setprecision(1) << timer.getSecondsElapsed() * (1 / progressBar.getProgressionRate() - 1) << " second(s).";
+			}
 		}
-		filterCalibrationModule.printCounters();
+		std::cout << std::endl;
 		timer.printSeconds("Loop done. Took about: ", " second(s).");
+		filterCalibrationModule.printCounters();
 	}
 	catch(const std::exception& e)
 	{
@@ -307,18 +329,35 @@ int main(int argc, char** argv) try
 			{
 				std::string epsFilename = (std::string(canvas -> GetTitle()) + ".eps");
 				std::transform(epsFilename.begin(), epsFilename.end(), epsFilename.begin(), [] (char ch) { return ch == ' ' ? '_' : ch; });
-				canvas -> SaveAs((std::string(PLOTS_SAVE_DIRECTORY) + "/" + epsFilename).c_str());
+				std::string savePath = config["plots_save_directory"].get<std::string>() + "/" + epsFilename;
+				canvas -> SaveAs(savePath.c_str());
+				if(config["save_histograms_to_ntuple"] == true)
+				{
+					canvas -> Write();
+				}
 			}
 		}
 		gErrorIgnoreLevel = kPrint;
+		if(config["save_histograms_to_ntuple"] == true)
+		{
+			for(const auto& histogramPair: histograms) if(histogramPair.second -> GetEntries()) histogramPair.second -> Write();
+		}
 	}
 	catch(const std::exception& e)
 	{
 		std::cout << error_prompt << "While saving histograms: " << e.what() << " exception occured." << std::endl;
 		exit(-1);
 	}
+	// theApp -> Run();
+	if(histogramsNtuple)
+	{
+		std::cout << process_prompt << "Saving histograms in: " << config["ntuple_save_directory"] << "/" << config["ntuple_name"] << "... ";
+		histogramsNtuple -> Write();
+		histogramsNtuple -> Close();
+		std::cout << "Done." << std::endl;
+	}
 	std::cout << process_prompt << argv[0] << " terminated succesfully." << std::endl;
-	theApp->Run();
+	std::cin.get();	
 	return 0;
 }
 catch(const std::exception& e)
@@ -327,9 +366,9 @@ catch(const std::exception& e)
 	return -1;
 }
 
-void testSaveFolders()
+void testSaveFolders(const JSON& config)
 {
-	auto checkDirectory = [] (const char* directoryName)
+	auto checkDirectory = [] (const std::string& directoryName)
 	{
 		try 
 		{
@@ -357,7 +396,30 @@ void testSaveFolders()
 		}
 	}; 
 	// Directories to check
-	checkDirectory(PLOTS_SAVE_DIRECTORY);
+	try { checkDirectory(config.at("plots_save_directory" )); } catch(...) { std::cout << error_prompt << "Configuration might require the definition of plots_save_directory..."  << std::endl; }
+	try { checkDirectory(config.at("ntuple_save_directory")); } catch(...) { std::cout << error_prompt << "Configuration might require the definition of ntuple_save_directory..." << std::endl; }
+}
+
+TFile* generateOutputNtuple(const JSON& config)
+{
+	if(config.find("save_histograms_to_ntuple") == config.end())
+	{
+		std::cout << error_prompt << "In the configurations: \"save_histograms_to_ntuple\" is undefined." << std::endl;
+		exit(-1);
+	}
+	if(config["save_histograms_to_ntuple"] == false) return nullptr;
+	std::string ntupleSavePath;
+	try
+	{
+		std::string saveDirname  = config.at("ntuple_save_directory");
+		std::string saveFilename = config.at("ntuple_name");
+		ntupleSavePath           = saveDirname + "/" + saveFilename;
+		std::cout << process_prompt << "Will be saving the histograms as: " << ntupleSavePath << std::endl;
+	}
+	catch(...) { ntupleSavePath = "./Ntuple.root"; }
+	std::time_t timeCreated = std::time(nullptr);
+	std::string fileTitle = std::string("Efficiency filter calibrations output histograms, created at: ") + std::asctime(std::localtime(&timeCreated));
+	return new TFile(ntupleSavePath.c_str(), "RECREATE", fileTitle.c_str());
 }
 
 void readInFilesAndAddToChain(const JSON& config, const std::string& configKey, const std::string& innerKey, TChain* chain)

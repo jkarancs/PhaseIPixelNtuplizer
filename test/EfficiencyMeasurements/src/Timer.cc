@@ -19,6 +19,12 @@ void Timer::restart(std::string  text)
 void Timer::printSeconds(std::string preText, std::string postText)
 {
 	time(&currentTime);
-	secondsElapsed = difftime(currentTime, startTime);
+	double secondsElapsed = difftime(currentTime, startTime);
 	std::cout << preText << secondsElapsed << postText << std::endl;
+}
+
+double Timer::getSecondsElapsed()
+{
+	time(&currentTime);
+	return difftime(currentTime, startTime);
 }

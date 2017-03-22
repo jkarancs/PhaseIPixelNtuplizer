@@ -1,7 +1,7 @@
 #pragma once
 
 // Data structure
-#include "../../../interface/DataStructures_v3.h"
+#include "../../../interface/DataStructures_v4.h"
 #include "../interface/TimerColored.h"
 #include "../interface/CommonActors.h"
 
@@ -51,6 +51,12 @@ class FilterCalibrationModule
 		const float&     moduleCoord_;
 		const float&     bladePanelCoord_;
 		const float&     diskRingCoord_;
+		const float&     lx_;
+		const float&     ly_;
+		const float&     lz_;
+		const float&     glx_;
+		const float&     gly_;
+		const float&     glz_;
 		const TrackData& trk_;
 		// Cut values
 		int nvtxCut     = 0;
@@ -87,6 +93,7 @@ class FilterCalibrationModule
 		TH1* onTrkCluOccupancy_l1;              TH1* onTrkCluOccupancy_l2;              TH1* onTrkCluOccupancy_l3;              TH1* onTrkCluOccupancy_l4;              TH1* onTrkCluOccupancy_fwd;
 		TH1* rocNumhitsWithCuts_l1;             TH1* rocNumhitsWithCuts_l2;             TH1* rocNumhitsWithCuts_l3;             TH1* rocNumhitsWithCuts_l4;             TH1* rocNumhitsWithCuts_fwd;
 		TH1* rocEfficiencyWithCuts_l1;          TH1* rocEfficiencyWithCuts_l2;          TH1* rocEfficiencyWithCuts_l3;          TH1* rocEfficiencyWithCuts_l4;          TH1* rocEfficiencyWithCuts_fwd;
+		TH1* rechitPhiVsZ_l1;                   TH1* rechitPhiVsZ_l2;                   TH1* rechitPhiVsZ_l3;                   TH1* rechitPhiVsZ_l4;                   TH1* rechitPhiVsZ_fwd;
 		TH1* vtxNtrkNumhitsPreCuts;             TH1* vtxNtrkEfficiencyPreCuts;
 		TH1* nMinus1VtxNtrkNumhits;             TH1* nMinus1VtxNtrkEfficiency;
 		TH1* nMinus1PtNumhits;                  TH1* nMinus1PtEfficiency;

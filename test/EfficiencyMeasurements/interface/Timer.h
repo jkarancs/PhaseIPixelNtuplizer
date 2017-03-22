@@ -9,12 +9,12 @@ class Timer
 	protected:
 		time_t startTime;
 		time_t currentTime;
-		double secondsElapsed;	
 	public:
 		Timer();
 		~Timer();
 		virtual void restart(std::string  text);
 		virtual void printSeconds(std::string preText, std::string postText);
+		virtual double getSecondsElapsed();
 };
 
 #endif

@@ -66,6 +66,61 @@
 			"dress_plot": 1,
 			"layer": 4
 		},
+		{
+			"type": "TH2D",
+			"name": "clusterPhiVsZ_fwd",
+			"title": "cluster occupancy, phi vs z - forward",
+			"nbinsx": 150,
+			"xMin": -52.15,
+			"xMax": 52.15,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterPhiVsZ_l1",
+			"title": "cluster occupancy, phi vs z - layer 1",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterPhiVsZ_l2",
+			"title": "cluster occupancy, phi vs z - layer 2",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterPhiVsZ_l3",
+			"title": "cluster occupancy, phi vs z - layer 3",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterPhiVsZ_l4",
+			"title": "cluster occupancy, phi vs z - layer 4",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
 
 		{
 			"type": "TH1D",
@@ -769,6 +824,62 @@
 			"yMax": 32.5,
 			"dress_plot": 1,
 			"layer": 4
+		},
+
+		{
+			"type": "TH2D",
+			"name": "rechitPhiVsZ_fwd",
+			"title": "hit rate, phi vs z - forward",
+			"nbinsx": 150,
+			"xMin": -52.15,
+			"xMax": 52.15,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitPhiVsZ_l1",
+			"title": "hit rate, phi vs z - layer 1",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitPhiVsZ_l2",
+			"title": "hit rate, phi vs z - layer 2",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitPhiVsZ_l3",
+			"title": "hit rate, phi vs z - layer 3",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitPhiVsZ_l4",
+			"title": "hit rate, phi vs z - layer 4",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
 		},
 
 		{

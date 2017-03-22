@@ -1,11 +1,9 @@
 {
 	"input_files":
 	[
-		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_110.root",
-		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_111.root",
-		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_112.root",
-		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_113.root",
-		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_114.root",
-		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_115.root"
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_117.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_118.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_119.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_12.root"
 	]
 }

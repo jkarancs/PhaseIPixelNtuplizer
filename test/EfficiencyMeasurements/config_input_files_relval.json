@@ -1,0 +1,11 @@
+{
+	"input_files":
+	[
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/RelValMinBias_13/Relval_MinBias_9_0_0_pre6_Ntuples/170313_111227/0000/Ntuple_1.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/RelValMinBias_13/Relval_MinBias_9_0_0_pre6_Ntuples/170313_111227/0000/Ntuple_2.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/RelValMinBias_13/Relval_MinBias_9_0_0_pre6_Ntuples/170313_111227/0000/Ntuple_3.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/RelValMinBias_13/Relval_MinBias_9_0_0_pre6_Ntuples/170313_111227/0000/Ntuple_4.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/RelValMinBias_13/Relval_MinBias_9_0_0_pre6_Ntuples/170313_111227/0000/Ntuple_5.root",
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/RelValMinBias_13/Relval_MinBias_9_0_0_pre6_Ntuples/170313_111227/0000/Ntuple_6.root"
+	]
+}

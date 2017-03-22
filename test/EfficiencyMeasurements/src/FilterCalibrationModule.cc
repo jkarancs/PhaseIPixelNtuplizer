@@ -30,6 +30,12 @@ FilterCalibrationModule::FilterCalibrationModule(HistoMapType& histogramsArg, co
 	moduleCoord_     (trajField_.mod_on.module_coord),
 	bladePanelCoord_ (trajField_.mod_on.blade_panel_coord),
 	diskRingCoord_   (trajField_.mod_on.disk_ring_coord),
+	lx_              (trajField_.lx),
+	ly_              (trajField_.ly),
+	lz_              (trajField_.lz),
+	glx_             (trajField_.glx),
+	gly_             (trajField_.gly),
+	glz_             (trajField_.glz),
 	trk_             (trajField_.trk)
 {
 	auto checkGetHistoFromMap = [&] (const std::string& name) -> TH1*
@@ -45,6 +51,7 @@ FilterCalibrationModule::FilterCalibrationModule(HistoMapType& histogramsArg, co
 		onTrkCluOccupancy_l1              = checkGetHistoFromMap("onTrkCluOccupancy_l1");              onTrkCluOccupancy_l2              = checkGetHistoFromMap("onTrkCluOccupancy_l2");              onTrkCluOccupancy_l3              = checkGetHistoFromMap("onTrkCluOccupancy_l3");              onTrkCluOccupancy_l4              = checkGetHistoFromMap("onTrkCluOccupancy_l4");              onTrkCluOccupancy_fwd             = checkGetHistoFromMap("onTrkCluOccupancy_fwd");
 		rocNumhitsWithCuts_l1             = checkGetHistoFromMap("rocNumhitsWithCuts_l1");             rocNumhitsWithCuts_l2             = checkGetHistoFromMap("rocNumhitsWithCuts_l2");             rocNumhitsWithCuts_l3             = checkGetHistoFromMap("rocNumhitsWithCuts_l3");             rocNumhitsWithCuts_l4             = checkGetHistoFromMap("rocNumhitsWithCuts_l4");             rocNumhitsWithCuts_fwd            = checkGetHistoFromMap("rocNumhitsWithCuts_fwd");
 		rocEfficiencyWithCuts_l1          = checkGetHistoFromMap("rocEfficiencyWithCuts_l1");          rocEfficiencyWithCuts_l2          = checkGetHistoFromMap("rocEfficiencyWithCuts_l2");          rocEfficiencyWithCuts_l3          = checkGetHistoFromMap("rocEfficiencyWithCuts_l3");          rocEfficiencyWithCuts_l4          = checkGetHistoFromMap("rocEfficiencyWithCuts_l4");          rocEfficiencyWithCuts_fwd         = checkGetHistoFromMap("rocEfficiencyWithCuts_fwd");
+		rechitPhiVsZ_l1                   = checkGetHistoFromMap("rechitPhiVsZ_l1");                   rechitPhiVsZ_l2                   = checkGetHistoFromMap("rechitPhiVsZ_l2");                   rechitPhiVsZ_l3                   = checkGetHistoFromMap("rechitPhiVsZ_l3");                   rechitPhiVsZ_l4                   = checkGetHistoFromMap("rechitPhiVsZ_l4");                   rechitPhiVsZ_fwd                  = checkGetHistoFromMap("rechitPhiVsZ_fwd");
 		vtxNtrkNumhitsPreCuts             = checkGetHistoFromMap("vtxNtrkNumhitsPreCuts");             vtxNtrkEfficiencyPreCuts          = checkGetHistoFromMap("vtxNtrkEfficiencyPreCuts");
 		nMinus1VtxNtrkNumhits             = checkGetHistoFromMap("nMinus1VtxNtrkNumhits");             nMinus1VtxNtrkEfficiency          = checkGetHistoFromMap("nMinus1VtxNtrkEfficiency");
 		nMinus1PtNumhits                  = checkGetHistoFromMap("nMinus1PtNumhits");                  nMinus1PtEfficiency               = checkGetHistoFromMap("nMinus1PtEfficiency");
@@ -92,35 +99,43 @@ void FilterCalibrationModule::fillHistograms()
 		if(layer_ == 4) onTrkCluOccupancy_l4 -> Fill(moduleCoord_, ladderCoord_);
 	}
 	if(det_ == 1) onTrkCluOccupancy_fwd -> Fill(diskRingCoord_, bladePanelCoord_);
+	if(det_ == 0)
+	{
+		if(layer_ == 1) rechitPhiVsZ_l1  -> Fill(glz_, atan2(gly_, glx_));
+		if(layer_ == 2) rechitPhiVsZ_l2  -> Fill(glz_, atan2(gly_, glx_));
+		if(layer_ == 3) rechitPhiVsZ_l3  -> Fill(glz_, atan2(gly_, glx_));
+		if(layer_ == 4) rechitPhiVsZ_l4  -> Fill(glz_, atan2(gly_, glx_));
+	}
+	if(det_ == 1) rechitPhiVsZ_fwd -> Fill(glz_, atan2(gly_, glx_));
 	fillPairs(vtxNtrkNumhitsPreCuts,  vtxNtrkEfficiencyPreCuts, trk_.fromVtxNtrk, fillEfficiencyCondition);
 	fillPairs(ptNumhitsPreCuts,       ptEfficiencyPreCuts,      trk_.pt,          fillEfficiencyCondition);
 	fillPairs(stripNumhitsPreCuts,    stripEfficiencyPreCuts,   trk_.strip,       fillEfficiencyCondition);
-	fillPairs(lxNumhitsPreCuts,       lxEfficiencyPreCuts,      trajField_.lx,    fillEfficiencyCondition);
-	fillPairs(lyNumhitsPreCuts,       lyEfficiencyPreCuts,      trajField_.ly,    fillEfficiencyCondition);
-	fillPairs(hitDistNumhitsPreCuts,  hitDistEfficiencyPreCuts, d_tr,  fillEfficiencyCondition);
-	fillPairs(cluDistNumhitsPreCuts,  cluDistEfficiencyPreCuts, d_cl,  !missing_);
+	fillPairs(lxNumhitsPreCuts,       lxEfficiencyPreCuts,      lx_,              fillEfficiencyCondition);
+	fillPairs(lyNumhitsPreCuts,       lyEfficiencyPreCuts,      ly_,              fillEfficiencyCondition);
+	fillPairs(hitDistNumhitsPreCuts,  hitDistEfficiencyPreCuts, d_tr,             fillEfficiencyCondition);
+	fillPairs(cluDistNumhitsPreCuts,  cluDistEfficiencyPreCuts, d_cl,             !missing_);
 	if(det_ == 0)
 	{
 		fillPairs(d0BarrelNumhitsPreCuts, d0BarrelEfficiencyPreCuts, trk_.d0, fillEfficiencyCondition);
 		fillPairs(dZBarrelNumhitsPreCuts, dZBarrelEfficiencyPreCuts, trk_.dz, fillEfficiencyCondition);
-		if(layer_ == 1) fillPairs(localPosNumhitsLay1PreCuts, localPosEfficiencyLay1PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
-		if(layer_ == 2) fillPairs(localPosNumhitsLay2PreCuts, localPosEfficiencyLay2PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
-		if(layer_ == 3) fillPairs(localPosNumhitsLay3PreCuts, localPosEfficiencyLay3PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
-		if(layer_ == 4) fillPairs(localPosNumhitsLay4PreCuts, localPosEfficiencyLay4PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
+		if(layer_ == 1) fillPairs(localPosNumhitsLay1PreCuts, localPosEfficiencyLay1PreCuts, lx_, ly_, fillEfficiencyCondition);
+		if(layer_ == 2) fillPairs(localPosNumhitsLay2PreCuts, localPosEfficiencyLay2PreCuts, lx_, ly_, fillEfficiencyCondition);
+		if(layer_ == 3) fillPairs(localPosNumhitsLay3PreCuts, localPosEfficiencyLay3PreCuts, lx_, ly_, fillEfficiencyCondition);
+		if(layer_ == 4) fillPairs(localPosNumhitsLay4PreCuts, localPosEfficiencyLay4PreCuts, lx_, ly_, fillEfficiencyCondition);
 	}
 	if(det_ == 1)
 	{
 		fillPairs(d0ForwardNumhitsPreCuts, d0ForwardEfficiencyPreCuts, trk_.d0, fillEfficiencyCondition);
 		fillPairs(dZForwardNumhitsPreCuts, dZForwardEfficiencyPreCuts, trk_.dz, fillEfficiencyCondition);
 		const int panelOrientation = (side_ - 1) * 4 + std::abs(ring_ % 2) * 2 + panel_; // +Z, -Z, ring 1, ring 2, panel 1, panel 2
-		if(panelOrientation == 1) fillPairs(localPosNumhitsForward1PreCuts, localPosEfficiencyForward1PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
-		if(panelOrientation == 2) fillPairs(localPosNumhitsForward2PreCuts, localPosEfficiencyForward2PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
-		if(panelOrientation == 3) fillPairs(localPosNumhitsForward3PreCuts, localPosEfficiencyForward3PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
-		if(panelOrientation == 4) fillPairs(localPosNumhitsForward4PreCuts, localPosEfficiencyForward4PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
-		if(panelOrientation == 5) fillPairs(localPosNumhitsForward5PreCuts, localPosEfficiencyForward5PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
-		if(panelOrientation == 6) fillPairs(localPosNumhitsForward6PreCuts, localPosEfficiencyForward6PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
-		if(panelOrientation == 7) fillPairs(localPosNumhitsForward7PreCuts, localPosEfficiencyForward7PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
-		if(panelOrientation == 8) fillPairs(localPosNumhitsForward8PreCuts, localPosEfficiencyForward8PreCuts, trajField_.lx, trajField_.ly, fillEfficiencyCondition);
+		if(panelOrientation == 1) fillPairs(localPosNumhitsForward1PreCuts, localPosEfficiencyForward1PreCuts, lx_, ly_, fillEfficiencyCondition);
+		if(panelOrientation == 2) fillPairs(localPosNumhitsForward2PreCuts, localPosEfficiencyForward2PreCuts, lx_, ly_, fillEfficiencyCondition);
+		if(panelOrientation == 3) fillPairs(localPosNumhitsForward3PreCuts, localPosEfficiencyForward3PreCuts, lx_, ly_, fillEfficiencyCondition);
+		if(panelOrientation == 4) fillPairs(localPosNumhitsForward4PreCuts, localPosEfficiencyForward4PreCuts, lx_, ly_, fillEfficiencyCondition);
+		if(panelOrientation == 5) fillPairs(localPosNumhitsForward5PreCuts, localPosEfficiencyForward5PreCuts, lx_, ly_, fillEfficiencyCondition);
+		if(panelOrientation == 6) fillPairs(localPosNumhitsForward6PreCuts, localPosEfficiencyForward6PreCuts, lx_, ly_, fillEfficiencyCondition);
+		if(panelOrientation == 7) fillPairs(localPosNumhitsForward7PreCuts, localPosEfficiencyForward7PreCuts, lx_, ly_, fillEfficiencyCondition);
+		if(panelOrientation == 8) fillPairs(localPosNumhitsForward8PreCuts, localPosEfficiencyForward8PreCuts, lx_, ly_, fillEfficiencyCondition);
 	}
 	fillPairs(nMinus1VtxNtrkNumhits, nMinus1VtxNtrkEfficiency, trk_.fromVtxNtrk, fillEfficiencyCondition,
 		{zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut});
@@ -140,28 +155,28 @@ void FilterCalibrationModule::fillHistograms()
 	}
 	{
 		const int cuts_passed = nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && valmisCut && hitsepCut;
-		fillPairs(nMinus1LxNumhits, nMinus1LxEfficiency, trajField_.lx, fillEfficiencyCondition, {cuts_passed});
-		fillPairs(nMinus1LyNumhits, nMinus1LyEfficiency, trajField_.ly, fillEfficiencyCondition, {cuts_passed});
+		fillPairs(nMinus1LxNumhits, nMinus1LxEfficiency, lx_, fillEfficiencyCondition, {cuts_passed});
+		fillPairs(nMinus1LyNumhits, nMinus1LyEfficiency, ly_, fillEfficiencyCondition, {cuts_passed});
 		if(det_ == 0 && !flipped_)
 		{
-			if(layer_ == 1) fillPairs(nMinus1LocalPosNumhitsLay1, nMinus1LocalPosEfficiencyLay1, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed});
-			if(layer_ == 2) fillPairs(nMinus1LocalPosNumhitsLay2, nMinus1LocalPosEfficiencyLay2, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed});
-			if(layer_ == 3) fillPairs(nMinus1LocalPosNumhitsLay3, nMinus1LocalPosEfficiencyLay3, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed});
-			if(layer_ == 4) fillPairs(nMinus1LocalPosNumhitsLay4, nMinus1LocalPosEfficiencyLay4, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed});
+			if(layer_ == 1) fillPairs(nMinus1LocalPosNumhitsLay1, nMinus1LocalPosEfficiencyLay1, lx_, ly_, fillEfficiencyCondition, {cuts_passed});
+			if(layer_ == 2) fillPairs(nMinus1LocalPosNumhitsLay2, nMinus1LocalPosEfficiencyLay2, lx_, ly_, fillEfficiencyCondition, {cuts_passed});
+			if(layer_ == 3) fillPairs(nMinus1LocalPosNumhitsLay3, nMinus1LocalPosEfficiencyLay3, lx_, ly_, fillEfficiencyCondition, {cuts_passed});
+			if(layer_ == 4) fillPairs(nMinus1LocalPosNumhitsLay4, nMinus1LocalPosEfficiencyLay4, lx_, ly_, fillEfficiencyCondition, {cuts_passed});
 		}
 		if(det_ == 1)
 		{
 			const int histoIndex = (side_ - 1) * 4 + std::abs(ring_ % 2) * 2 + panel_;
 			switch(histoIndex)
 			{
-				case 1: fillPairs(nMinus1LocalPosNumhitsForward1, nMinus1LocalPosEfficiencyForward1, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed}); break;
-				case 2: fillPairs(nMinus1LocalPosNumhitsForward2, nMinus1LocalPosEfficiencyForward2, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed}); break;
-				case 3: fillPairs(nMinus1LocalPosNumhitsForward3, nMinus1LocalPosEfficiencyForward3, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed}); break;
-				case 4: fillPairs(nMinus1LocalPosNumhitsForward4, nMinus1LocalPosEfficiencyForward4, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed}); break;
-				case 5: fillPairs(nMinus1LocalPosNumhitsForward5, nMinus1LocalPosEfficiencyForward5, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed}); break;
-				case 6: fillPairs(nMinus1LocalPosNumhitsForward6, nMinus1LocalPosEfficiencyForward6, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed}); break;
-				case 7: fillPairs(nMinus1LocalPosNumhitsForward7, nMinus1LocalPosEfficiencyForward7, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed}); break;
-				case 8: fillPairs(nMinus1LocalPosNumhitsForward8, nMinus1LocalPosEfficiencyForward8, trajField_.lx, trajField_.ly, fillEfficiencyCondition, {cuts_passed}); break;
+				case 1: fillPairs(nMinus1LocalPosNumhitsForward1, nMinus1LocalPosEfficiencyForward1, lx_, ly_, fillEfficiencyCondition, {cuts_passed}); break;
+				case 2: fillPairs(nMinus1LocalPosNumhitsForward2, nMinus1LocalPosEfficiencyForward2, lx_, ly_, fillEfficiencyCondition, {cuts_passed}); break;
+				case 3: fillPairs(nMinus1LocalPosNumhitsForward3, nMinus1LocalPosEfficiencyForward3, lx_, ly_, fillEfficiencyCondition, {cuts_passed}); break;
+				case 4: fillPairs(nMinus1LocalPosNumhitsForward4, nMinus1LocalPosEfficiencyForward4, lx_, ly_, fillEfficiencyCondition, {cuts_passed}); break;
+				case 5: fillPairs(nMinus1LocalPosNumhitsForward5, nMinus1LocalPosEfficiencyForward5, lx_, ly_, fillEfficiencyCondition, {cuts_passed}); break;
+				case 6: fillPairs(nMinus1LocalPosNumhitsForward6, nMinus1LocalPosEfficiencyForward6, lx_, ly_, fillEfficiencyCondition, {cuts_passed}); break;
+				case 7: fillPairs(nMinus1LocalPosNumhitsForward7, nMinus1LocalPosEfficiencyForward7, lx_, ly_, fillEfficiencyCondition, {cuts_passed}); break;
+				case 8: fillPairs(nMinus1LocalPosNumhitsForward8, nMinus1LocalPosEfficiencyForward8, lx_, ly_, fillEfficiencyCondition, {cuts_passed}); break;
 			}
 		}
 	}
