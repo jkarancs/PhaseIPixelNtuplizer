@@ -22,6 +22,7 @@
 #include "../interface/common_functions_jkarancs.h"
 #include "../interface/FilterCalibrationModule.h"
 #include "../interface/ClusterOccupancyModule.h"
+#include "../interface/WilsonScoreInterval.h"
 
 // #include "../../../interface/CanvasExtras.h"
 
@@ -57,17 +58,19 @@ constexpr float HALF_PI = 0.5 * 3.141592653589793238462;
 constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE              = {0.97, 1.01};
 
 // const std::pair<float, float>  LAYER_MODULE_LABEL_POS      = std::make_pair(0.79f, 0.88f);
-constexpr auto                     CONFIG_FILE_PATH            = "./config_main.json"; 
+constexpr auto                    CONFIG_FILE_PATH            = "./config_main.json"; 
+const     std::string             EFFICIENCY_PLOT_IDENTIFIER      = "Efficiency";
+const     std::string             EFFICIENCY_NUMERATOR_IDENTIFIER = "Numhits";
 
-const bool CLUST_LOOP_REQUESTED = true;
+const bool CLUST_LOOP_REQUESTED = false;
 const bool TRAJ_LOOP_REQUESTED  = true;
 
 void                                        testSaveFolders(const JSON& config);
 TFile*                                      generateOutputNtuple(const JSON& config);
 void                                        readInFilesAndAddToChain(const JSON& config, const std::string& configKey, const std::string& innerKey, TChain* chain);
 std::map<std::string, std::shared_ptr<TH1>> processHistogramDefinitions(const JSON& config, const std::string& configKey, const std::string& innerKey);
-void                                        fillPairs(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& numHitsHisto, const std::string& efficiencyHisto, const float& xFill,                     const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
-void                                        fillPairs(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& numHitsHisto, const std::string& efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
+TH1*                                        getEfficiencyNumeratorHisto(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& efficiencyHistoName);
+void                                        drawEfficiencyWithAsymmetricErrors(TCanvas& canvas, const TH1D& efficiencyHistogram, const TH1D& numHitsHistogram);
 
 int main(int argc, char** argv) try
 {
@@ -180,29 +183,20 @@ int main(int argc, char** argv) try
 	// Scale Efficiency plots //
 	////////////////////////////
 	{
-		static const std::string efficiencyPlotIdentifier      = "Efficiency";
-		static const std::string efficiencyNumeratorIdentifier = "Numhits";
 		for(const auto& histogramPair: histograms)
 		{
 			std::string efficiencyHistoName = histogramPair.first;
-			size_t      effPos              = efficiencyHistoName.find(efficiencyPlotIdentifier);
-			if(effPos == std::string::npos)      continue;
-			std::string numeratorHistoName  = std::string(efficiencyHistoName).replace(effPos, efficiencyPlotIdentifier.size(), efficiencyNumeratorIdentifier);
-			auto numHitsHisto               = histograms.find(numeratorHistoName);
-			if(numHitsHisto == histograms.end())
-			{
-				std::cout << error_prompt << "Efficiency histo: " << efficiencyHistoName << " exist, but there is no histogram called: " << numeratorHistoName << std::endl;
-				continue;
-			}
+			if(efficiencyHistoName.find(EFFICIENCY_PLOT_IDENTIFIER) == std::string::npos) continue;
+			auto numhitsHisto               = getEfficiencyNumeratorHisto(histograms, efficiencyHistoName);
 			auto efficiencyHisto2DPtrConversionResult = dynamic_cast<TH2D*>(histogramPair.second.get());
 			if(efficiencyHisto2DPtrConversionResult)
 			{
 				// std::cout << "Downscaling histogram: " << efficiencyHistoName << std::endl;
-				downscale2DHistogram(efficiencyHisto2DPtrConversionResult, dynamic_cast<TH2D*>(numHitsHisto -> second.get()));
+				downscale2DHistogram(efficiencyHisto2DPtrConversionResult, dynamic_cast<TH2D*>(numhitsHisto));
 				efficiencyHisto2DPtrConversionResult -> GetZaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE.first, EFFICIENCY_ZOOM_RANGE.second);
 				continue;
 			}
-			downscale1DHistogram(dynamic_cast<TH1D*>(histogramPair.second.get()), dynamic_cast<TH1D*>(numHitsHisto -> second.get()));
+			downscale1DHistogram(dynamic_cast<TH1D*>(histogramPair.second.get()), dynamic_cast<TH1D*>(numhitsHisto));
 			dynamic_cast<TH1D*>(histogramPair.second.get()) -> GetYaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE.first, EFFICIENCY_ZOOM_RANGE.second);
 		}
 	}
@@ -321,7 +315,14 @@ int main(int argc, char** argv) try
 				// {
 					// std::cout << "Drawn with entries: " << dynamic_cast<TH1D*>(histogram) -> GetEntries() << std::endl;
 				// }
-				dynamic_cast<TH1D*>(histogram) -> Draw("HIST");
+				if(histogramName.find(EFFICIENCY_PLOT_IDENTIFIER) != std::string::npos)
+				{
+					drawEfficiencyWithAsymmetricErrors(*canvas, *dynamic_cast<TH1D*>(histogram), *dynamic_cast<TH1D*>(getEfficiencyNumeratorHisto(histograms, histogramName)));
+				}
+				else
+				{
+					dynamic_cast<TH1D*>(histogram) -> Draw("HIST");
+				}
 			}
 			// TText label;
 			// CanvasExtras::setLabelStyleNote(label);
@@ -472,4 +473,68 @@ std::map<std::string, std::shared_ptr<TH1>> processHistogramDefinitions(const JS
 		}
 	}
 	return histograms;
+}
+
+TH1* getEfficiencyNumeratorHisto(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& efficiencyHistoName)
+{
+	if(histograms.find(efficiencyHistoName) == histograms.end())
+	{
+		std::cout << error_prompt << "Looking up efficiency histogram called " << efficiencyHistoName << " failed." << std::endl;
+		return nullptr;
+	}
+	size_t effPos = efficiencyHistoName.find(EFFICIENCY_PLOT_IDENTIFIER);
+	if(effPos != std::string::npos)
+	{
+		std::string numeratorHistoName = std::string(efficiencyHistoName).replace(effPos, EFFICIENCY_PLOT_IDENTIFIER.size(), EFFICIENCY_NUMERATOR_IDENTIFIER);
+		auto numHitsHisto              = histograms.find(numeratorHistoName);
+		if(numHitsHisto == histograms.end())
+		{
+			std::cout << error_prompt << "Efficiency histo: " << efficiencyHistoName << " exist, but there is no histogram called: " << numeratorHistoName << std::endl;
+			return nullptr;
+		}
+		return numHitsHisto -> second.get();
+	}
+	return nullptr;
+}
+
+void drawEfficiencyWithAsymmetricErrors(TCanvas& canvas, const TH1D& efficiencyHistogram, const TH1D& numHitsHistogram)
+{
+	const TAxis* xAxis = efficiencyHistogram.GetXaxis();
+	const TAxis* yAxis = efficiencyHistogram.GetYaxis();
+	const int numBins = xAxis -> GetNbins();
+	std::vector<Double_t> valuesX;
+	std::vector<Double_t> valuesY;
+	std::vector<Double_t> errorsXLow (numBins, 0.5 * xAxis -> GetBinWidth(xAxis -> GetFirst()));
+	std::vector<Double_t> errorsXHigh(numBins, 0.5 * xAxis -> GetBinWidth(xAxis -> GetFirst()));
+	std::vector<Double_t> errorsYLow;
+	std::vector<Double_t> errorsYHigh;
+	for(int bin = 0; bin < numBins; ++bin)
+	{
+		valuesX.push_back(xAxis -> GetBinCenter(bin));
+		valuesY.push_back(efficiencyHistogram.GetBinContent(bin));
+		double lowerBound, upperBound;
+		std::tie(lowerBound, upperBound) = WilsonScoreIntervalErrorCalculator(numHitsHistogram.GetBinContent(bin), valuesY[bin], 1.0).getError();
+		errorsYLow .emplace_back(std::move(valuesY[bin] - lowerBound  ));
+		errorsYHigh.emplace_back(std::move(upperBound   - valuesY[bin]));
+		// std::cout << "--- Error value check --- " << std::endl;
+		// std::cout << valuesX[bin] << std::endl;
+		// std::cout << valuesY[bin] << std::endl;
+		// std::cout << errorsXLow[bin] << std::endl;
+		// std::cout << errorsXHigh[bin] << std::endl;
+		// std::cout << errorsYLow[bin] << std::endl;
+		// std::cout << errorsYHigh[bin] << std::endl;
+		// std::cout << "--- End value check --- " << std::endl;
+		// std::cin.get();
+	}
+	TGraphAsymmErrors* graph = new TGraphAsymmErrors(numBins, valuesX.data(), valuesY.data(), errorsXLow.data(), errorsXHigh.data(), errorsYLow.data(), errorsYHigh.data());
+	graph -> SetTitle(efficiencyHistogram.GetTitle());
+	graph -> GetXaxis() -> SetNdivisions(xAxis -> GetNdivisions());
+	graph -> GetYaxis() -> SetNdivisions(yAxis -> GetNdivisions());
+	graph -> SetMarkerColor(4);
+	graph -> SetMarkerStyle(24);
+	graph -> SetLineWidth(1);
+	graph -> SetLineStyle(1);
+	canvas.cd();
+	graph -> Draw("AP");
+	// const_cast<TH1D*>(&efficiencyHistogram) -> Draw("HIST");
 }

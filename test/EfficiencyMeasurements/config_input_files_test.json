@@ -1,9 +1,6 @@
 {
 	"input_files":
 	[
-		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_117.root",
-		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_118.root",
-		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_119.root",
-		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_12.root"
+		"/data/gridout/ahunyadi/MinBias/PhaseINtuplizer/Run2_CMSSW90X/MinBias_90X_mcRun2_eff_85_FlatPU0to50_evt100000_Ntuples/170306_111136/0000/Ntuple_117.root"
 	]
 }

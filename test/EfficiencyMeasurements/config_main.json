@@ -1,5 +1,5 @@
 {
-	"input_files_list": "config_input_files_dcoleff_95.json",
+	"input_files_list": "config_input_files_test.json",
 	"histogram_definition_list": "config_histogram_definitions.json",
 	"save_histograms_to_ntuple": true,
 	"ntuple_save_directory": ".",
