@@ -24,6 +24,7 @@ namespace ConsoleColor
 			Code code;
 		public:
 			Modifier(Code code_p);
+			Modifier(Modifier& other_p);
 			~Modifier();
 			friend std::ostream& operator <<(std::ostream& osArg, const Modifier& modArg);
 	};

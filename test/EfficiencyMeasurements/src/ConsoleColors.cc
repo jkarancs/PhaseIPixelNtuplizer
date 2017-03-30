@@ -2,14 +2,9 @@
 
 namespace ConsoleColor 
 {
-	Modifier::Modifier(Code code_p) : code(code_p) 
-	{
-
-	}
-	Modifier::~Modifier()
-	{
-
-	}
+	Modifier::Modifier(Code code_p) : code(code_p) {}
+	Modifier::Modifier(Modifier& other_p) : code(other_p.code) {}
+	Modifier::~Modifier() {}
 	std::ostream& operator <<(std::ostream& os_p, const Modifier& mod_p) 
 	{
 		return os_p << "\033[" << mod_p.code << "m";

@@ -1,14 +1,8 @@
 #include "../interface/ConsoleActor.h"
 
-ConsoleActor::ConsoleActor(std::string nameArg, ConsoleColor::Modifier modifierArg) : name(nameArg), c_modifier(modifierArg)
-{
+ConsoleActor::ConsoleActor(std::string nameArg, ConsoleColor::Modifier modifierArg) : name(nameArg), c_modifier(modifierArg) {}
 
-}
-
-ConsoleActor::~ConsoleActor()
-{
-
-}
+ConsoleActor::~ConsoleActor() {}
 
 std::ostream& operator <<(std::ostream& osArg, const ConsoleActor& actorArg) 
 {

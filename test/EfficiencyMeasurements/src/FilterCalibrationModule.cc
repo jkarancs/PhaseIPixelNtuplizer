@@ -48,10 +48,14 @@ FilterCalibrationModule::FilterCalibrationModule(HistoMapType& histogramsArg, co
 			return nullptr;
 		}
 	};
-		onTrkCluOccupancy_l1              = checkGetHistoFromMap("onTrkCluOccupancy_l1");              onTrkCluOccupancy_l2              = checkGetHistoFromMap("onTrkCluOccupancy_l2");              onTrkCluOccupancy_l3              = checkGetHistoFromMap("onTrkCluOccupancy_l3");              onTrkCluOccupancy_l4              = checkGetHistoFromMap("onTrkCluOccupancy_l4");              onTrkCluOccupancy_fwd             = checkGetHistoFromMap("onTrkCluOccupancy_fwd");
-		rocNumhitsWithCuts_l1             = checkGetHistoFromMap("rocNumhitsWithCuts_l1");             rocNumhitsWithCuts_l2             = checkGetHistoFromMap("rocNumhitsWithCuts_l2");             rocNumhitsWithCuts_l3             = checkGetHistoFromMap("rocNumhitsWithCuts_l3");             rocNumhitsWithCuts_l4             = checkGetHistoFromMap("rocNumhitsWithCuts_l4");             rocNumhitsWithCuts_fwd            = checkGetHistoFromMap("rocNumhitsWithCuts_fwd");
-		rocEfficiencyWithCuts_l1          = checkGetHistoFromMap("rocEfficiencyWithCuts_l1");          rocEfficiencyWithCuts_l2          = checkGetHistoFromMap("rocEfficiencyWithCuts_l2");          rocEfficiencyWithCuts_l3          = checkGetHistoFromMap("rocEfficiencyWithCuts_l3");          rocEfficiencyWithCuts_l4          = checkGetHistoFromMap("rocEfficiencyWithCuts_l4");          rocEfficiencyWithCuts_fwd         = checkGetHistoFromMap("rocEfficiencyWithCuts_fwd");
-		rechitPhiVsZ_l1                   = checkGetHistoFromMap("rechitPhiVsZ_l1");                   rechitPhiVsZ_l2                   = checkGetHistoFromMap("rechitPhiVsZ_l2");                   rechitPhiVsZ_l3                   = checkGetHistoFromMap("rechitPhiVsZ_l3");                   rechitPhiVsZ_l4                   = checkGetHistoFromMap("rechitPhiVsZ_l4");                   rechitPhiVsZ_fwd                  = checkGetHistoFromMap("rechitPhiVsZ_fwd");
+		layersDisksNumhits                = checkGetHistoFromMap("layersDisksNumhits");                layersDisksEfficiency             = checkGetHistoFromMap("layersDisksEfficiency");
+		rechitOccupancy_l1                = checkGetHistoFromMap("rechitOccupancy_l1");                rechitOccupancy_l2                = checkGetHistoFromMap("rechitOccupancy_l2");                rechitOccupancy_l3                = checkGetHistoFromMap("rechitOccupancy_l3");                rechitOccupancy_l4                = checkGetHistoFromMap("rechitOccupancy_l4");                rechitOccupancy_fwd                = checkGetHistoFromMap("rechitOccupancy_fwd");
+		rocNumhitsWithCuts_l1             = checkGetHistoFromMap("rocNumhitsWithCuts_l1");             rocNumhitsWithCuts_l2             = checkGetHistoFromMap("rocNumhitsWithCuts_l2");             rocNumhitsWithCuts_l3             = checkGetHistoFromMap("rocNumhitsWithCuts_l3");             rocNumhitsWithCuts_l4             = checkGetHistoFromMap("rocNumhitsWithCuts_l4");             rocNumhitsWithCuts_fwd             = checkGetHistoFromMap("rocNumhitsWithCuts_fwd");
+		rocEfficiencyWithCuts_l1          = checkGetHistoFromMap("rocEfficiencyWithCuts_l1");          rocEfficiencyWithCuts_l2          = checkGetHistoFromMap("rocEfficiencyWithCuts_l2");          rocEfficiencyWithCuts_l3          = checkGetHistoFromMap("rocEfficiencyWithCuts_l3");          rocEfficiencyWithCuts_l4          = checkGetHistoFromMap("rocEfficiencyWithCuts_l4");          rocEfficiencyWithCuts_fwd          = checkGetHistoFromMap("rocEfficiencyWithCuts_fwd");
+		rechitPhiVsZ_l1                   = checkGetHistoFromMap("rechitPhiVsZ_l1");                   rechitPhiVsZ_l2                   = checkGetHistoFromMap("rechitPhiVsZ_l2");                   rechitPhiVsZ_l3                   = checkGetHistoFromMap("rechitPhiVsZ_l3");                   rechitPhiVsZ_l4                   = checkGetHistoFromMap("rechitPhiVsZ_l4");                   rechitPhiVsZ_fwd                   = checkGetHistoFromMap("rechitPhiVsZ_fwd");
+		sensorNumhitsWithCutsPhiVsZ_l1    = checkGetHistoFromMap("sensorNumhitsWithCutsPhiVsZ_l1");    sensorNumhitsWithCutsPhiVsZ_l2    = checkGetHistoFromMap("sensorNumhitsWithCutsPhiVsZ_l2");    sensorNumhitsWithCutsPhiVsZ_l3    = checkGetHistoFromMap("sensorNumhitsWithCutsPhiVsZ_l3");    sensorNumhitsWithCutsPhiVsZ_l4    = checkGetHistoFromMap("sensorNumhitsWithCutsPhiVsZ_l4");    sensorNumhitsWithCutsPhiVsZ_fwd    = checkGetHistoFromMap("sensorNumhitsWithCutsPhiVsZ_fwd");
+		sensorEfficiencyWithCutsPhiVsZ_l1 = checkGetHistoFromMap("sensorEfficiencyWithCutsPhiVsZ_l1"); sensorEfficiencyWithCutsPhiVsZ_l2 = checkGetHistoFromMap("sensorEfficiencyWithCutsPhiVsZ_l2"); sensorEfficiencyWithCutsPhiVsZ_l3 = checkGetHistoFromMap("sensorEfficiencyWithCutsPhiVsZ_l3"); sensorEfficiencyWithCutsPhiVsZ_l4 = checkGetHistoFromMap("sensorEfficiencyWithCutsPhiVsZ_l4"); sensorEfficiencyWithCutsPhiVsZ_fwd = checkGetHistoFromMap("sensorEfficiencyWithCutsPhiVsZ_fwd");
+		rechitPhiVsZ_l1                   = checkGetHistoFromMap("rechitPhiVsZ_l1");                   rechitPhiVsZ_l2                   = checkGetHistoFromMap("rechitPhiVsZ_l2");                   rechitPhiVsZ_l3                   = checkGetHistoFromMap("rechitPhiVsZ_l3");                   rechitPhiVsZ_l4                   = checkGetHistoFromMap("rechitPhiVsZ_l4");                   rechitPhiVsZ_fwd                   = checkGetHistoFromMap("rechitPhiVsZ_fwd");
 		vtxNtrkNumhitsPreCuts             = checkGetHistoFromMap("vtxNtrkNumhitsPreCuts");             vtxNtrkEfficiencyPreCuts          = checkGetHistoFromMap("vtxNtrkEfficiencyPreCuts");
 		nMinus1VtxNtrkNumhits             = checkGetHistoFromMap("nMinus1VtxNtrkNumhits");             nMinus1VtxNtrkEfficiency          = checkGetHistoFromMap("nMinus1VtxNtrkEfficiency");
 		nMinus1PtNumhits                  = checkGetHistoFromMap("nMinus1PtNumhits");                  nMinus1PtEfficiency               = checkGetHistoFromMap("nMinus1PtEfficiency");
@@ -88,25 +92,36 @@ void FilterCalibrationModule::fillHistograms()
 {
 	const float d_cl = sqrt(trajField_.dx_cl * trajField_.dx_cl + trajField_.dy_cl * trajField_.dy_cl);
 	const float d_tr = sqrt(trajField_.dx_tr * trajField_.dx_tr + trajField_.dy_tr * trajField_.dy_tr);
+	const float phi  = atan2(gly_, glx_);
 	const int        clust_near              = (0 < d_cl) && (d_cl < HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL);
 	const int        fillEfficiencyCondition = !missing_ || clust_near;
 	calculateCuts();
+	if(det_ == 0) fillPairs(layersDisksNumhits, layersDisksEfficiency, layer_, fillEfficiencyCondition);
+	if(det_ == 1) fillPairs(layersDisksNumhits, layersDisksEfficiency, disk_ + 4, fillEfficiencyCondition);
 	if(det_ == 0)
 	{
-		if(layer_ == 1) onTrkCluOccupancy_l1 -> Fill(moduleCoord_, ladderCoord_);
-		if(layer_ == 2) onTrkCluOccupancy_l2 -> Fill(moduleCoord_, ladderCoord_);
-		if(layer_ == 3) onTrkCluOccupancy_l3 -> Fill(moduleCoord_, ladderCoord_);
-		if(layer_ == 4) onTrkCluOccupancy_l4 -> Fill(moduleCoord_, ladderCoord_);
+		if(layer_ == 1) rechitOccupancy_l1 -> Fill(moduleCoord_, ladderCoord_);
+		if(layer_ == 2) rechitOccupancy_l2 -> Fill(moduleCoord_, ladderCoord_);
+		if(layer_ == 3) rechitOccupancy_l3 -> Fill(moduleCoord_, ladderCoord_);
+		if(layer_ == 4) rechitOccupancy_l4 -> Fill(moduleCoord_, ladderCoord_);
 	}
-	if(det_ == 1) onTrkCluOccupancy_fwd -> Fill(diskRingCoord_, bladePanelCoord_);
+	if(det_ == 1) rechitOccupancy_fwd -> Fill(diskRingCoord_, bladePanelCoord_);
 	if(det_ == 0)
 	{
-		if(layer_ == 1) rechitPhiVsZ_l1  -> Fill(glz_, atan2(gly_, glx_));
-		if(layer_ == 2) rechitPhiVsZ_l2  -> Fill(glz_, atan2(gly_, glx_));
-		if(layer_ == 3) rechitPhiVsZ_l3  -> Fill(glz_, atan2(gly_, glx_));
-		if(layer_ == 4) rechitPhiVsZ_l4  -> Fill(glz_, atan2(gly_, glx_));
+		if(layer_ == 1) rechitPhiVsZ_l1  -> Fill(glz_, phi);
+		if(layer_ == 2) rechitPhiVsZ_l2  -> Fill(glz_, phi);
+		if(layer_ == 3) rechitPhiVsZ_l3  -> Fill(glz_, phi);
+		if(layer_ == 4) rechitPhiVsZ_l4  -> Fill(glz_, phi);
 	}
-	if(det_ == 1) rechitPhiVsZ_fwd -> Fill(glz_, atan2(gly_, glx_));
+	if(det_ == 1) rechitPhiVsZ_fwd -> Fill(glz_, phi);
+	if(det_ == 0)
+	{
+		if(layer_ == 1) fillPairs(sensorNumhitsWithCutsPhiVsZ_l1, sensorEfficiencyWithCutsPhiVsZ_l1, glz_, phi, fillEfficiencyCondition);
+		if(layer_ == 2) fillPairs(sensorNumhitsWithCutsPhiVsZ_l2, sensorEfficiencyWithCutsPhiVsZ_l2, glz_, phi, fillEfficiencyCondition);
+		if(layer_ == 3) fillPairs(sensorNumhitsWithCutsPhiVsZ_l3, sensorEfficiencyWithCutsPhiVsZ_l3, glz_, phi, fillEfficiencyCondition);
+		if(layer_ == 4) fillPairs(sensorNumhitsWithCutsPhiVsZ_l4, sensorEfficiencyWithCutsPhiVsZ_l4, glz_, phi, fillEfficiencyCondition);
+	}
+	if(det_ == 1) fillPairs(sensorNumhitsWithCutsPhiVsZ_fwd, sensorEfficiencyWithCutsPhiVsZ_fwd, glz_, phi, fillEfficiencyCondition);
 	fillPairs(vtxNtrkNumhitsPreCuts,  vtxNtrkEfficiencyPreCuts, trk_.fromVtxNtrk, fillEfficiencyCondition);
 	fillPairs(ptNumhitsPreCuts,       ptEfficiencyPreCuts,      trk_.pt,          fillEfficiencyCondition);
 	fillPairs(stripNumhitsPreCuts,    stripEfficiencyPreCuts,   trk_.strip,       fillEfficiencyCondition);

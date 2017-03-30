@@ -66,6 +66,12 @@ EFFICIENCY_FILTERCALIBRATION_A = ./bin/efficiency_filterCalibration$(ExeSuf)
 OBJS     += $(EFFICIENCY_FILTERCALIBRATION_O)
 PROGRAMS += $(EFFICIENCY_FILTERCALIBRATION_A)
 
+MERGE_SIMHIT_PLOTS_S = ./src/mergeSimhitPlots.$(SrcSuf)
+MERGE_SIMHIT_PLOTS_O = ./obj/mergeSimhitPlots.$(ObjSuf)
+MERGE_SIMHIT_PLOTS_A = ./bin/mergeSimhitPlots$(ExeSuf)
+OBJS     += $(MERGE_SIMHIT_PLOTS_O)
+PROGRAMS += $(MERGE_SIMHIT_PLOTS_A)
+
 all: $(PROGRAMS)
 
 # Executables
@@ -86,6 +92,13 @@ $(EFFICIENCY_MULTIHITMEAS_A): $(EFFICIENCY_MULTIHITMEAS_O) $(CONSOLECOLORS_O) $(
 
 $(EFFICIENCY_FILTERCALIBRATION_A): $(EFFICIENCY_FILTERCALIBRATION_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
 	@printf "Compiling done, linking efficiency_filterCalibration...\n"
+	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
+	$(MT_EXE)
+	@echo "Succesful make..."
+	@echo "...$@ is ready to use."
+
+$(MERGE_SIMHIT_PLOTS_A): $(MERGE_SIMHIT_PLOTS_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
+	@printf "Compiling done, linking mergeSimhitPlots...\n"
 	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
 	$(MT_EXE)
 	@echo "Succesful make..."
@@ -144,7 +157,6 @@ $(CLUSTEROCCUPANCY_MODULE_O): $(CLUSTEROCCUPANCY_MODULE_S)
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 
-
 ###
 
 $(EFFICIENCY_MAIN_O): $(EFFICIENCY_MAIN_S)  
@@ -159,6 +171,11 @@ $(EFFICIENCY_MULTIHITMEAS_O): $(EFFICIENCY_MULTIHITMEAS_S)
 
 $(EFFICIENCY_FILTERCALIBRATION_O): $(EFFICIENCY_FILTERCALIBRATION_S)
 	@printf "Compiling program: \"efficiency_filterCalibration\"...\n"
+	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
+	@printf "Done.\n"
+
+$(MERGE_SIMHIT_PLOTS_O): $(MERGE_SIMHIT_PLOTS_S)
+	@printf "Compiling program: \"mergeSimhitPlots\"...\n"
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 

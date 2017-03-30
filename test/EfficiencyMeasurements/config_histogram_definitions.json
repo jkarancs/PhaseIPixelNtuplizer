@@ -2,6 +2,44 @@
 	"histogram_definitions":
 	[
 		{
+			"type": "TH1D",
+			"name": "layersDisksNumhits",
+			"title": "num. hits. used to calculate efficiency, layers 1-4, disks 1-3 [with cuts]",
+			"nbinsx": 7,
+			"xMin": 0.5,
+			"xMax": 7.5,
+			"custom_x_axis_labels": 1,
+			"x_axis_labels": 
+			[
+				"Lay 1",
+				"Lay 2",
+				"Lay 3",
+				"Lay 4",
+				"Disk 1",
+				"Disk 2",
+				"Disk 3"
+			]
+		},
+		{
+			"type": "TH1D",
+			"name": "layersDisksEfficiency",
+			"title": "efficiency, layers 1-4, disks 1-3 [with cuts]",
+			"nbinsx": 7,
+			"xMin": 0.5,
+			"xMax": 7.5,
+			"custom_x_axis_labels": 1,
+			"x_axis_labels": 
+			[
+				"Lay 1",
+				"Lay 2",
+				"Lay 3",
+				"Lay 4",
+				"Disk 1",
+				"Disk 2",
+				"Disk 3"
+			]
+		},
+		{
 			"type": "TH2D",
 			"name": "clusterOccupancy_fwd",
 			"title": "cluster occupancy on the ROCs - forward",
@@ -696,8 +734,8 @@
 
 		{
 			"type": "TH2D",
-			"name": "onTrkCluOccupancy_fwd",
-			"title": "on-track cluster occupancy forward",
+			"name": "rechitOccupancy_fwd",
+			"title": "rechit occupancy forward",
 			"nbinsx": 112,
 			"xMin": -3.5,
 			"xMax": 3.5,
@@ -709,8 +747,8 @@
 		},
 		{
 			"type": "TH2D",
-			"name": "onTrkCluOccupancy_l1",
-			"title": "on-track cluster occupancy layer 1",
+			"name": "rechitOccupancy_l1",
+			"title": "rechit occupancy layer 1",
 			"nbinsx": 72,
 			"xMin": -4.5,
 			"xMax": 4.5,
@@ -722,8 +760,8 @@
 		},
 		{
 			"type": "TH2D",
-			"name": "onTrkCluOccupancy_l2",
-			"title": "on-track cluster occupancy layer 2",
+			"name": "rechitOccupancy_l2",
+			"title": "rechit occupancy layer 2",
 			"nbinsx": 72,
 			"xMin": -4.5,
 			"xMax": 4.5,
@@ -735,8 +773,8 @@
 		},
 		{
 			"type": "TH2D",
-			"name": "onTrkCluOccupancy_l3",
-			"title": "on-track cluster occupancy layer 3",
+			"name": "rechitOccupancy_l3",
+			"title": "rechit occupancy layer 3",
 			"nbinsx": 72,
 			"xMin": -4.5,
 			"xMax": 4.5,
@@ -748,8 +786,8 @@
 		},
 		{
 			"type": "TH2D",
-			"name": "onTrkCluOccupancy_l4",
-			"title": "on-track cluster occupancy layer 4",
+			"name": "rechitOccupancy_l4",
+			"title": "rechit occupancy layer 4",
 			"nbinsx": 72,
 			"xMin": -4.5,
 			"xMax": 4.5,
@@ -829,7 +867,7 @@
 		{
 			"type": "TH2D",
 			"name": "rechitPhiVsZ_fwd",
-			"title": "hit rate, phi vs z - forward",
+			"title": "rechit occupancy, phi vs z - forward",
 			"nbinsx": 150,
 			"xMin": -52.15,
 			"xMax": 52.15,
@@ -840,7 +878,7 @@
 		{
 			"type": "TH2D",
 			"name": "rechitPhiVsZ_l1",
-			"title": "hit rate, phi vs z - layer 1",
+			"title": "rechit occupancy, phi vs z - layer 1",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -851,7 +889,7 @@
 		{
 			"type": "TH2D",
 			"name": "rechitPhiVsZ_l2",
-			"title": "hit rate, phi vs z - layer 2",
+			"title": "rechit occupancy, phi vs z - layer 2",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -862,7 +900,7 @@
 		{
 			"type": "TH2D",
 			"name": "rechitPhiVsZ_l3",
-			"title": "hit rate, phi vs z - layer 3",
+			"title": "rechit occupancy, phi vs z - layer 3",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -873,7 +911,117 @@
 		{
 			"type": "TH2D",
 			"name": "rechitPhiVsZ_l4",
-			"title": "hit rate, phi vs z - layer 4",
+			"title": "rechit occupancy, phi vs z - layer 4",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "sensorNumhitsWithCutsPhiVsZ_fwd",
+			"title": "num. hits used to calc. eff., phi vs z - forward",
+			"nbinsx": 150,
+			"xMin": -52.15,
+			"xMax": 52.15,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "sensorNumhitsWithCutsPhiVsZ_l1",
+			"title": "num. hits used to calc. eff., phi vs z - layer 1",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "sensorNumhitsWithCutsPhiVsZ_l2",
+			"title": "num. hits used to calc. eff., phi vs z - layer 2",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "sensorNumhitsWithCutsPhiVsZ_l3",
+			"title": "num. hits used to calc. eff., phi vs z - layer 3",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "sensorNumhitsWithCutsPhiVsZ_l4",
+			"title": "num. hits used to calc. eff., phi vs z - layer 4",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "sensorEfficiencyWithCutsPhiVsZ_fwd",
+			"title": "efficiency, phi vs z - forward",
+			"nbinsx": 150,
+			"xMin": -52.15,
+			"xMax": 52.15,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "sensorEfficiencyWithCutsPhiVsZ_l1",
+			"title": "efficiency, phi vs z - layer 1",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "sensorEfficiencyWithCutsPhiVsZ_l2",
+			"title": "efficiency, phi vs z - layer 2",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "sensorEfficiencyWithCutsPhiVsZ_l3",
+			"title": "efficiency, phi vs z - layer 3",
+			"nbinsx": 150,
+			"xMin": -26.7,
+			"xMax": 26.7,
+			"nbinsy": 150,
+			"yMin": 0,
+			"yMax": 3.14159
+		},
+		{
+			"type": "TH2D",
+			"name": "sensorEfficiencyWithCutsPhiVsZ_l4",
+			"title": "efficiency, phi vs z - layer 4",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,

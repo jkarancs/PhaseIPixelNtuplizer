@@ -112,6 +112,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		TTree* clustTree_;
 		TTree* trackTree_;
 		TTree* trajTree_;
+		TTree* nonPropagatedExtraTrajTree_;
 		// Tree field definitions are in the interface directory
 		EventData       evt_;
 		LumiData        lumi_;
@@ -178,6 +179,8 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		TH2D* rechitOccupancyROCBins_l3;
 		TH2D* rechitOccupancyROCBins_l4;
 #endif
+		TH1D* disk1PropagationEtaNumhits;
+		TH1D* disk1PropagationEtaEfficiency;
 		// Private methods
 		void                                getEvtData(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
@@ -187,8 +190,9 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		void                                getClustData(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle);
 		std::map<reco::TrackRef, TrackData> getTrackData(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
 		void                                getTrajTrackData(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
-		void                                checkAndSaveTrajMeasurementData(const TrajectoryMeasurement& measurement, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
+		void                                checkAndSaveTrajMeasurementData(const TrajectoryMeasurement& measurement, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, TTree* targetTree);
 		std::vector<TrajectoryMeasurement>  getLayer1ExtrapolatedHitsFromMeas(const TrajectoryMeasurement& trajMeasurement);
+		void                                getDisk1PropagationData(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
 		void                                handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::string msg);
 		void                                handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::vector<std::string> msg);
 		void                                printEvtInfo(const std::string& streamType);

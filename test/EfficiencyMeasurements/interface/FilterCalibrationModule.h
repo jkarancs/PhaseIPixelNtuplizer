@@ -90,10 +90,13 @@ class FilterCalibrationModule
 		int hitsepCut_counter_   = 0;
 		int effCutAll_counter_   = 0;
 		// Histograms
-		TH1* onTrkCluOccupancy_l1;              TH1* onTrkCluOccupancy_l2;              TH1* onTrkCluOccupancy_l3;              TH1* onTrkCluOccupancy_l4;              TH1* onTrkCluOccupancy_fwd;
+		TH1* layersDisksNumhits;                TH1* layersDisksEfficiency;
+		TH1* rechitOccupancy_l1;                TH1* rechitOccupancy_l2;                TH1* rechitOccupancy_l3;                TH1* rechitOccupancy_l4;                TH1* rechitOccupancy_fwd;  
 		TH1* rocNumhitsWithCuts_l1;             TH1* rocNumhitsWithCuts_l2;             TH1* rocNumhitsWithCuts_l3;             TH1* rocNumhitsWithCuts_l4;             TH1* rocNumhitsWithCuts_fwd;
 		TH1* rocEfficiencyWithCuts_l1;          TH1* rocEfficiencyWithCuts_l2;          TH1* rocEfficiencyWithCuts_l3;          TH1* rocEfficiencyWithCuts_l4;          TH1* rocEfficiencyWithCuts_fwd;
 		TH1* rechitPhiVsZ_l1;                   TH1* rechitPhiVsZ_l2;                   TH1* rechitPhiVsZ_l3;                   TH1* rechitPhiVsZ_l4;                   TH1* rechitPhiVsZ_fwd;
+		TH1* sensorNumhitsWithCutsPhiVsZ_l1;    TH1* sensorNumhitsWithCutsPhiVsZ_l2;    TH1* sensorNumhitsWithCutsPhiVsZ_l3;    TH1* sensorNumhitsWithCutsPhiVsZ_l4;    TH1* sensorNumhitsWithCutsPhiVsZ_fwd;
+		TH1* sensorEfficiencyWithCutsPhiVsZ_l1; TH1* sensorEfficiencyWithCutsPhiVsZ_l2; TH1* sensorEfficiencyWithCutsPhiVsZ_l3; TH1* sensorEfficiencyWithCutsPhiVsZ_l4; TH1* sensorEfficiencyWithCutsPhiVsZ_fwd;
 		TH1* vtxNtrkNumhitsPreCuts;             TH1* vtxNtrkEfficiencyPreCuts;
 		TH1* nMinus1VtxNtrkNumhits;             TH1* nMinus1VtxNtrkEfficiency;
 		TH1* nMinus1PtNumhits;                  TH1* nMinus1PtEfficiency;

@@ -36,6 +36,8 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
 	rechitOccupancyROCBins_l4 (new TH2D("rechitOccupancyROCBins_l4",  "rechit occupancy on ROCS - layer 4",  72,   -4.5,   4.5,  130, -32.5, 32.5   ))
 #endif
 {
+	disk1PropagationEtaNumhits    = new TH1D("disk1PropagationEtaNumhits",    "disk1PropagationEtaNumhits", 100, -3.1415, 3.1415);
+	disk1PropagationEtaEfficiency = new TH1D("disk1PropagationEtaEfficiency", "disk1PropagationEtaEfficiency", 100, -3.1415, 3.1415);
 	iConfig_                = iConfig;
 	clusterSaveDownscaling_ = 1;
 	if(iConfig_.exists("triggerTag"))
@@ -90,6 +92,7 @@ void PhaseIPixelNtuplizer::beginJob()
 	clustTree_ = new TTree("clustTree", "Pixel clusters.");
 	trackTree_ = new TTree("trackTree", "The track in the event.");
 	trajTree_  = new TTree("trajTree",   "Trajectory measurements in the Pixel detector.");
+	nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree",   "The original trajectroy measurements replaced by propagated hits in the Pixel detector.");
 	// Event tree
 	eventTree_ -> Branch("event",     &evt_,         evt_        .list.c_str());
 	// Cluster tree
@@ -111,6 +114,16 @@ void PhaseIPixelNtuplizer::beginJob()
 	trajTree_  -> Branch("clust_pix", &traj_.clu.pix, "pix[size][2]/F");
 	trajTree_  -> Branch("track",     &track_,        track_      .list.c_str());
 	trajTree_  -> Branch("traj",      &traj_,         traj_       .list.c_str());
+	// Additional trajectory tree
+	nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree",   "The original trajectroy measurements replaced by propagated hits in the Pixel detector.");
+	nonPropagatedExtraTrajTree_  -> Branch("event",     &evt_,          evt_        .list.c_str());
+	nonPropagatedExtraTrajTree_  -> Branch("mod_on",    &traj_.mod_on,  traj_.mod_on.list.c_str());
+	nonPropagatedExtraTrajTree_  -> Branch("mod",       &traj_.mod,     traj_.mod   .list.c_str());
+	nonPropagatedExtraTrajTree_  -> Branch("clust",     &traj_.clu,     traj_.clu   .list.c_str());
+	nonPropagatedExtraTrajTree_  -> Branch("clust_adc", &traj_.clu.adc, "adc[size]/F");
+	nonPropagatedExtraTrajTree_  -> Branch("clust_pix", &traj_.clu.pix, "pix[size][2]/F");
+	nonPropagatedExtraTrajTree_  -> Branch("track",     &track_,        track_      .list.c_str());
+	nonPropagatedExtraTrajTree_  -> Branch("traj",      &traj_,         traj_       .list.c_str());
 }
 
 void PhaseIPixelNtuplizer::endJob() 
@@ -127,14 +140,13 @@ void PhaseIPixelNtuplizer::endJob()
 		clustOccupancy_fwd,         clustOccupancy_l1,         clustOccupancy_l2,         clustOccupancy_l3,         clustOccupancy_l4, 
 		rechitOccupancy_fwd,        rechitOccupancy_l1,        rechitOccupancy_l2,        rechitOccupancy_l3,        rechitOccupancy_l4,
 		clustOccupancyROCBins_fwd,  clustOccupancyROCBins_l1,  clustOccupancyROCBins_l2,  clustOccupancyROCBins_l3,  clustOccupancyROCBins_l4,
-		rechitOccupancyROCBins_fwd, rechitOccupancyROCBins_l1, rechitOccupancyROCBins_l2, rechitOccupancyROCBins_l3, rechitOccupancyROCBins_l4,
-
+		rechitOccupancyROCBins_fwd, rechitOccupancyROCBins_l1, rechitOccupancyROCBins_l2, rechitOccupancyROCBins_l3, rechitOccupancyROCBins_l4
 	};
 	for(auto histoIt = histogramsToSave.begin(); histoIt != histogramsToSave.end(); ++histoIt)
 	{
 		TCanvas* canvas = custom_can_((*histoIt), std::string((*histoIt) -> GetTitle()) + "_canvas", 0, 0, 800, 800, 80, 140); 
-		(*histoIt) -> Draw("COLZ");
 		canvas -> cd();
+		(*histoIt) -> Draw("COLZ");
 		std::string histoName = (*histoIt) -> GetName();
 		if(histoName.find("ROC") != std::string::npos)
 		{
@@ -160,6 +172,20 @@ void PhaseIPixelNtuplizer::endJob()
 		canvas     -> Write();
 	}
 #endif
+	const std::vector<TH1D*> disk1PropagationPlots =
+	{
+		disk1PropagationEtaNumhits,
+		disk1PropagationEtaEfficiency
+	};
+	for(auto histoIt = disk1PropagationPlots.begin(); histoIt != disk1PropagationPlots.end(); ++histoIt)
+	{
+		TCanvas* canvas = custom_can_((*histoIt), std::string((*histoIt) -> GetTitle()) + "_canvas", 0, 0, 800, 800, 80, 140); 
+		canvas -> cd();
+		(*histoIt) -> Draw("");
+		std::string histoName = (*histoIt) -> GetName();
+		(*histoIt) -> Write();
+		canvas     -> Write();
+	}
 	std::cout << "Writing plots to file: \"" << ntupleOutputFilename_ << "\"." << std::endl;
 	ntupleOutputFile_ -> Write();
 	std::cout << "Closing file: \"" << ntupleOutputFilename_ << "\"." << std::endl;
@@ -230,7 +256,7 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	pixelClusterParameterEstimator_ = pixelClusterParameterEstimatorHandle.product();
 	// Initialize the object used to calculate module geometric informations
 	coord_.init(iSetup);
-	getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle, clusterCollectionHandle, trajTrackCollectionHandle);
+	// getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle, clusterCollectionHandle, trajTrackCollectionHandle);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	// std::cout << "Handling simhits." << std::endl;
 	std::vector<edm::Handle<edm::PSimHitContainer>> simhitCollectionHandles(simhitCollectionTokens_.size());
@@ -244,10 +270,13 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
 	iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
 	// std::cout << "Digis: " << std::endl;
-	getDigiData(digiCollectionHandle);
+	// getDigiData(digiCollectionHandle);
 	// std::cout << "Simhits: " << std::endl;
-	getSimhitData(simhitCollectionHandles);
+	// getSimhitData(simhitCollectionHandles);
 #endif
+	std::cout << "Disk 1 propagation check..." << std::endl;
+	getDisk1PropagationData(trajTrackCollectionHandle);
+	std::cout << "Done disk 1 propagation check." << std::endl;
 	// for(const auto& currentTrackKeypair: *trajTrackCollectionHandle)
 	// {
 	// 	static int numPrintout = 0;
@@ -262,9 +291,9 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// 	}
 	// }
 	// std::cout << "Clusters: " << std::endl;
-	getClustData(clusterCollectionHandle);
+	// getClustData(clusterCollectionHandle);
 	// std::cout << "TrajTrackData: " << std::endl;
-	getTrajTrackData(vertexCollectionHandle, trajTrackCollectionHandle);
+	// getTrajTrackData(vertexCollectionHandle, trajTrackCollectionHandle);
 	// std::cout << "end " << std::endl;
 }
 
@@ -563,7 +592,6 @@ void PhaseIPixelNtuplizer::getClustData(const edm::Handle<edmNew::DetSetVector<S
 				clustOccupancyROCBins_fwd -> Fill(clu_.mod_on.disk_ring_coord, clu_.mod_on.blade_panel_coord);
 				clustOccupancy_l4         -> Fill(clu_.glz, atan2(clu_.gly, clu_.glx));
 			}
-
 #endif
 			clustTree_ -> Fill();
 		}
@@ -701,8 +729,6 @@ void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollec
 		const reco::TrackRef                    track = currentTrackKeypair.val;
 		// Discarding tracks without pixel measurements
 		if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
-		// Trajectory info
-		traj_.init();
 		track_ = trackDataCollection.at(track);
 		const auto& trajectoryMeasurements = traj -> measurements();
 		auto firstLayer1TrajMeasurementIt = std::find_if(trajectoryMeasurements.begin(), trajectoryMeasurements.end(), [&] (const TrajectoryMeasurement& measurement)
@@ -714,7 +740,12 @@ void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollec
 		// Save trajectory measurement data for non-layer 1 hits
 		for(auto measurementIt = trajectoryMeasurements.begin(); measurementIt != firstLayer1TrajMeasurementIt; measurementIt++)
 		{
-			checkAndSaveTrajMeasurementData(*measurementIt, trajTrackCollectionHandle);
+			checkAndSaveTrajMeasurementData(*measurementIt, trajTrackCollectionHandle, trajTree_);
+		}
+		// Save non-propagated hits as an additional tree
+		for(auto measurementIt = firstLayer1TrajMeasurementIt; measurementIt != trajectoryMeasurements.end(); measurementIt++)
+		{
+			checkAndSaveTrajMeasurementData(*measurementIt, trajTrackCollectionHandle, nonPropagatedExtraTrajTree_);
 		}
 		// Check there are hits before the first layer 1 traj. measurement
 		if(firstLayer1TrajMeasurementIt == trajectoryMeasurements.begin()) continue;
@@ -724,15 +755,17 @@ void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollec
 		if(lastNonLayer1TrajMeasurementRecHit == nullptr) std::cout << "Invalid rechit pointer." << std::endl;
 		if(!(lastNonLayer1TrajMeasurementRecHit -> isValid())) continue;
 		std::vector<TrajectoryMeasurement> extrapolatedHitsOnLayer1(getLayer1ExtrapolatedHitsFromMeas(*lastNonLayer1TrajMeasurementIt));
+		// Save propagated hits
 		for(auto measurementIt = extrapolatedHitsOnLayer1.begin(); measurementIt != extrapolatedHitsOnLayer1.end(); measurementIt++)
 		{
-			checkAndSaveTrajMeasurementData(*measurementIt, trajTrackCollectionHandle);
+			checkAndSaveTrajMeasurementData(*measurementIt, trajTrackCollectionHandle, trajTree_);
 		}
 	}
 }
 
-void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasurement& measurement, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
+void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasurement& measurement, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, TTree* targetTree)
 {
+	traj_.init();
 	// Check if the measurement infos can be read
 	if(!measurement.updatedState().isValid()) return;
 	TransientTrackingRecHit::ConstRecHitPointer recHit = measurement.recHit();
@@ -853,7 +886,7 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasu
 	}
 	#endif
 	// Filling the tree
-	trajTree_ -> Fill();
+	targetTree -> Fill();
 }
 
 std::vector<TrajectoryMeasurement> PhaseIPixelNtuplizer::getLayer1ExtrapolatedHitsFromMeas(const TrajectoryMeasurement& trajMeasurement)
@@ -865,6 +898,68 @@ std::vector<TrajectoryMeasurement> PhaseIPixelNtuplizer::getLayer1ExtrapolatedHi
 	return layerMeasurements -> measurements(*pixelBarrelLayer1, trajMeasurement.updatedState(), *trackerPropagator_, *chi2MeasurementEstimator_);
 }
 
+// kiplotolom az összes olyan track etáját, amelyhez a layer 2-ről vagy a disk 1-ről sikeresen progagáltam a layer 1-re
+// van-e olyan track ami nagy étájú (nyalábhoz simul) és disk 2-n és disk 3-n van csak valid hitje
+// ha minden tracknek van layer 1-en hitje, akkor nem lehet trükközni
+// ha nincs, akkor vannak doublet seedelt hitek 
+void PhaseIPixelNtuplizer::getDisk1PropagationData(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
+{
+	int hitsDisk1WhenLayer1PropagationUsed      = 0;
+	int validhitsDisk1WhenLayer1PropagationUsed = 0;
+	for(const auto& currentTrackKeypair: *trajTrackCollectionHandle)
+	{
+		const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
+		const reco::TrackRef                    track = currentTrackKeypair.val;
+		// Discarding tracks without pixel measurements
+		if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
+		const auto& trajectoryMeasurements = traj -> measurements();
+		auto firstLayer1TrajMeasurementIt = std::find_if(trajectoryMeasurements.begin(), trajectoryMeasurements.end(), [&] (const TrajectoryMeasurement& measurement)
+		{
+			ModuleData mod;
+			getModuleData(mod, 1, measurement.recHit() -> geographicalId());
+			return mod.det == 0 && mod.layer == 1;
+		});
+		// Check there are hits before the first layer 1 traj. measurement
+		if(firstLayer1TrajMeasurementIt == trajectoryMeasurements.begin()) continue;
+		auto lastNonLayer1TrajMeasurementIt = std::prev(firstLayer1TrajMeasurementIt);
+		// Check if the last non-layer1 traj measurement is valid 
+		auto lastNonLayer1TrajMeasurementRecHit = lastNonLayer1TrajMeasurementIt -> recHit();
+		if(lastNonLayer1TrajMeasurementRecHit == nullptr) std::cout << "Invalid rechit pointer." << std::endl;
+		if(!(lastNonLayer1TrajMeasurementRecHit -> isValid())) continue;
+		std::vector<TrajectoryMeasurement> extrapolatedHitsOnLayer1(getLayer1ExtrapolatedHitsFromMeas(*lastNonLayer1TrajMeasurementIt));
+		if(extrapolatedHitsOnLayer1.size() == 0) continue;
+		bool trackHasHitOnDisk1      = false;
+		bool trackHasValidHitOnDisk1 = false;
+		bool trackHasValidHitOnDisk2 = false;
+		bool trackHasValidHitOnDisk3 = false;
+		for(auto measurementIt = trajectoryMeasurements.begin(); measurementIt != firstLayer1TrajMeasurementIt; measurementIt++)
+		{
+			TransientTrackingRecHit::ConstRecHitPointer recHit = measurementIt -> recHit();
+			DetId detId = recHit -> geographicalId();
+			ModuleData mod;
+			getModuleData(mod, 0, detId);
+			if(mod.det != 1) continue;
+			bool isValid   = recHit -> getType() == TrackingRecHit::valid;
+			bool isMissing = recHit -> getType() == TrackingRecHit::missing;
+			if(mod.disk == 1 && (isValid || isMissing)) trackHasHitOnDisk1 = true;
+			if(mod.disk == 1 && isValid) trackHasValidHitOnDisk1 = true;
+			if(mod.disk == 2 && isValid) trackHasValidHitOnDisk2 = true;
+			if(mod.disk == 3 && isValid) trackHasValidHitOnDisk3 = true;
+		}
+		if(trackHasHitOnDisk1 && trackHasValidHitOnDisk2 && trackHasValidHitOnDisk3)
+		{
+			hitsDisk1WhenLayer1PropagationUsed++;
+			disk1PropagationEtaNumhits -> Fill(track -> eta());
+			if(trackHasValidHitOnDisk1)
+			{
+				validhitsDisk1WhenLayer1PropagationUsed++;
+				disk1PropagationEtaEfficiency -> Fill(track -> eta());
+			}
+		}
+	}
+	std::cout << "Number of hits on disk 1 when layer 1 propagation was used:       " << hitsDisk1WhenLayer1PropagationUsed      << std::endl;
+	std::cout << "Number of valid hits on disk 1 when layer 1 propagation was used: " << validhitsDisk1WhenLayer1PropagationUsed << std::endl;
+}
 
 //////////////////////////////
 // Private member functions //

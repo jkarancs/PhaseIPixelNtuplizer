@@ -44,7 +44,7 @@ cmsDriver.py TTbar_13TeV_TuneCUETP8M1_cfi \
 --no_exec
 ```
 
-MinBias RECO, no pileup + added DynIneff:
+MinBias RECO, pileup + added DynIneff:
 
 ```bash
 cmsDriver.py \

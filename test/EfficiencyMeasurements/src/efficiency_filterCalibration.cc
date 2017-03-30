@@ -55,7 +55,7 @@ using JSON = nlohmann::json;
 
 constexpr float HALF_PI = 0.5 * 3.141592653589793238462;
 
-constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE              = {0.97, 1.01};
+constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE              = {0.97, 1.005};
 
 // const std::pair<float, float>  LAYER_MODULE_LABEL_POS      = std::make_pair(0.79f, 0.88f);
 constexpr auto                    CONFIG_FILE_PATH            = "./config_main.json"; 
@@ -67,10 +67,11 @@ const bool TRAJ_LOOP_REQUESTED  = true;
 
 void                                        testSaveFolders(const JSON& config);
 TFile*                                      generateOutputNtuple(const JSON& config);
+std::vector<std::string>                    getFilesFromConfig(const JSON& config, const std::string& configKey, const std::string& innerKey);
 void                                        readInFilesAndAddToChain(const JSON& config, const std::string& configKey, const std::string& innerKey, TChain* chain);
 std::map<std::string, std::shared_ptr<TH1>> processHistogramDefinitions(const JSON& config, const std::string& configKey, const std::string& innerKey);
 TH1*                                        getEfficiencyNumeratorHisto(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& efficiencyHistoName);
-void                                        drawEfficiencyWithAsymmetricErrors(TCanvas& canvas, const TH1D& efficiencyHistogram, const TH1D& numHitsHistogram);
+TGraphAsymmErrors*                          getGraphForEfficiencyWithAsymmetricErrors(const TH1D& efficiencyHistogram, const TH1D& numHitsHistogram);
 
 int main(int argc, char** argv) try
 {
@@ -215,6 +216,8 @@ int main(int argc, char** argv) try
 		int yAxisDivisions = 510;
 		int logXAxis = 0;
 		int logYAxis = 0;
+		int customXAxisLabels = 0;
+		std::vector<std::string> xAxisLabels;
 	};
 	std::map<std::string, PlotOptions> plotOptionsMap;
 	try
@@ -237,6 +240,8 @@ int main(int argc, char** argv) try
 			if(definition.count("y_axis_divisions"        ) != 0) plotExtras.yAxisDivisions         = definition.at("y_axis_divisions");
 			if(definition.count("log_x_axis"              ) != 0) plotExtras.logXAxis               = definition.at("log_x_axis");
 			if(definition.count("log_y_axis"              ) != 0) plotExtras.logYAxis               = definition.at("log_y_axis");
+			if(definition.count("custom_x_axis_labels"    ) != 0) plotExtras.customXAxisLabels      = definition.at("custom_x_axis_labels");
+			if(definition.count("x_axis_labels"           ) != 0) plotExtras.xAxisLabels            = definition.at("x_axis_labels").get<std::vector<std::string>>();
 			plotOptionsMap.emplace(name, std::move(plotExtras));
 		}
 	}
@@ -287,6 +292,13 @@ int main(int argc, char** argv) try
 				histogram -> GetXaxis() -> SetNdivisions(plotOptions.xAxisDivisions);
 				histogram -> GetYaxis() -> SetNdivisions(plotOptions.yAxisDivisions);
 			}
+			if(plotOptions.customXAxisLabels)
+			{
+				for(unsigned int numBin = 0; numBin < plotOptions.xAxisLabels.size(); ++numBin)
+				{
+					histogram -> GetXaxis() -> ChangeLabel(numBin + 1, -1, 0.025, -1, -1, -1, plotOptions.xAxisLabels[numBin].c_str());
+				}
+			}
 			// std::cout << "Histogram name: "    << histogramName << std::endl;
 			// std::cout << "Number of entries: " << histogram -> GetEntries() << std::endl; 
 			TH2D* histo2D = dynamic_cast<TH2D*>(histogram);
@@ -317,7 +329,24 @@ int main(int argc, char** argv) try
 				// }
 				if(histogramName.find(EFFICIENCY_PLOT_IDENTIFIER) != std::string::npos)
 				{
-					drawEfficiencyWithAsymmetricErrors(*canvas, *dynamic_cast<TH1D*>(histogram), *dynamic_cast<TH1D*>(getEfficiencyNumeratorHisto(histograms, histogramName)));
+					TGraphAsymmErrors* graph = getGraphForEfficiencyWithAsymmetricErrors(*dynamic_cast<TH1D*>(histogram), *dynamic_cast<TH1D*>(getEfficiencyNumeratorHisto(histograms, histogramName)));
+					if(plotOptions.customTicks)
+					{
+						graph -> GetXaxis() -> SetNdivisions(plotOptions.xAxisDivisions);
+						graph -> GetYaxis() -> SetNdivisions(plotOptions.yAxisDivisions);
+					}
+					if(plotOptions.customXAxisLabels)
+					{
+						for(unsigned int numBin = 0; numBin < plotOptions.xAxisLabels.size(); ++numBin)
+						{
+							graph -> GetXaxis() -> ChangeLabel(numBin + 1, -1, 0.025, -1, -1, -1, plotOptions.xAxisLabels[numBin].c_str());
+						}
+						if(std::string(graph -> GetTitle()).find("efficiency") != std::string::npos)
+						{
+							graph -> GetYaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE.first, EFFICIENCY_ZOOM_RANGE.second);
+						}
+					}
+					graph -> Draw("AP");
 				}
 				else
 				{
@@ -423,11 +452,16 @@ TFile* generateOutputNtuple(const JSON& config)
 	return new TFile(ntupleSavePath.c_str(), "RECREATE", fileTitle.c_str());
 }
 
-void readInFilesAndAddToChain(const JSON& config, const std::string& configKey, const std::string& innerKey, TChain* chain)
+std::vector<std::string> getFilesFromConfig(const JSON& config, const std::string& configKey, const std::string& innerKey)
 {
 	std::string inputFilesListPath = config[configKey];
 	JSON inputListJSON = JSON::parse(fileToString(inputFilesListPath));
-	std::vector<std::string> inputFiles = inputListJSON[innerKey];
+	return inputListJSON[innerKey];	
+}
+
+void readInFilesAndAddToChain(const JSON& config, const std::string& configKey, const std::string& innerKey, TChain* chain)
+{
+	std::vector<std::string> inputFiles = getFilesFromConfig(config, configKey, innerKey);
 	std::for_each(inputFiles.begin(), inputFiles.end(), [&] (const std::string& fileName) { chain  -> Add(fileName.c_str()); });
 }
 
@@ -451,6 +485,8 @@ T checkGetElement(const JSON& definition, const std::string& propertyName)
 
 std::map<std::string, std::shared_ptr<TH1>> processHistogramDefinitions(const JSON& config, const std::string& configKey, const std::string& innerKey)
 {
+	auto noDeletionPolicyTH1D = [] (TH1D*) -> void {};
+	auto noDeletionPolicyTH2D = [] (TH2D*) -> void {};
 	std::map<std::string, std::shared_ptr<TH1>> histograms;
 	std::string histogramDefinitionListPath = config[configKey];
 	JSON inputListJSON = JSON::parse(fileToString(histogramDefinitionListPath));
@@ -463,13 +499,13 @@ std::map<std::string, std::shared_ptr<TH1>> processHistogramDefinitions(const JS
 		int nbinsx        = checkGetElement<int>(definition, "nbinsx");
 		float xMin        = checkGetElement<float>(definition, "xMin");
 		float xMax        = checkGetElement<float>(definition, "xMax");
-		if(type == "TH1D") histograms.insert({name, std::make_shared<TH1D>(name.c_str(),  title.c_str(),  nbinsx, xMin, xMax)});
+		if(type == "TH1D") histograms.insert({name, std::shared_ptr<TH1D>(new TH1D(name.c_str(),  title.c_str(),  nbinsx, xMin, xMax), noDeletionPolicyTH1D)});
 		if(type == "TH2D")
 		{
 			int nbinsy        = checkGetElement<int>(definition, "nbinsy");
 			float yMin        = checkGetElement<float>(definition, "yMin");
 			float yMax        = checkGetElement<float>(definition, "yMax");
-			histograms.insert({name, std::make_shared<TH2D>(name.c_str(),  title.c_str(),  nbinsx, xMin, xMax, nbinsy, yMin, yMax)});
+			histograms.insert({name, std::shared_ptr<TH2D>(new TH2D(name.c_str(),  title.c_str(),  nbinsx, xMin, xMax, nbinsy, yMin, yMax), noDeletionPolicyTH2D)});
 		}
 	}
 	return histograms;
@@ -497,7 +533,7 @@ TH1* getEfficiencyNumeratorHisto(const std::map<std::string, std::shared_ptr<TH1
 	return nullptr;
 }
 
-void drawEfficiencyWithAsymmetricErrors(TCanvas& canvas, const TH1D& efficiencyHistogram, const TH1D& numHitsHistogram)
+TGraphAsymmErrors* getGraphForEfficiencyWithAsymmetricErrors(const TH1D& efficiencyHistogram, const TH1D& numHitsHistogram)
 {
 	const TAxis* xAxis = efficiencyHistogram.GetXaxis();
 	const TAxis* yAxis = efficiencyHistogram.GetYaxis();
@@ -510,31 +546,29 @@ void drawEfficiencyWithAsymmetricErrors(TCanvas& canvas, const TH1D& efficiencyH
 	std::vector<Double_t> errorsYHigh;
 	for(int bin = 0; bin < numBins; ++bin)
 	{
-		valuesX.push_back(xAxis -> GetBinCenter(bin));
-		valuesY.push_back(efficiencyHistogram.GetBinContent(bin));
+		valuesX.push_back(xAxis -> GetBinCenter(bin + 1));
+		if(std::string(efficiencyHistogram.GetName()) == std::string("layersDisksEfficiency"))
+		{
+			std::cout << efficiencyHistogram.GetBinContent(bin + 1) << std::endl;
+		}
+		valuesY.push_back(efficiencyHistogram.GetBinContent(bin + 1));
 		double lowerBound, upperBound;
-		std::tie(lowerBound, upperBound) = WilsonScoreIntervalErrorCalculator(numHitsHistogram.GetBinContent(bin), valuesY[bin], 1.0).getError();
+		std::tie(lowerBound, upperBound) = WilsonScoreIntervalErrorCalculator(numHitsHistogram.GetBinContent(bin + 1), valuesY[bin], 1.0).getError();
 		errorsYLow .emplace_back(std::move(valuesY[bin] - lowerBound  ));
 		errorsYHigh.emplace_back(std::move(upperBound   - valuesY[bin]));
-		// std::cout << "--- Error value check --- " << std::endl;
-		// std::cout << valuesX[bin] << std::endl;
-		// std::cout << valuesY[bin] << std::endl;
-		// std::cout << errorsXLow[bin] << std::endl;
-		// std::cout << errorsXHigh[bin] << std::endl;
-		// std::cout << errorsYLow[bin] << std::endl;
-		// std::cout << errorsYHigh[bin] << std::endl;
-		// std::cout << "--- End value check --- " << std::endl;
-		// std::cin.get();
 	}
 	TGraphAsymmErrors* graph = new TGraphAsymmErrors(numBins, valuesX.data(), valuesY.data(), errorsXLow.data(), errorsXHigh.data(), errorsYLow.data(), errorsYHigh.data());
 	graph -> SetTitle(efficiencyHistogram.GetTitle());
+	graph -> GetXaxis() -> SetRangeUser (xAxis -> GetXmin(), xAxis -> GetXmax());
+	// graph -> GetYaxis() -> SetRangeUser (yAxis -> GetXmin(), yAxis -> GetXmax());
 	graph -> GetXaxis() -> SetNdivisions(xAxis -> GetNdivisions());
 	graph -> GetYaxis() -> SetNdivisions(yAxis -> GetNdivisions());
+	graph -> GetXaxis() -> SetLabelOffset(xAxis -> GetLabelOffset());
+	graph -> GetYaxis() -> SetLabelOffset(yAxis -> GetLabelOffset());
 	graph -> SetMarkerColor(4);
 	graph -> SetMarkerStyle(24);
 	graph -> SetLineWidth(1);
 	graph -> SetLineStyle(1);
-	canvas.cd();
-	graph -> Draw("AP");
+	return graph;
 	// const_cast<TH1D*>(&efficiencyHistogram) -> Draw("HIST");
 }
