@@ -55,14 +55,15 @@ using JSON = nlohmann::json;
 
 constexpr float HALF_PI = 0.5 * 3.141592653589793238462;
 
-constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE              = {0.97, 1.005};
+constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE_1D = {0.97,  1.005};
+constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE_2D = {0.965, 1.000};
 
 // const std::pair<float, float>  LAYER_MODULE_LABEL_POS      = std::make_pair(0.79f, 0.88f);
-constexpr auto                    CONFIG_FILE_PATH            = "./config_main.json"; 
+constexpr auto                    CONFIG_FILE_PATH                = "./config_main.json"; 
 const     std::string             EFFICIENCY_PLOT_IDENTIFIER      = "Efficiency";
 const     std::string             EFFICIENCY_NUMERATOR_IDENTIFIER = "Numhits";
 
-const bool CLUST_LOOP_REQUESTED = false;
+const bool CLUST_LOOP_REQUESTED = true;
 const bool TRAJ_LOOP_REQUESTED  = true;
 
 void                                        testSaveFolders(const JSON& config);
@@ -194,11 +195,11 @@ int main(int argc, char** argv) try
 			{
 				// std::cout << "Downscaling histogram: " << efficiencyHistoName << std::endl;
 				downscale2DHistogram(efficiencyHisto2DPtrConversionResult, dynamic_cast<TH2D*>(numhitsHisto));
-				efficiencyHisto2DPtrConversionResult -> GetZaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE.first, EFFICIENCY_ZOOM_RANGE.second);
+				efficiencyHisto2DPtrConversionResult -> GetZaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE_2D.first, EFFICIENCY_ZOOM_RANGE_2D.second);
 				continue;
 			}
 			downscale1DHistogram(dynamic_cast<TH1D*>(histogramPair.second.get()), dynamic_cast<TH1D*>(numhitsHisto));
-			dynamic_cast<TH1D*>(histogramPair.second.get()) -> GetYaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE.first, EFFICIENCY_ZOOM_RANGE.second);
+			dynamic_cast<TH1D*>(histogramPair.second.get()) -> GetYaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE_1D.first, EFFICIENCY_ZOOM_RANGE_1D.second);
 		}
 	}
 	///////////////////////
@@ -343,7 +344,7 @@ int main(int argc, char** argv) try
 						}
 						if(std::string(graph -> GetTitle()).find("efficiency") != std::string::npos)
 						{
-							graph -> GetYaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE.first, EFFICIENCY_ZOOM_RANGE.second);
+							graph -> GetYaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE_1D.first, EFFICIENCY_ZOOM_RANGE_1D.second);
 						}
 					}
 					graph -> Draw("AP");

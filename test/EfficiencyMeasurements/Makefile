@@ -72,6 +72,12 @@ MERGE_SIMHIT_PLOTS_A = ./bin/mergeSimhitPlots$(ExeSuf)
 OBJS     += $(MERGE_SIMHIT_PLOTS_O)
 PROGRAMS += $(MERGE_SIMHIT_PLOTS_A)
 
+DISK1_PROPAGATION_CHECK_S = ./src/disk1PropagationCheck.$(SrcSuf)
+DISK1_PROPAGATION_CHECK_O = ./obj/disk1PropagationCheck.$(ObjSuf)
+DISK1_PROPAGATION_CHECK_A = ./bin/disk1PropagationCheck$(ExeSuf)
+OBJS     += $(DISK1_PROPAGATION_CHECK_O)
+PROGRAMS += $(DISK1_PROPAGATION_CHECK_A)
+
 all: $(PROGRAMS)
 
 # Executables
@@ -99,6 +105,13 @@ $(EFFICIENCY_FILTERCALIBRATION_A): $(EFFICIENCY_FILTERCALIBRATION_O) $(CONSOLECO
 
 $(MERGE_SIMHIT_PLOTS_A): $(MERGE_SIMHIT_PLOTS_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
 	@printf "Compiling done, linking mergeSimhitPlots...\n"
+	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
+	$(MT_EXE)
+	@echo "Succesful make..."
+	@echo "...$@ is ready to use."
+
+$(DISK1_PROPAGATION_CHECK_A): $(DISK1_PROPAGATION_CHECK_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
+	@printf "Compiling done, linking disk1PropagationCheck...\n"
 	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
 	$(MT_EXE)
 	@echo "Succesful make..."
@@ -176,6 +189,11 @@ $(EFFICIENCY_FILTERCALIBRATION_O): $(EFFICIENCY_FILTERCALIBRATION_S)
 
 $(MERGE_SIMHIT_PLOTS_O): $(MERGE_SIMHIT_PLOTS_S)
 	@printf "Compiling program: \"mergeSimhitPlots\"...\n"
+	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
+	@printf "Done.\n"
+
+$(DISK1_PROPAGATION_CHECK_O): $(DISK1_PROPAGATION_CHECK_S)
+	@printf "Compiling program: \"disk1PropagationCheck\"...\n"
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 

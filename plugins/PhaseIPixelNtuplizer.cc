@@ -4,26 +4,26 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
   ntupleOutputFilename_(iConfig.getUntrackedParameter<std::string>("outputFileName", "Ntuple.root"))
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	,
-	simhitOccupancy_fwd       (new TH2D("simhitOccupancy_fwd",        "simhit occupancy - forward",          112, -52.15, 52.15,  50,   0.0, 3.14159)),
-	simhitOccupancy_l1        (new TH2D("simhitOccupancy_l1",         "simhit occupancy - layer 1",          72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	simhitOccupancy_l2        (new TH2D("simhitOccupancy_l2",         "simhit occupancy - layer 2",          72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	simhitOccupancy_l3        (new TH2D("simhitOccupancy_l3",         "simhit occupancy - layer 3",          72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	simhitOccupancy_l4        (new TH2D("simhitOccupancy_l4",         "simhit occupancy - layer 4",          72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	digiOccupancy_fwd         (new TH2D("digiOccupancy_fwd",          "digi occupancy - forward",            112, -52.15, 52.15,  50,   0.0, 3.14159)),
-	digiOccupancy_l1          (new TH2D("digiOccupancy_l1",           "digi occupancy - layer 1",            72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	digiOccupancy_l2          (new TH2D("digiOccupancy_l2",           "digi occupancy - layer 2",            72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	digiOccupancy_l3          (new TH2D("digiOccupancy_l3",           "digi occupancy - layer 3",            72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	digiOccupancy_l4          (new TH2D("digiOccupancy_l4",           "digi occupancy - layer 4",            72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	clustOccupancy_fwd        (new TH2D("clustOccupancy_fwd",         "cluster occupancy - forward",            72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	clustOccupancy_l1         (new TH2D("clustOccupancy_l1",          "cluster occupancy - layer 1",            72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	clustOccupancy_l2         (new TH2D("clustOccupancy_l2",          "cluster occupancy - layer 2",            72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	clustOccupancy_l3         (new TH2D("clustOccupancy_l3",          "cluster occupancy - layer 3",            72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	clustOccupancy_l4         (new TH2D("clustOccupancy_l4",          "cluster occupancy - layer 4",            72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	rechitOccupancy_fwd       (new TH2D("rechitOccupancy_fwd",        "rechit occupancy - forward",         112, -52.15, 52.15,  50,   0.0, 3.14159)),
-	rechitOccupancy_l1        (new TH2D("rechitOccupancy_l1",         "rechit occupancy - layer 1",         72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	rechitOccupancy_l2        (new TH2D("rechitOccupancy_l2",         "rechit occupancy - layer 2",         72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	rechitOccupancy_l3        (new TH2D("rechitOccupancy_l3",         "rechit occupancy - layer 3",         72,  -26.7,  26.7,   50,   0.0, 3.14159)),
-	rechitOccupancy_l4        (new TH2D("rechitOccupancy_l4",         "rechit occupancy - layer 4",         72,  -26.7,  26.7,   50,   0.0, 3.14159)),
+	simhitOccupancy_fwd       (new TH2D("simhitOccupancy_fwd",        "simhit occupancy - forward",          150, -52.15, 52.15,  300,   -3.14159, 3.14159)),
+	simhitOccupancy_l1        (new TH2D("simhitOccupancy_l1",         "simhit occupancy - layer 1",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	simhitOccupancy_l2        (new TH2D("simhitOccupancy_l2",         "simhit occupancy - layer 2",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	simhitOccupancy_l3        (new TH2D("simhitOccupancy_l3",         "simhit occupancy - layer 3",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	simhitOccupancy_l4        (new TH2D("simhitOccupancy_l4",         "simhit occupancy - layer 4",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	digiOccupancy_fwd         (new TH2D("digiOccupancy_fwd",          "digi occupancy - forward",            150, -52.15, 52.15,  300,   -3.14159, 3.14159)),
+	digiOccupancy_l1          (new TH2D("digiOccupancy_l1",           "digi occupancy - layer 1",            150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	digiOccupancy_l2          (new TH2D("digiOccupancy_l2",           "digi occupancy - layer 2",            150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	digiOccupancy_l3          (new TH2D("digiOccupancy_l3",           "digi occupancy - layer 3",            150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	digiOccupancy_l4          (new TH2D("digiOccupancy_l4",           "digi occupancy - layer 4",            150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	clustOccupancy_fwd        (new TH2D("clustOccupancy_fwd",         "cluster occupancy - forward",         150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	clustOccupancy_l1         (new TH2D("clustOccupancy_l1",          "cluster occupancy - layer 1",         150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	clustOccupancy_l2         (new TH2D("clustOccupancy_l2",          "cluster occupancy - layer 2",         150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	clustOccupancy_l3         (new TH2D("clustOccupancy_l3",          "cluster occupancy - layer 3",         150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	clustOccupancy_l4         (new TH2D("clustOccupancy_l4",          "cluster occupancy - layer 4",         150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	rechitOccupancy_fwd       (new TH2D("rechitOccupancy_fwd",        "rechit occupancy - forward",          150, -52.15, 52.15,  300,   -3.14159, 3.14159)),
+	rechitOccupancy_l1        (new TH2D("rechitOccupancy_l1",         "rechit occupancy - layer 1",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	rechitOccupancy_l2        (new TH2D("rechitOccupancy_l2",         "rechit occupancy - layer 2",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	rechitOccupancy_l3        (new TH2D("rechitOccupancy_l3",         "rechit occupancy - layer 3",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
+	rechitOccupancy_l4        (new TH2D("rechitOccupancy_l4",         "rechit occupancy - layer 4",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
 	clustOccupancyROCBins_fwd (new TH2D("clustOccupancyROCBins_fwd",  "cluster occupancy on ROCs - forward", 112,  -3.5,   3.5,  140, -17.5, 17.5   )),
 	clustOccupancyROCBins_l1  (new TH2D("clustOccupancyROCBins_l1",   "cluster occupancy on ROCs - layer 1", 72,   -4.5,   4.5,   26,  -6.5,  6.5   )),
 	clustOccupancyROCBins_l2  (new TH2D("clustOccupancyROCBins_l2",   "cluster occupancy on ROCs - layer 2", 72,   -4.5,   4.5,   58, -14.5, 14.5   )),
@@ -269,32 +269,41 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// std::cout << "Tokens fetched." << std::endl;
 	edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
 	iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
-	// std::cout << "Digis: " << std::endl;
-	// getDigiData(digiCollectionHandle);
-	// std::cout << "Simhits: " << std::endl;
-	// getSimhitData(simhitCollectionHandles);
+	std::cout << "Saving digi plots..." << std::endl;
+	getDigiData(digiCollectionHandle);
+	std::cout << "Saving simhit plots..." << std::endl;
+	getSimhitData(simhitCollectionHandles);
 #endif
-	std::cout << "Disk 1 propagation check..." << std::endl;
-	getDisk1PropagationData(trajTrackCollectionHandle);
-	std::cout << "Done disk 1 propagation check." << std::endl;
+	// std::cout << "Disk 1 propagation check..." << std::endl;
+	// getDisk1PropagationData(trajTrackCollectionHandle);
+	// std::cout << "Done disk 1 propagation check." << std::endl;
 	// for(const auto& currentTrackKeypair: *trajTrackCollectionHandle)
 	// {
 	// 	static int numPrintout = 0;
-	// 	const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
-	// 	const reco::TrackRef                    track = currentTrackKeypair.val;
-	// 	if(!(track -> qualityMask() & 4)) continue;
+	// 	const edm::Ref<std::vector<Trajectory>> traj             = currentTrackKeypair.key;
+	// 	const reco::TrackRef                    track            = currentTrackKeypair.val;
+	// 	const auto&                             trajMeasurements = traj -> measurements();
+	// 	size_t numMissingHitsOnLayer2 = std::count_if(trajMeasurements.begin(), trajMeasurements.end(), [this] (const auto& meas)
+	// 	{
+	// 		ModuleData mod;
+	// 		this -> getModuleData(mod, 1, meas.recHit() -> geographicalId());
+	// 		return meas.recHit() -> getType() == TrackingRecHit::missing;
+	// 	});
+	// 	// if(!(track -> qualityMask() & 4)) continue;
+	// 	if(!numMissingHitsOnLayer2) continue;
 	// 	printTrackCompositionInfo(traj, track, clusterCollectionHandle, vertexCollectionHandle);
+	// 	// printTrackCompositionInfo(traj, track, clusterCollectionHandle, vertexCollectionHandle);
 	// 	if(numPrintout++ == 1000)
 	// 	{
 	// 		std::cout << "1000 printouts exceeded." << std::endl;
 	// 		break;
 	// 	}
 	// }
-	// std::cout << "Clusters: " << std::endl;
-	// getClustData(clusterCollectionHandle);
-	// std::cout << "TrajTrackData: " << std::endl;
-	// getTrajTrackData(vertexCollectionHandle, trajTrackCollectionHandle);
-	// std::cout << "end " << std::endl;
+	std::cout << "Saving clusters..." << std::endl;
+	getClustData(clusterCollectionHandle);
+	std::cout << "Saving trajecectory measurements and track data..." << std::endl;
+	getTrajTrackData(vertexCollectionHandle, trajTrackCollectionHandle);
+	std::cout << "The Phase1Ntuplizer data processing has been finished." << std::endl;
 }
 
 void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
@@ -737,6 +746,11 @@ void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollec
 			getModuleData(mod, 1, measurement.recHit() -> geographicalId());
 			return mod.det == 0 && mod.layer == 1;
 		});
+		// std::cout << "***" << std::endl;
+		// std::cout << "Number of traj. measurements in track: " << std::distance(trajectoryMeasurements.begin(), trajectoryMeasurements.begin()) << std::endl;
+		// std::cout << "First layer 1 hit index:               " << std::distance(trajectoryMeasurements.begin(), firstLayer1TrajMeasurementIt)   << std::endl;
+		// std::cout << "Number of layer 1 hits:                " << std::distance(firstLayer1TrajMeasurementIt,   trajectoryMeasurements.end())   << std::endl;
+		// std::cout << "***" << std::endl;
 		// Save trajectory measurement data for non-layer 1 hits
 		for(auto measurementIt = trajectoryMeasurements.begin(); measurementIt != firstLayer1TrajMeasurementIt; measurementIt++)
 		{
@@ -772,29 +786,15 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasu
 	// Only looking for pixel hits
 	DetId detId = recHit -> geographicalId();
 	if(!NtuplizerHelpers::detidIsOnPixel(detId)) return;
-	// We could match recHits to simhits, here, using recipe:
-	//   https://github.com/cms-analysis/DPGAnalysis-SiPixelTools/blob/master/PixelHitAssociator/test/SiPixelRecHitsValid_pix.cc#L573-L632
-	//TransientTrackingRecHit::ConstRecHitPointer hit = tmeasIt -> recHit();
-	//if (detId == hit -> geographicalId()) matchToSimHits(associate, &(*hit), detId, theGeomDet,trackerTopology_);
-	// Looking for valid and missing hits
-	traj_.validhit = recHit -> getType() == TrackingRecHit::valid;
-	traj_.missing  = recHit -> getType() == TrackingRecHit::missing;
+	// Skipping hits with undeterminable positions
+	TrajectoryStateOnSurface trajStateOnSurface = NtuplizerHelpers::getTrajectoryStateOnSurface(measurement);
+	if(!(trajStateOnSurface.isValid())) return;
 	// Save module data
 	getModuleData(traj_.mod,    0, detId);
 	getModuleData(traj_.mod_on, 1, detId);
-	getRocData   (traj_.mod,    0, static_cast<const SiPixelRecHit*>(recHit->hit()));
-	getRocData   (traj_.mod_on, 1, static_cast<const SiPixelRecHit*>(recHit->hit()));
-	if(traj_.mod_on.layer == 1)
-	{
-		// std::vector<TrajMeasurement> measurementsFromTracksPropagatedToLayer1 = propagateTrackToLayer1();
-	}
 	// Position measurements
 	const GeomDetUnit* geomDetUnit = recHit -> detUnit();
-	TrajectoryStateOnSurface trajStateOnSurface = NtuplizerHelpers::getTrajectoryStateOnSurface(measurement);
-	if(!(trajStateOnSurface.isValid())) 
-	{
-		return;
-	}
+	// Looking for valid and missing hits
 	GlobalPoint globalPosition     = trajStateOnSurface.globalPosition();
 	LocalPoint  localPosition      = trajStateOnSurface.localPosition();
 	LocalError  localPositionError = trajStateOnSurface.localError().positionError();
@@ -808,16 +808,33 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasu
 	traj_.ly_err = localPositionError.yy();
 	// traj_.lz_err = localPositionError.zz();
 	// traj_.onedge = std::abs(traj_.lx) < 0.55 && std::abs(traj_.ly) < 3.0;
+	traj_.validhit = recHit -> getType() == TrackingRecHit::valid;
+	traj_.missing  = recHit -> getType() == TrackingRecHit::missing;
 	// Track local angles
 	LocalTrajectoryParameters trajectoryParameters = trajStateOnSurface.localParameters();
 	auto trajectoryMomentum = trajectoryParameters.momentum();
 	LocalVector localTrackDirection = trajectoryMomentum / trajectoryMomentum.mag();
 	traj_.alpha = atan2(localTrackDirection.z(), localTrackDirection.x());
 	traj_.beta  = atan2(localTrackDirection.z(), localTrackDirection.y());
+	// Roc informations
+	if(traj_.validhit == 1)
+	{
+		getRocData(traj_.mod,    0, static_cast<const SiPixelRecHit*>(recHit -> hit()));
+		getRocData(traj_.mod_on, 1, static_cast<const SiPixelRecHit*>(recHit -> hit()));
+	}
+	// Get correct coordinates for non-valid hits
+	else
+	{
+		int row = std::max(0, std::min(159, static_cast<int>((localPosition.x() / 0.81 + 1) * 80)));
+		int col = std::max(0, std::min(415, static_cast<int>((localPosition.y() / 0.81 + 4) * 52)));
+		PixelDigi missing_hit(row, col, 0);
+		getRocData(traj_.mod,    0, detId, &missing_hit);
+		getRocData(traj_.mod_on, 1, detId, &missing_hit);
+	}
 	// Read associated cluster parameters
 	if(recHit -> isValid() && recHit -> hit() != 0)
 	{
-		const SiPixelRecHit *hit = (const SiPixelRecHit*)recHit -> hit();
+		const SiPixelRecHit *hit = static_cast<const SiPixelRecHit*>(recHit -> hit());
 		SiPixelRecHit::ClusterRef const& clust = hit -> cluster();
 		if(clust.isNonnull())
 		{
@@ -850,11 +867,12 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasu
 			traj_.d_cl        = sqrt(traj_.dx_cl * traj_.dx_cl + traj_.dy_cl * traj_.dy_cl);
 		}
 	}
+	else traj_.clu.init();
 	// Get closest other traj measurement
 	NtuplizerHelpers::getClosestOtherTrajMeasurementDistanceByLooping(measurement, trajTrackCollectionHandle, traj_.d_tr, traj_.dx_tr, traj_.dy_tr);
 	traj_.hit_near = (traj_.d_tr < 0.5); // 5 mm
 	traj_.clust_near = (traj_.d_cl != NOVAL_F && traj_.d_cl < 0.05); // 500 um
-	#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	if(traj_.mod_on.det == 0)
 	{
 		const auto& layer = traj_.mod_on.layer;
@@ -884,7 +902,7 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasu
 		rechitOccupancyROCBins_fwd -> Fill(traj_.mod_on.disk_ring_coord, traj_.mod_on.blade_panel_coord);
 		rechitOccupancy_l4         -> Fill(traj_.glz, atan2(traj_.gly, traj_.glx));
 	}
-	#endif
+#endif
 	// Filling the tree
 	targetTree -> Fill();
 }
@@ -1076,6 +1094,7 @@ void PhaseIPixelNtuplizer::getRocData(ModuleData &mod, bool online, const DetId 
 		}
 	}
 }
+
 void PhaseIPixelNtuplizer::getRocData(ModuleData &mod, bool online, const DetId &detId, const SiPixelCluster *cluster)
 {
 	mod.channel = coord_.channel(detId, cluster);
@@ -1240,8 +1259,11 @@ void PhaseIPixelNtuplizer::printTrackCompositionInfo(const edm::Ref<std::vector<
 	for(const auto& trajMeasurement: trajMeasurements)
 	{
 		ModuleData mod;
-		DetId trajMeasDetId(trajMeasurement.recHit() -> geographicalId().rawId());
-		uint32_t subDetId = (trajMeasDetId.subdetId());
+		TransientTrackingRecHit::ConstRecHitPointer hit = trajMeasurement.recHit();
+		DetId trajMeasDetId(hit -> geographicalId().rawId());
+		const int& validhit            = hit -> getType() == TrackingRecHit::valid;
+		const int& missing             = hit -> getType() == TrackingRecHit::missing;
+		uint32_t subDetId              = (trajMeasDetId.subdetId());
 		const GeomDetUnit* geomDetUnit = trackerGeometry_ -> idToDetUnit(trajMeasDetId);
 		getModuleData(mod, 0, trajMeasDetId);
 		TrajectoryStateOnSurface trajStateOnSurface = NtuplizerHelpers::getTrajectoryStateOnSurface(trajMeasurement);
@@ -1268,6 +1290,7 @@ void PhaseIPixelNtuplizer::printTrackCompositionInfo(const edm::Ref<std::vector<
 		if(subDetId == StripSubdetector::TID) detectorPartName = "strip TID";
 		if(subDetId == StripSubdetector::TEC) detectorPartName = "strip TEC";
 		std::cout << "Trajectory measurement on " << detectorPartName << "." << std::endl;
+		std::cout << "Validhit: " << validhit << " Missing:" << missing << std::endl;
 		if(mod.det == 0)
 		{
 			std::cout << "Layer: " << mod.layer << ", ladder: " << mod.ladder << ", module: " << mod.module << std::endl;

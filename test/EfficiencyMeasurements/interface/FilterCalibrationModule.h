@@ -91,12 +91,28 @@ class FilterCalibrationModule
 		int effCutAll_counter_   = 0;
 		// Histograms
 		TH1* layersDisksNumhits;                TH1* layersDisksEfficiency;
-		TH1* rechitOccupancy_l1;                TH1* rechitOccupancy_l2;                TH1* rechitOccupancy_l3;                TH1* rechitOccupancy_l4;                TH1* rechitOccupancy_fwd;  
+		TH1* rechitOccupancy_l1;                TH1* rechitOccupancy_l2;                TH1* rechitOccupancy_l3;                TH1* rechitOccupancy_l4;                TH1* rechitOccupancy_fwd;
 		TH1* rocNumhitsWithCuts_l1;             TH1* rocNumhitsWithCuts_l2;             TH1* rocNumhitsWithCuts_l3;             TH1* rocNumhitsWithCuts_l4;             TH1* rocNumhitsWithCuts_fwd;
 		TH1* rocEfficiencyWithCuts_l1;          TH1* rocEfficiencyWithCuts_l2;          TH1* rocEfficiencyWithCuts_l3;          TH1* rocEfficiencyWithCuts_l4;          TH1* rocEfficiencyWithCuts_fwd;
 		TH1* rechitPhiVsZ_l1;                   TH1* rechitPhiVsZ_l2;                   TH1* rechitPhiVsZ_l3;                   TH1* rechitPhiVsZ_l4;                   TH1* rechitPhiVsZ_fwd;
 		TH1* sensorNumhitsWithCutsPhiVsZ_l1;    TH1* sensorNumhitsWithCutsPhiVsZ_l2;    TH1* sensorNumhitsWithCutsPhiVsZ_l3;    TH1* sensorNumhitsWithCutsPhiVsZ_l4;    TH1* sensorNumhitsWithCutsPhiVsZ_fwd;
 		TH1* sensorEfficiencyWithCutsPhiVsZ_l1; TH1* sensorEfficiencyWithCutsPhiVsZ_l2; TH1* sensorEfficiencyWithCutsPhiVsZ_l3; TH1* sensorEfficiencyWithCutsPhiVsZ_l4; TH1* sensorEfficiencyWithCutsPhiVsZ_fwd;
+		TH1* lxNumhitsPreCuts_fwd;              TH1* lxNumhitsPreCuts_l1;               TH1* lxNumhitsPreCuts_l2;               TH1* lxNumhitsPreCuts_l3;               TH1* lxNumhitsPreCuts_l4;
+		TH1* lxNumhitsInnerPreCuts_l1;          TH1* lxNumhitsOuterPreCuts_l1;          TH1* lxNumhitsInnerPreCuts_l2;          TH1* lxNumhitsOuterPreCuts_l2;          TH1* lxNumhitsInnerPreCuts_l3;           TH1* lxNumhitsOuterPreCuts_l3;          TH1* lxNumhitsInnerPreCuts_l4;          TH1* lxNumhitsOuterPreCuts_l4;
+		TH1* lxEfficiencyPreCuts_fwd;           TH1* lxEfficiencyPreCuts_l1;            TH1* lxEfficiencyPreCuts_l2;            TH1* lxEfficiencyPreCuts_l3;            TH1* lxEfficiencyPreCuts_l4;
+		TH1* lxEfficiencyInnerPreCuts_l1;       TH1* lxEfficiencyOuterPreCuts_l1;       TH1* lxEfficiencyInnerPreCuts_l2;       TH1* lxEfficiencyOuterPreCuts_l2;       TH1* lxEfficiencyInnerPreCuts_l3;        TH1* lxEfficiencyOuterPreCuts_l3;       TH1* lxEfficiencyInnerPreCuts_l4;       TH1* lxEfficiencyOuterPreCuts_l4;
+		TH1* lyNumhitsPreCuts_fwd;              TH1* lyNumhitsPreCuts_l1;               TH1* lyNumhitsPreCuts_l2;               TH1* lyNumhitsPreCuts_l3;               TH1* lyNumhitsPreCuts_l4;
+		TH1* lyNumhitsInnerPreCuts_l1;          TH1* lyNumhitsOuterPreCuts_l1;          TH1* lyNumhitsInnerPreCuts_l2;          TH1* lyNumhitsOuterPreCuts_l2;          TH1* lyNumhitsInnerPreCuts_l3;           TH1* lyNumhitsOuterPreCuts_l3;          TH1* lyNumhitsInnerPreCuts_l4;          TH1* lyNumhitsOuterPreCuts_l4;
+		TH1* lyEfficiencyPreCuts_fwd;           TH1* lyEfficiencyPreCuts_l1;            TH1* lyEfficiencyPreCuts_l2;            TH1* lyEfficiencyPreCuts_l3;            TH1* lyEfficiencyPreCuts_l4;
+		TH1* lyEfficiencyInnerPreCuts_l1;       TH1* lyEfficiencyOuterPreCuts_l1;       TH1* lyEfficiencyInnerPreCuts_l2;       TH1* lyEfficiencyOuterPreCuts_l2;       TH1* lyEfficiencyInnerPreCuts_l3;        TH1* lyEfficiencyOuterPreCuts_l3;       TH1* lyEfficiencyInnerPreCuts_l4;       TH1* lyEfficiencyOuterPreCuts_l4;
+		TH1* nMinus1LxNumhits_fwd;              TH1* nMinus1LxNumhits_l1;               TH1* nMinus1LxNumhits_l2;               TH1* nMinus1LxNumhits_l3;               TH1* nMinus1LxNumhits_l4;
+		TH1* nMinus1LxNumhitsInner_l1;          TH1* nMinus1LxNumhitsOuter_l1;          TH1* nMinus1LxNumhitsInner_l2;          TH1* nMinus1LxNumhitsOuter_l2;          TH1* nMinus1LxNumhitsInner_l3;           TH1* nMinus1LxNumhitsOuter_l3;          TH1* nMinus1LxNumhitsInner_l4;          TH1* nMinus1LxNumhitsOuter_l4;
+		TH1* nMinus1LxEfficiency_fwd;           TH1* nMinus1LxEfficiency_l1;            TH1* nMinus1LxEfficiency_l2;            TH1* nMinus1LxEfficiency_l3;            TH1* nMinus1LxEfficiency_l4;
+		TH1* nMinus1LxEfficiencyInner_l1;       TH1* nMinus1LxEfficiencyOuter_l1;       TH1* nMinus1LxEfficiencyInner_l2;       TH1* nMinus1LxEfficiencyOuter_l2;       TH1* nMinus1LxEfficiencyInner_l3;        TH1* nMinus1LxEfficiencyOuter_l3;       TH1* nMinus1LxEfficiencyInner_l4;       TH1* nMinus1LxEfficiencyOuter_l4;
+		TH1* nMinus1LyNumhits_fwd;              TH1* nMinus1LyNumhits_l1;               TH1* nMinus1LyNumhits_l2;               TH1* nMinus1LyNumhits_l3;               TH1* nMinus1LyNumhits_l4;
+		TH1* nMinus1LyNumhitsInner_l1;          TH1* nMinus1LyNumhitsOuter_l1;          TH1* nMinus1LyNumhitsInner_l2;          TH1* nMinus1LyNumhitsOuter_l2;          TH1* nMinus1LyNumhitsInner_l3;           TH1* nMinus1LyNumhitsOuter_l3;          TH1* nMinus1LyNumhitsInner_l4;          TH1* nMinus1LyNumhitsOuter_l4;
+		TH1* nMinus1LyEfficiency_fwd;           TH1* nMinus1LyEfficiency_l1;            TH1* nMinus1LyEfficiency_l2;            TH1* nMinus1LyEfficiency_l3;            TH1* nMinus1LyEfficiency_l4;
+		TH1* nMinus1LyEfficiencyInner_l1;       TH1* nMinus1LyEfficiencyOuter_l1;       TH1* nMinus1LyEfficiencyInner_l2;       TH1* nMinus1LyEfficiencyOuter_l2;       TH1* nMinus1LyEfficiencyInner_l3;        TH1* nMinus1LyEfficiencyOuter_l3;       TH1* nMinus1LyEfficiencyInner_l4;       TH1* nMinus1LyEfficiencyOuter_l4;
 		TH1* vtxNtrkNumhitsPreCuts;             TH1* vtxNtrkEfficiencyPreCuts;
 		TH1* nMinus1VtxNtrkNumhits;             TH1* nMinus1VtxNtrkEfficiency;
 		TH1* nMinus1PtNumhits;                  TH1* nMinus1PtEfficiency;
@@ -117,14 +133,14 @@ class FilterCalibrationModule
 		TH1* nMinus1D0ForwardNumhits;           TH1* nMinus1D0ForwardEfficiency;
 		TH1* dZBarrelNumhitsPreCuts;            TH1* dZBarrelEfficiencyPreCuts;         TH1* dZForwardNumhitsPreCuts;           TH1* dZForwardEfficiencyPreCuts;
 		TH1* nMinus1DZBarrelNumhits;            TH1* nMinus1DZBarrelEfficiency;
-		TH1* localPosNumhitsLay1PreCuts;        TH1* localPosEfficiencyLay1PreCuts;     TH1* localPosNumhitsLay2PreCuts;        TH1* localPosEfficiencyLay2PreCuts;     TH1* localPosNumhitsLay3PreCuts;        TH1* localPosEfficiencyLay3PreCuts;     TH1* localPosNumhitsLay4PreCuts;        TH1* localPosEfficiencyLay4PreCuts;
-		TH1* localPosNumhitsForward1PreCuts;    TH1* localPosNumhitsForward2PreCuts;    TH1* localPosNumhitsForward3PreCuts;    TH1* localPosNumhitsForward4PreCuts;    TH1* localPosNumhitsForward5PreCuts;    TH1* localPosNumhitsForward6PreCuts;    TH1* localPosNumhitsForward7PreCuts;    TH1* localPosNumhitsForward8PreCuts;
-		TH1* localPosEfficiencyForward1PreCuts; TH1* localPosEfficiencyForward2PreCuts; TH1* localPosEfficiencyForward3PreCuts; TH1* localPosEfficiencyForward4PreCuts; TH1* localPosEfficiencyForward5PreCuts; TH1* localPosEfficiencyForward6PreCuts; TH1* localPosEfficiencyForward7PreCuts; TH1* localPosEfficiencyForward8PreCuts;
+		TH1* localPosNumhitsLay1PreCuts;        TH1* localPosEfficiencyLay1PreCuts;     TH1* localPosNumhitsLay2PreCuts;        TH1* localPosEfficiencyLay2PreCuts;     TH1* localPosNumhitsLay3PreCuts;         TH1* localPosEfficiencyLay3PreCuts;     TH1* localPosNumhitsLay4PreCuts;        TH1* localPosEfficiencyLay4PreCuts;
+		TH1* localPosNumhitsForward1PreCuts;    TH1* localPosNumhitsForward2PreCuts;    TH1* localPosNumhitsForward3PreCuts;    TH1* localPosNumhitsForward4PreCuts;    TH1* localPosNumhitsForward5PreCuts;     TH1* localPosNumhitsForward6PreCuts;    TH1* localPosNumhitsForward7PreCuts;    TH1* localPosNumhitsForward8PreCuts;
+		TH1* localPosEfficiencyForward1PreCuts; TH1* localPosEfficiencyForward2PreCuts; TH1* localPosEfficiencyForward3PreCuts; TH1* localPosEfficiencyForward4PreCuts; TH1* localPosEfficiencyForward5PreCuts;  TH1* localPosEfficiencyForward6PreCuts; TH1* localPosEfficiencyForward7PreCuts; TH1* localPosEfficiencyForward8PreCuts;
 		TH1* nMinus1DZForwardNumhits;           TH1* nMinus1DZForwardEfficiency;
 		TH1* nMinus1LocalPosNumhitsLay1;        TH1* nMinus1LocalPosNumhitsLay2;        TH1* nMinus1LocalPosNumhitsLay3;        TH1* nMinus1LocalPosNumhitsLay4;
 		TH1* nMinus1LocalPosEfficiencyLay1;     TH1* nMinus1LocalPosEfficiencyLay2;     TH1* nMinus1LocalPosEfficiencyLay3;     TH1* nMinus1LocalPosEfficiencyLay4;
-		TH1* nMinus1LocalPosNumhitsForward1;    TH1* nMinus1LocalPosNumhitsForward2;    TH1* nMinus1LocalPosNumhitsForward3;    TH1* nMinus1LocalPosNumhitsForward4;    TH1* nMinus1LocalPosNumhitsForward5;    TH1* nMinus1LocalPosNumhitsForward6;    TH1* nMinus1LocalPosNumhitsForward7;    TH1* nMinus1LocalPosNumhitsForward8;
-		TH1* nMinus1LocalPosEfficiencyForward1; TH1* nMinus1LocalPosEfficiencyForward2; TH1* nMinus1LocalPosEfficiencyForward3; TH1* nMinus1LocalPosEfficiencyForward4; TH1* nMinus1LocalPosEfficiencyForward5; TH1* nMinus1LocalPosEfficiencyForward6; TH1* nMinus1LocalPosEfficiencyForward7; TH1* nMinus1LocalPosEfficiencyForward8;
+		TH1* nMinus1LocalPosNumhitsForward1;    TH1* nMinus1LocalPosNumhitsForward2;    TH1* nMinus1LocalPosNumhitsForward3;    TH1* nMinus1LocalPosNumhitsForward4;    TH1* nMinus1LocalPosNumhitsForward5;     TH1* nMinus1LocalPosNumhitsForward6;    TH1* nMinus1LocalPosNumhitsForward7;    TH1* nMinus1LocalPosNumhitsForward8;
+		TH1* nMinus1LocalPosEfficiencyForward1; TH1* nMinus1LocalPosEfficiencyForward2; TH1* nMinus1LocalPosEfficiencyForward3; TH1* nMinus1LocalPosEfficiencyForward4; TH1* nMinus1LocalPosEfficiencyForward5;  TH1* nMinus1LocalPosEfficiencyForward6; TH1* nMinus1LocalPosEfficiencyForward7; TH1* nMinus1LocalPosEfficiencyForward8;
 	public:
 		FilterCalibrationModule(HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
 		~FilterCalibrationModule() = default;
@@ -132,8 +148,10 @@ class FilterCalibrationModule
 		void printCounters();
 		void printCutValues();
 	private:
-		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
-		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts = {});
+		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const int& cuts = 1);
+		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts);
+		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const int& cuts = 1);
+		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts);
 		void calculateCuts();
 		void incrementCounters();
 };

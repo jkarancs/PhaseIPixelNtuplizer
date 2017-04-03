@@ -111,8 +111,8 @@
 			"nbinsx": 150,
 			"xMin": -52.15,
 			"xMax": 52.15,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -122,8 +122,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -133,8 +133,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -144,8 +144,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -155,8 +155,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 
@@ -311,6 +311,422 @@
 			"nbinsx": 104,
 			"xMin": -3.5,
 			"xMax": 3.5
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhits_fwd",
+			"title": "lx on fwd. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhits_l1",
+			"title": "lx on l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhits_l2",
+			"title": "lx on l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhits_l3",
+			"title": "lx on l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhits_l4",
+			"title": "lx on l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhitsInner_l1",
+			"title": "lx on inner l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhitsOuter_l1",
+			"title": "lx on outer l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhitsInner_l2",
+			"title": "lx on inner l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhitsOuter_l2",
+			"title": "lx on outer l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhitsInner_l3",
+			"title": "lx on inner l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhitsOuter_l3",
+			"title": "lx on outer l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhitsInner_l4",
+			"title": "lx on inner l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxNumhitsOuter_l4",
+			"title": "lx on outer l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiency_fwd",
+			"title": "eff. vs lx on fwd. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiency_l1",
+			"title": "eff. vs lx on l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiency_l2",
+			"title": "eff. vs lx on l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiency_l3",
+			"title": "eff. vs lx on l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiency_l4",
+			"title": "eff. vs lx on l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiencyInner_l1",
+			"title": "eff. vs lx on inner l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiencyOuter_l1",
+			"title": "eff. vs lx on outer l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiencyInner_l2",
+			"title": "eff. vs lx on inner l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiencyOuter_l2",
+			"title": "eff. vs lx on outer l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiencyInner_l3",
+			"title": "eff. vs lx on inner l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiencyOuter_l3",
+			"title": "eff. vs lx on outer l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiencyInner_l4",
+			"title": "eff. vs lx on inner l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LxEfficiencyOuter_l4",
+			"title": "eff. vs lx on outer l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhits_fwd",
+			"title": "ly on fwd. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhits_l1",
+			"title": "ly on l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhits_l2",
+			"title": "ly on l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhits_l3",
+			"title": "ly on l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhits_l4",
+			"title": "ly on l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhitsInner_l1",
+			"title": "ly on inner l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhitsOuter_l1",
+			"title": "ly on outer l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhitsInner_l2",
+			"title": "ly on inner l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhitsOuter_l2",
+			"title": "ly on outer l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhitsInner_l3",
+			"title": "ly on inner l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhitsOuter_l3",
+			"title": "ly on outer l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhitsInner_l4",
+			"title": "ly on inner l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyNumhitsOuter_l4",
+			"title": "ly on outer l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiency_fwd",
+			"title": "eff. vs ly on fwd. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiency_l1",
+			"title": "eff. vs ly on l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiency_l2",
+			"title": "eff. vs ly on l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiency_l3",
+			"title": "eff. vs ly on l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiency_l4",
+			"title": "eff. vs ly on l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiencyInner_l1",
+			"title": "eff. vs ly on inner l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiencyOuter_l1",
+			"title": "eff. vs ly on outer l1. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiencyInner_l2",
+			"title": "eff. vs ly on inner l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiencyOuter_l2",
+			"title": "eff. vs ly on outer l2. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiencyInner_l3",
+			"title": "eff. vs ly on inner l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiencyOuter_l3",
+			"title": "eff. vs ly on outer l3. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiencyInner_l4",
+			"title": "eff. vs ly on inner l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "nMinus1LyEfficiencyOuter_l4",
+			"title": "eff. vs ly on outer l4. modules [with other effcuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
 		},
 		{
 			"type": "TH2D",
@@ -730,8 +1146,6 @@
 			"xMax": 0.25
 		},
 
-
-
 		{
 			"type": "TH2D",
 			"name": "rechitOccupancy_fwd",
@@ -871,8 +1285,8 @@
 			"nbinsx": 150,
 			"xMin": -52.15,
 			"xMax": 52.15,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -882,8 +1296,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -893,8 +1307,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -904,8 +1318,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -915,8 +1329,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -926,8 +1340,8 @@
 			"nbinsx": 150,
 			"xMin": -52.15,
 			"xMax": 52.15,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -937,8 +1351,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -948,8 +1362,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -959,8 +1373,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -970,8 +1384,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -981,8 +1395,8 @@
 			"nbinsx": 150,
 			"xMin": -52.15,
 			"xMax": 52.15,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -992,8 +1406,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -1003,8 +1417,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -1014,8 +1428,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 		{
@@ -1025,8 +1439,8 @@
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
-			"nbinsy": 150,
-			"yMin": 0,
+			"nbinsy": 300,
+			"yMin": -3.14159,
 			"yMax": 3.14159
 		},
 
@@ -1095,9 +1509,6 @@
 			"dress_plot": 1,
 			"layer": 4
 		},
-
-
-
 		{
 			"type": "TH1D",
 			"name": "vtxNtrkNumhitsPreCuts",
@@ -1249,6 +1660,422 @@
 			"nbinsx": 104,
 			"xMin": -3.5,
 			"xMax": 3.5
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsPreCuts_fwd",
+			"title": "lx on fwd. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsPreCuts_l1",
+			"title": "lx on l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsPreCuts_l2",
+			"title": "lx on l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsPreCuts_l3",
+			"title": "lx on l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsPreCuts_l4",
+			"title": "lx on l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsInnerPreCuts_l1",
+			"title": "lx on inner l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsOuterPreCuts_l1",
+			"title": "lx on outer l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsInnerPreCuts_l2",
+			"title": "lx on inner l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsOuterPreCuts_l2",
+			"title": "lx on outer l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsInnerPreCuts_l3",
+			"title": "lx on inner l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsOuterPreCuts_l3",
+			"title": "lx on outer l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsInnerPreCuts_l4",
+			"title": "lx on inner l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxNumhitsOuterPreCuts_l4",
+			"title": "lx on outer l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyPreCuts_fwd",
+			"title": "eff. vs lx on fwd. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyPreCuts_l1",
+			"title": "eff. vs lx on l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyPreCuts_l2",
+			"title": "eff. vs lx on l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyPreCuts_l3",
+			"title": "eff. vs lx on l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyPreCuts_l4",
+			"title": "eff. vs lx on l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyInnerPreCuts_l1",
+			"title": "eff. vs lx on inner l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyOuterPreCuts_l1",
+			"title": "eff. vs lx on outer l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyInnerPreCuts_l2",
+			"title": "eff. vs lx on inner l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyOuterPreCuts_l2",
+			"title": "eff. vs lx on outer l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyInnerPreCuts_l3",
+			"title": "eff. vs lx on inner l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyOuterPreCuts_l3",
+			"title": "eff. vs lx on outer l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyInnerPreCuts_l4",
+			"title": "eff. vs lx on inner l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lxEfficiencyOuterPreCuts_l4",
+			"title": "eff. vs lx on outer l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsPreCuts_fwd",
+			"title": "ly on fwd. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsPreCuts_l1",
+			"title": "ly on l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsPreCuts_l2",
+			"title": "ly on l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsPreCuts_l3",
+			"title": "ly on l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsPreCuts_l4",
+			"title": "ly on l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsInnerPreCuts_l1",
+			"title": "ly on inner l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsOuterPreCuts_l1",
+			"title": "ly on outer l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsInnerPreCuts_l2",
+			"title": "ly on inner l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsOuterPreCuts_l2",
+			"title": "ly on outer l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsInnerPreCuts_l3",
+			"title": "ly on inner l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsOuterPreCuts_l3",
+			"title": "ly on outer l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsInnerPreCuts_l4",
+			"title": "ly on inner l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyNumhitsOuterPreCuts_l4",
+			"title": "ly on outer l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyPreCuts_fwd",
+			"title": "eff. vs ly on fwd. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyPreCuts_l1",
+			"title": "eff. vs ly on l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyPreCuts_l2",
+			"title": "eff. vs ly on l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyPreCuts_l3",
+			"title": "eff. vs ly on l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyPreCuts_l4",
+			"title": "eff. vs ly on l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyInnerPreCuts_l1",
+			"title": "eff. vs ly on inner l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyOuterPreCuts_l1",
+			"title": "eff. vs ly on outer l1. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyInnerPreCuts_l2",
+			"title": "eff. vs ly on inner l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyOuterPreCuts_l2",
+			"title": "eff. vs ly on outer l2. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyInnerPreCuts_l3",
+			"title": "eff. vs ly on inner l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyOuterPreCuts_l3",
+			"title": "eff. vs ly on outer l3. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyInnerPreCuts_l4",
+			"title": "eff. vs ly on inner l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
+		},
+		{
+			"type": "TH1D",
+			"name": "lyEfficiencyOuterPreCuts_l4",
+			"title": "eff. vs ly on outer l4. modules [no cuts]",
+			"nbinsx": 40,
+			"xMin": -0.9,
+			"xMax": 0.9
 		},
 		{
 			"type": "TH2D",

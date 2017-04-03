@@ -82,11 +82,11 @@ int main(int argc, char** argv) try
 	Cluster         clusterField;
 	TrajMeasurement trajField;
 	// Histogram definitions
-	TH2D simhitsPhiVsZ_fwd("simhitsPhiVsZ_fwd", "simhit occupancy, phi vs z - forward", 150, -52.15, 52.15, 300, -3.14159, 3.14159);
-	TH2D simhitsPhiVsZ_l1 ("simhitsPhiVsZ_l1",  "simhit occupancy, phi vs z - layer 1", 150,  -26.7,  26.7, 300, -3.14159, 3.14159);
-	TH2D simhitsPhiVsZ_l2 ("simhitsPhiVsZ_l2",  "simhit occupancy, phi vs z - layer 2", 150,  -26.7,  26.7, 300, -3.14159, 3.14159);
-	TH2D simhitsPhiVsZ_l3 ("simhitsPhiVsZ_l3",  "simhit occupancy, phi vs z - layer 3", 150,  -26.7,  26.7, 300, -3.14159, 3.14159);
-	TH2D simhitsPhiVsZ_l4 ("simhitsPhiVsZ_l4",  "simhit occupancy, phi vs z - layer 4", 150,  -26.7,  26.7, 300, -3.14159, 3.14159);
+	TH2D simhitsPhiVsZ_fwd("", "simhit occupancy, phi vs z - forward", 112,  -52.15, 52.15,  50,   0.0, 3.14159);
+	TH2D simhitsPhiVsZ_l1 ("",  "simhit occupancy, phi vs z - layer 1", 72,  -26.7,  26.7,   50,   0.0, 3.14159);
+	TH2D simhitsPhiVsZ_l2 ("",  "simhit occupancy, phi vs z - layer 2", 72,  -26.7,  26.7,   50,   0.0, 3.14159);
+	TH2D simhitsPhiVsZ_l3 ("",  "simhit occupancy, phi vs z - layer 3", 72,  -26.7,  26.7,   50,   0.0, 3.14159);
+	TH2D simhitsPhiVsZ_l4 ("",  "simhit occupancy, phi vs z - layer 4", 72,  -26.7,  26.7,   50,   0.0, 3.14159);
 	// Merge the histograms
 	std::vector<std::string> filenames = getFilesFromConfig(config, "input_files_list", "input_files");
 	for(const auto& filename: filenames)

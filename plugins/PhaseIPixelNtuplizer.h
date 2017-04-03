@@ -5,7 +5,6 @@
 
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 #pragma message("ADD_CHECK_PLOTS_TO_NTUPLE defined. Ignore this message if this is the intended behaviour (or if you don't know what this means).")
-#include "../interface/common_functions.h"
 #else
 #pragma message("ADD_CHECK_PLOTS_TO_NTUPLE is NOT defined. No cluster occupancy plots will be generated in the ntuple file.")
 #endif
@@ -53,6 +52,7 @@
 #include "RecoTracker/Record/interface/CkfComponentsRecord.h"
 #include "RecoLocalTracker/Records/interface/TkPixelCPERecord.h"
 
+
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
@@ -60,6 +60,9 @@
 
 // New class for plotting Phase 0/1 Geometry (Will be added to DQM later)
 #include "../interface/SiPixelCoordinates.h"
+
+// Helpers to save canvases
+#include "../interface/common_functions.h"
 
 // ROOT Libraries
 #include <TROOT.h>
