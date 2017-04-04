@@ -84,8 +84,6 @@
 
 class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 {
-	private:
-
 	public:
 		PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);
 		virtual ~PhaseIPixelNtuplizer();
@@ -100,7 +98,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		std::string ntupleOutputFilename_;
 		edm::ParameterSet iConfig_;
 		// States
-		int isEventFromMc_ = -1;
+		int isEventFromMc_;
 		// Options
 		int                           clusterSaveDownscaling_;
 		TFile*                        ntupleOutputFile_;
@@ -185,6 +183,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		TH1D* disk1PropagationEtaNumhits;
 		TH1D* disk1PropagationEtaEfficiency;
 		// Private methods
+		void                                setTriggerTable();
 		void                                getEvtData(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 		void                                getSimhitData(const std::vector<edm::Handle<edm::PSimHitContainer>>& simhitCollectionHandles);

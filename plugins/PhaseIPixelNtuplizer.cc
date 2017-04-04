@@ -1,64 +1,10 @@
 #include "PhaseIPixelNtuplizer.h"
 
-PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
-  ntupleOutputFilename_(iConfig.getUntrackedParameter<std::string>("outputFileName", "Ntuple.root"))
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-	,
-	simhitOccupancy_fwd       (new TH2D("simhitOccupancy_fwd",        "simhit occupancy - forward",          150, -52.15, 52.15,  300,   -3.14159, 3.14159)),
-	simhitOccupancy_l1        (new TH2D("simhitOccupancy_l1",         "simhit occupancy - layer 1",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	simhitOccupancy_l2        (new TH2D("simhitOccupancy_l2",         "simhit occupancy - layer 2",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	simhitOccupancy_l3        (new TH2D("simhitOccupancy_l3",         "simhit occupancy - layer 3",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	simhitOccupancy_l4        (new TH2D("simhitOccupancy_l4",         "simhit occupancy - layer 4",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	digiOccupancy_fwd         (new TH2D("digiOccupancy_fwd",          "digi occupancy - forward",            150, -52.15, 52.15,  300,   -3.14159, 3.14159)),
-	digiOccupancy_l1          (new TH2D("digiOccupancy_l1",           "digi occupancy - layer 1",            150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	digiOccupancy_l2          (new TH2D("digiOccupancy_l2",           "digi occupancy - layer 2",            150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	digiOccupancy_l3          (new TH2D("digiOccupancy_l3",           "digi occupancy - layer 3",            150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	digiOccupancy_l4          (new TH2D("digiOccupancy_l4",           "digi occupancy - layer 4",            150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	clustOccupancy_fwd        (new TH2D("clustOccupancy_fwd",         "cluster occupancy - forward",         150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	clustOccupancy_l1         (new TH2D("clustOccupancy_l1",          "cluster occupancy - layer 1",         150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	clustOccupancy_l2         (new TH2D("clustOccupancy_l2",          "cluster occupancy - layer 2",         150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	clustOccupancy_l3         (new TH2D("clustOccupancy_l3",          "cluster occupancy - layer 3",         150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	clustOccupancy_l4         (new TH2D("clustOccupancy_l4",          "cluster occupancy - layer 4",         150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	rechitOccupancy_fwd       (new TH2D("rechitOccupancy_fwd",        "rechit occupancy - forward",          150, -52.15, 52.15,  300,   -3.14159, 3.14159)),
-	rechitOccupancy_l1        (new TH2D("rechitOccupancy_l1",         "rechit occupancy - layer 1",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	rechitOccupancy_l2        (new TH2D("rechitOccupancy_l2",         "rechit occupancy - layer 2",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	rechitOccupancy_l3        (new TH2D("rechitOccupancy_l3",         "rechit occupancy - layer 3",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	rechitOccupancy_l4        (new TH2D("rechitOccupancy_l4",         "rechit occupancy - layer 4",          150, -26.7,  26.7,   300,   -3.14159, 3.14159)),
-	clustOccupancyROCBins_fwd (new TH2D("clustOccupancyROCBins_fwd",  "cluster occupancy on ROCs - forward", 112,  -3.5,   3.5,  140, -17.5, 17.5   )),
-	clustOccupancyROCBins_l1  (new TH2D("clustOccupancyROCBins_l1",   "cluster occupancy on ROCs - layer 1", 72,   -4.5,   4.5,   26,  -6.5,  6.5   )),
-	clustOccupancyROCBins_l2  (new TH2D("clustOccupancyROCBins_l2",   "cluster occupancy on ROCs - layer 2", 72,   -4.5,   4.5,   58, -14.5, 14.5   )),
-	clustOccupancyROCBins_l3  (new TH2D("clustOccupancyROCBins_l3",   "cluster occupancy on ROCs - layer 3", 72,   -4.5,   4.5,   90, -22.5, 22.5   )),
-	clustOccupancyROCBins_l4  (new TH2D("clustOccupancyROCBins_l4",   "cluster occupancy on ROCs - layer 4", 72,   -4.5,   4.5,  130, -32.5, 32.5   )),
-	rechitOccupancyROCBins_fwd(new TH2D("rechitOccupancyROCBins_fwd", "rechit occupancy on ROCS - forward",  112,  -3.5,   3.5,  140, -17.5, 17.5   )),
-	rechitOccupancyROCBins_l1 (new TH2D("rechitOccupancyROCBins_l1",  "rechit occupancy on ROCS - layer 1",  72,   -4.5,   4.5,   26,  -6.5,  6.5   )),
-	rechitOccupancyROCBins_l2 (new TH2D("rechitOccupancyROCBins_l2",  "rechit occupancy on ROCS - layer 2",  72,   -4.5,   4.5,   58, -14.5, 14.5   )),
-	rechitOccupancyROCBins_l3 (new TH2D("rechitOccupancyROCBins_l3",  "rechit occupancy on ROCS - layer 3",  72,   -4.5,   4.5,   90, -22.5, 22.5   )),
-	rechitOccupancyROCBins_l4 (new TH2D("rechitOccupancyROCBins_l4",  "rechit occupancy on ROCS - layer 4",  72,   -4.5,   4.5,  130, -32.5, 32.5   ))
-#endif
+PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) : 
+	iConfig_(iConfig),
+	isEventFromMc_(-1),
+	clusterSaveDownscaling_(1)
 {
-	disk1PropagationEtaNumhits    = new TH1D("disk1PropagationEtaNumhits",    "disk1PropagationEtaNumhits", 100, -3.1415, 3.1415);
-	disk1PropagationEtaEfficiency = new TH1D("disk1PropagationEtaEfficiency", "disk1PropagationEtaEfficiency", 100, -3.1415, 3.1415);
-	iConfig_                = iConfig;
-	clusterSaveDownscaling_ = 1;
-	if(iConfig_.exists("triggerTag"))
-	{
-		triggerTag_ = iConfig_.getParameter<edm::InputTag>("triggerTag");
-		std::cout << "NON-DEFAULT PARAMETER: triggerTag = " << triggerTag_ << std::endl;
-	}
-	else { triggerTag_ = edm::InputTag("TriggerResults", "", "HLT"); }
-	if(iConfig_.exists("triggerNames"))
-	{
-		triggerNames_ = iConfig_.getParameter<std::vector<std::string>>("triggerNames");
-		std::cout << "NON-DEFAULT PARAMETER: triggerNames= ";
-		for(size_t i = 0; i < triggerNames_.size(); i++) std::cout << triggerNames_[i] << " ";
-		std::cout << std::endl;
-	}
-	else
-	{
-		triggerNames_.clear();
-		triggerNames_.push_back("HLT_ZeroBias");
-		triggerNames_.push_back("HLT_Random");
-	}
 	// Tokens
 	rawDataErrorToken_            = consumes<edm::DetSetVector<SiPixelRawDataError>>(edm::InputTag("siPixelDigis"));
 	primaryVerticesToken_         = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
@@ -79,7 +25,12 @@ PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer() {}
 
 void PhaseIPixelNtuplizer::beginJob()
 {
-	if(iConfig_.exists("fileName")) ntupleOutputFilename_ = iConfig_.getParameter<std::string>("filename");
+	setTriggerTable();
+	// Set cluster saving downscale factor
+	if(iConfig_.exists("clusterSaveDownscaleFactor")) clusterSaveDownscaling_ = iConfig_.getParameter<int>("clusterSaveDownscaleFactor");
+	// Set output file name by either the fileName or outputFileName configuration field
+	ntupleOutputFilename_ = iConfig_.getUntrackedParameter<std::string>("fileName", "Ntuple.root");
+	if(iConfig_.exists("outputFileName")) ntupleOutputFilename_ = iConfig_.getParameter<std::string>("outputFileName");
 	// Create output file
 	ntupleOutputFile_ = new TFile(ntupleOutputFilename_.c_str(), "RECREATE");
 	if(!(ntupleOutputFile_ -> IsOpen()))
@@ -124,6 +75,40 @@ void PhaseIPixelNtuplizer::beginJob()
 	nonPropagatedExtraTrajTree_  -> Branch("clust_pix", &traj_.clu.pix, "pix[size][2]/F");
 	nonPropagatedExtraTrajTree_  -> Branch("track",     &track_,        track_      .list.c_str());
 	nonPropagatedExtraTrajTree_  -> Branch("traj",      &traj_,         traj_       .list.c_str());
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+	simhitOccupancy_fwd        = new TH2D("simhitOccupancy_fwd",        "simhit occupancy - forward",          150, -52.15, 52.15,  300,  -3.14159,  3.14159);
+	simhitOccupancy_l1         = new TH2D("simhitOccupancy_l1",         "simhit occupancy - layer 1",          150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	simhitOccupancy_l2         = new TH2D("simhitOccupancy_l2",         "simhit occupancy - layer 2",          150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	simhitOccupancy_l3         = new TH2D("simhitOccupancy_l3",         "simhit occupancy - layer 3",          150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	simhitOccupancy_l4         = new TH2D("simhitOccupancy_l4",         "simhit occupancy - layer 4",          150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	digiOccupancy_fwd          = new TH2D("digiOccupancy_fwd",          "digi occupancy - forward",            150, -52.15, 52.15,  300,  -3.14159,  3.14159);
+	digiOccupancy_l1           = new TH2D("digiOccupancy_l1",           "digi occupancy - layer 1",            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	digiOccupancy_l2           = new TH2D("digiOccupancy_l2",           "digi occupancy - layer 2",            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	digiOccupancy_l3           = new TH2D("digiOccupancy_l3",           "digi occupancy - layer 3",            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	digiOccupancy_l4           = new TH2D("digiOccupancy_l4",           "digi occupancy - layer 4",            150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	clustOccupancy_fwd         = new TH2D("clustOccupancy_fwd",         "cluster occupancy - forward",         150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	clustOccupancy_l1          = new TH2D("clustOccupancy_l1",          "cluster occupancy - layer 1",         150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	clustOccupancy_l2          = new TH2D("clustOccupancy_l2",          "cluster occupancy - layer 2",         150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	clustOccupancy_l3          = new TH2D("clustOccupancy_l3",          "cluster occupancy - layer 3",         150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	clustOccupancy_l4          = new TH2D("clustOccupancy_l4",          "cluster occupancy - layer 4",         150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	rechitOccupancy_fwd        = new TH2D("rechitOccupancy_fwd",        "rechit occupancy - forward",          150, -52.15, 52.15,  300,  -3.14159,  3.14159);
+	rechitOccupancy_l1         = new TH2D("rechitOccupancy_l1",         "rechit occupancy - layer 1",          150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	rechitOccupancy_l2         = new TH2D("rechitOccupancy_l2",         "rechit occupancy - layer 2",          150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	rechitOccupancy_l3         = new TH2D("rechitOccupancy_l3",         "rechit occupancy - layer 3",          150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	rechitOccupancy_l4         = new TH2D("rechitOccupancy_l4",         "rechit occupancy - layer 4",          150, -26.7,  26.7,   300,  -3.14159,  3.14159);
+	clustOccupancyROCBins_fwd  = new TH2D("clustOccupancyROCBins_fwd",  "cluster occupancy on ROCs - forward", 112,  -3.5,   3.5,   140, -17.5,     17.5    );
+	clustOccupancyROCBins_l1   = new TH2D("clustOccupancyROCBins_l1",   "cluster occupancy on ROCs - layer 1", 72,   -4.5,   4.5,    26,  -6.5,      6.5    );
+	clustOccupancyROCBins_l2   = new TH2D("clustOccupancyROCBins_l2",   "cluster occupancy on ROCs - layer 2", 72,   -4.5,   4.5,    58, -14.5,     14.5    );
+	clustOccupancyROCBins_l3   = new TH2D("clustOccupancyROCBins_l3",   "cluster occupancy on ROCs - layer 3", 72,   -4.5,   4.5,    90, -22.5,     22.5    );
+	clustOccupancyROCBins_l4   = new TH2D("clustOccupancyROCBins_l4",   "cluster occupancy on ROCs - layer 4", 72,   -4.5,   4.5,   130, -32.5,     32.5    );
+	rechitOccupancyROCBins_fwd = new TH2D("rechitOccupancyROCBins_fwd", "rechit occupancy on ROCS - forward",  112,  -3.5,   3.5,   140, -17.5,     17.5    );
+	rechitOccupancyROCBins_l1  = new TH2D("rechitOccupancyROCBins_l1",  "rechit occupancy on ROCS - layer 1",  72,   -4.5,   4.5,    26,  -6.5,      6.5    );
+	rechitOccupancyROCBins_l2  = new TH2D("rechitOccupancyROCBins_l2",  "rechit occupancy on ROCS - layer 2",  72,   -4.5,   4.5,    58, -14.5,     14.5    );
+	rechitOccupancyROCBins_l3  = new TH2D("rechitOccupancyROCBins_l3",  "rechit occupancy on ROCS - layer 3",  72,   -4.5,   4.5,    90, -22.5,     22.5    );
+	rechitOccupancyROCBins_l4  = new TH2D("rechitOccupancyROCBins_l4",  "rechit occupancy on ROCS - layer 4",  72,   -4.5,   4.5,   130, -32.5,     32.5    );
+#endif
+	disk1PropagationEtaNumhits    = new TH1D("disk1PropagationEtaNumhits",    "disk1PropagationEtaNumhits",    100, -3.1415, 3.1415);
+	disk1PropagationEtaEfficiency = new TH1D("disk1PropagationEtaEfficiency", "disk1PropagationEtaEfficiency", 100, -3.1415, 3.1415);
 }
 
 void PhaseIPixelNtuplizer::endJob() 
@@ -196,10 +181,6 @@ void PhaseIPixelNtuplizer::beginRun(edm::Run const& iRun, edm::EventSetup const&
 void PhaseIPixelNtuplizer::endRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {}
 void PhaseIPixelNtuplizer::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iSetup) {}
 void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iSetup) {}
-
-// BLUE:    "\03334[m"
-// RED:     "\03331[m"
-// DEFAULT: "\03339[m"
 
 void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
@@ -304,6 +285,29 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	std::cout << "Saving trajecectory measurements and track data..." << std::endl;
 	getTrajTrackData(vertexCollectionHandle, trajTrackCollectionHandle);
 	std::cout << "The Phase1Ntuplizer data processing has been finished." << std::endl;
+}
+
+void PhaseIPixelNtuplizer::setTriggerTable()
+{
+	triggerNames_.clear();
+	if(iConfig_.exists("triggerTag"))
+	{
+		triggerTag_ = iConfig_.getParameter<edm::InputTag>("triggerTag");
+		std::cout << "NON-DEFAULT PARAMETER: triggerTag = " << triggerTag_ << std::endl;
+	}
+	else { triggerTag_ = edm::InputTag("TriggerResults", "", "HLT"); }
+	if(iConfig_.exists("triggerNames"))
+	{
+		triggerNames_ = iConfig_.getParameter<std::vector<std::string>>("triggerNames");
+		std::cout << "NON-DEFAULT PARAMETER: triggerNames= ";
+		for(size_t i = 0; i < triggerNames_.size(); i++) std::cout << triggerNames_[i] << " ";
+		std::cout << std::endl;
+	}
+	else
+	{
+		triggerNames_.push_back("HLT_ZeroBias");
+		triggerNames_.push_back("HLT_Random");
+	}
 }
 
 void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
