@@ -41,12 +41,19 @@ void PhaseIPixelNtuplizer::beginJob()
 	LogDebug("file_operations") << "Output file: \"" << ntupleOutputFilename_ << "\" created." << std::endl;
 	// Tree definitions
 	eventTree_ = new TTree("eventTree", "The event.");
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+	digiTree_ = new TTree("digiTree",   "Digis in the Pixel detector.");
+#endif
 	clustTree_ = new TTree("clustTree", "Pixel clusters.");
 	trackTree_ = new TTree("trackTree", "The track in the event.");
 	trajTree_  = new TTree("trajTree",   "Trajectory measurements in the Pixel detector.");
 	nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree",   "The original trajectroy measurements replaced by propagated hits in the Pixel detector.");
 	// Event tree
-	eventTree_ -> Branch("event",     &evt_,         evt_        .list.c_str());
+	eventTree_ -> Branch("event", &evt_, evt_.list.c_str());
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+	digiTree_ -> Branch("event", &evt_,  evt_.list.c_str());
+	digiTree_ -> Branch("digi",  &digi_, digi_.list.c_str());
+#endif
 	// Cluster tree
 	clustTree_ -> Branch("event",     &evt_,         evt_        .list.c_str());
 	clustTree_ -> Branch("mod_on",    &clu_.mod_on,  clu_.mod_on .list.c_str());
@@ -256,11 +263,13 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// std::cout << "Tokens fetched." << std::endl;
 	edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
 	iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
-	if (digiCollectionHandle.isValid()) {
+	if (digiCollectionHandle.isValid())
+	{
 		std::cout << "Saving digi plots..." << std::endl;
 		getDigiData(digiCollectionHandle);
 	}
-	if (simhitCollectionHandles.size()){
+	if (simhitCollectionHandles.size())
+	{
 		std::cout << "Saving simhit plots..." << std::endl;
 		getSimhitData(simhitCollectionHandles);
 	}
@@ -514,6 +523,7 @@ void PhaseIPixelNtuplizer::getSimhitData(const std::vector<edm::Handle<edm::PSim
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 void PhaseIPixelNtuplizer::getDigiData(const edm::Handle<edm::DetSetVector<PixelDigi>>& digiCollectionHandle)
 {
+	int digiIndexInEvent = 0;
 	for(const auto& digiDetSet: *digiCollectionHandle)
 	{
 		DetId detId(digiDetSet.detId());
@@ -521,14 +531,15 @@ void PhaseIPixelNtuplizer::getDigiData(const edm::Handle<edm::DetSetVector<Pixel
 		const GeomDetUnit* geomDetUnit      = trackerGeometry_ -> idToDetUnit(detId);
 		for(const auto& digi: digiDetSet)
 		{
-			int x = digi.column();
-			int y = digi.row();
-			LocalPoint digiLocalCoordinates(x, y, 0);
+			digi_.init();
+			digi_.i   = digiIndexInEvent++;
+			digi_.row = digi.row();
+			digi_.col = digi.column();
+			digi_.adc = digi.adc();
+			LocalPoint digiLocalCoordinates(digi_.row, digi_.col, 0);
 			GlobalPoint digiGlobalCoordinates = geomDetUnit -> toGlobal(digiLocalCoordinates);
 			if(subdetId == PixelSubdetector::PixelBarrel)
 			{
-				// constexpr pixelXWidth = 
-				// constexpr pixelYWidth = 
 				int layer = trackerTopology_ -> pxbLayer(detId);
 				if(layer == 1) digiOccupancy_l1 -> Fill(digiGlobalCoordinates.z(), atan2(digiGlobalCoordinates.y(), digiGlobalCoordinates.x()));
 				if(layer == 2) digiOccupancy_l2 -> Fill(digiGlobalCoordinates.z(), atan2(digiGlobalCoordinates.y(), digiGlobalCoordinates.x()));
@@ -538,7 +549,8 @@ void PhaseIPixelNtuplizer::getDigiData(const edm::Handle<edm::DetSetVector<Pixel
 			if(subdetId == PixelSubdetector::PixelEndcap)
 			{
 				digiOccupancy_fwd -> Fill(digiGlobalCoordinates.z(), atan2(digiGlobalCoordinates.y(), digiGlobalCoordinates.x()));
-			}			
+			}
+			digiTree_ -> Fill();
 		}
 	}
 }
@@ -586,7 +598,7 @@ void PhaseIPixelNtuplizer::getClustData(const edm::Handle<edmNew::DetSetVector<S
 			clu_.x     = currentCluster.x();
 			clu_.y     = currentCluster.y();
 			clu_.lx    = clustLocalCoordinates.x();
-			clu_.lx    = clustLocalCoordinates.y();
+			clu_.ly    = clustLocalCoordinates.y();
 			clu_.glx   = clustGlobalCoordinates.x();
 			clu_.gly   = clustGlobalCoordinates.y();
 			clu_.glz   = clustGlobalCoordinates.z();
@@ -883,7 +895,7 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasu
 			traj_.clu.x      = clust -> x();
 			traj_.clu.y      = clust -> y();
 			traj_.clu.lx     = clustLocalCoordinates.x();
-			traj_.clu.lx     = clustLocalCoordinates.y();
+			traj_.clu.ly     = clustLocalCoordinates.y();
 			traj_.clu.glx    = clustGlobalCoordinates.x();
 			traj_.clu.gly    = clustGlobalCoordinates.y();
 			traj_.clu.glz    = clustGlobalCoordinates.z();
