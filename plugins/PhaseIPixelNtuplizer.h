@@ -39,6 +39,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "TrackingTools/PatternTools/interface/TrajTrackAssociation.h"
 #include "TrackingTools/TrackFitters/interface/TrajectoryStateCombiner.h"
 #include "TrackingTools/GeomPropagators/interface/Propagator.h"
@@ -129,6 +130,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken_;
 		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken_;
 		edm::EDGetTokenT<MeasurementTrackerEvent>                measurementTrackerEventToken_;
+		edm::EDGetTokenT<std::vector<PileupSummaryInfo>>         pileupSummaryToken_;
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 		edm::EDGetTokenT<edm::DetSetVector<PixelDigi>>           pixelDigiCollectionToken_;
 		std::vector<edm::EDGetTokenT<std::vector<PSimHit>>>      simhitCollectionTokens_;
@@ -184,7 +186,9 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		TH1D* disk1PropagationEtaEfficiency;
 		// Private methods
 		void                                setTriggerTable();
-		void                                getEvtData(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
+		void                                getEvtData(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
+		int                                 getTriggerInfo(const edm::Event& iEvent, const edm::Handle<edm::TriggerResults>& triggerResultsHandle);
+		float                               getPileupInfo(const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 		void                                getSimhitData(const std::vector<edm::Handle<edm::PSimHitContainer>>& simhitCollectionHandles);
 		void                                getDigiData(const edm::Handle<edm::DetSetVector<PixelDigi>>& digiCollectionHandle);

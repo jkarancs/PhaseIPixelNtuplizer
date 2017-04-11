@@ -9,6 +9,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
 	rawDataErrorToken_            = consumes<edm::DetSetVector<SiPixelRawDataError>>(edm::InputTag("siPixelDigis"));
 	primaryVerticesToken_         = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
 	triggerResultsToken_          = consumes<edm::TriggerResults>(triggerTag_);
+	pileupSummaryToken_           = consumes<std::vector<PileupSummaryInfo>>        (edm::InputTag("addPileupInfo"));
 	clustersToken_                = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
 	trajTrackCollectionToken_     = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
 	measurementTrackerEventToken_ = consumes<MeasurementTrackerEvent>(edm::InputTag("MeasurementTrackerEvent"));
@@ -18,7 +19,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
 	simhitCollectionTokens_.push_back(consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelLowTof")));
 	simhitCollectionTokens_.push_back(consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapHighTof")));
 	simhitCollectionTokens_.push_back(consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapLowTof")));
-#endif	
+#endif
 }
 
 PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer() {}
@@ -199,6 +200,9 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	// Get trigger info
 	edm::Handle<edm::TriggerResults> triggerResultsHandle;
 	iEvent.getByToken(triggerResultsToken_, triggerResultsHandle);
+	// Get pileup info
+	edm::Handle<std::vector<PileupSummaryInfo>> puInfoCollectionHandle;
+	iEvent.getByToken(pileupSummaryToken_,      puInfoCollectionHandle);
 	// Get cluster collection
 	edm::Handle<edmNew::DetSetVector<SiPixelCluster>> clusterCollectionHandle;
 	iEvent.getByToken(clustersToken_,                 clusterCollectionHandle);
@@ -237,7 +241,7 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	pixelClusterParameterEstimator_ = pixelClusterParameterEstimatorHandle.product();
 	// Initialize the object used to calculate module geometric informations
 	coord_.init(iSetup);
-	// getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle, clusterCollectionHandle, trajTrackCollectionHandle);
+	getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle, puInfoCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	// std::cout << "Handling simhits." << std::endl;
 	std::vector<edm::Handle<edm::PSimHitContainer>> simhitCollectionHandles(simhitCollectionTokens_.size());
@@ -310,7 +314,7 @@ void PhaseIPixelNtuplizer::setTriggerTable()
 	}
 }
 
-void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
+void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
 {
 	// Event info
 	// Set data holder object
@@ -321,32 +325,8 @@ void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handl
 	evt_.orb          = iEvent.orbitNumber();
 	evt_.bx           = iEvent.bunchCrossing();
 	evt_.evt          = iEvent.id().event();
-	if(triggerResultsHandle.isValid())
-	{
-		evt_.trig = 0;
-		// Get the trigger names found in the current event
-		const edm::TriggerNames& eventTriggerNames = iEvent.triggerNames(*triggerResultsHandle);
-		for(size_t eventNumTrigger = 0; eventNumTrigger < eventTriggerNames.size(); eventNumTrigger++)
-		{
-			std::string eventTriggerNameToTest = eventTriggerNames.triggerNames()[eventNumTrigger];
-			// Compare current trigger name to the ones found in the config 
-			for(size_t configNumTrigger = 0; configNumTrigger < triggerNames_.size(); configNumTrigger++)
-			{
-				// If the name starts with the one specified in the configuration
-				if(eventTriggerNameToTest.find(triggerNames_[configNumTrigger])) continue;
-				/// Check: Has the eventNumTrigger-th path accepted the event?
-				if(triggerResultsHandle -> accept(eventNumTrigger) == 0) continue;
-				evt_.trig |= (1 << configNumTrigger);
-			}
-		}
-	}
-	else
-	{
-		if(isEventFromMc_)
-		{
-			evt_.trig = 1; // Assuming that ZeroBias is the first trigger bit
-		}
-	}
+	evt_.trig         = getTriggerInfo(iEvent, triggerResultsHandle);
+	evt_.pileup       = getPileupInfo(puInfoCollectionHandle);
 	// Loop on vertices
 	evt_.nvtx    = 0;
 	evt_.vtxntrk = 0;
@@ -436,6 +416,48 @@ void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handl
 		}
 	}
 	eventTree_ -> Fill();
+}
+
+int PhaseIPixelNtuplizer::getTriggerInfo(const edm::Event& iEvent, const edm::Handle<edm::TriggerResults>& triggerResultsHandle)
+{
+	if(!triggerResultsHandle.isValid())
+	{
+		if(isEventFromMc_) return 1; // Assuming that ZeroBias is the first trigger bit
+		else               return NOVAL_I;
+	}
+	int trig = 0;
+	// Get the trigger names found in the current event
+	const edm::TriggerNames& eventTriggerNames = iEvent.triggerNames(*triggerResultsHandle);
+	for(size_t eventNumTrigger = 0; eventNumTrigger < eventTriggerNames.size(); eventNumTrigger++)
+	{
+		std::string eventTriggerNameToTest = eventTriggerNames.triggerNames()[eventNumTrigger];
+		// Compare current trigger name to the ones found in the config 
+		for(size_t configNumTrigger = 0; configNumTrigger < triggerNames_.size(); configNumTrigger++)
+		{
+			// If the name starts with the one specified in the configuration
+			if(eventTriggerNameToTest.find(triggerNames_[configNumTrigger])) continue;
+			// Check: Has the eventNumTrigger-th path accepted the event?
+			if(triggerResultsHandle -> accept(eventNumTrigger) == 0) continue;
+			trig |= (1 << configNumTrigger);
+		}
+	}
+	return trig;
+}
+
+float PhaseIPixelNtuplizer::getPileupInfo(const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle)
+{
+	if(!puInfoCollectionHandle.isValid()) 
+	{
+		std::cout << "Warning: The provided pileup info is invalid." << std::endl;
+		return NOVAL_F;
+	}
+	auto zerothPileup = std::find_if(puInfoCollectionHandle -> rbegin(), puInfoCollectionHandle -> rend(), [] (const auto& puInfo) { return puInfo.getBunchCrossing() == 0; });
+	if(zerothPileup == puInfoCollectionHandle -> rend())
+	{
+		std::cout << "Error: Cannot find the in-time pileup info" << std::endl;
+		return NOVAL_F;
+	}
+	return zerothPileup -> getTrueNumInteractions();
 }
 
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE

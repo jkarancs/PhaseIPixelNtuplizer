@@ -55,15 +55,15 @@ using JSON = nlohmann::json;
 
 constexpr float HALF_PI = 0.5 * 3.141592653589793238462;
 
-constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE_1D = {0.97,  1.005};
-constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE_2D = {0.965, 1.000};
+constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE_1D = {0.95,  1.005};
+constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE_2D = {0.945, 1.000};
 
 // const std::pair<float, float>  LAYER_MODULE_LABEL_POS      = std::make_pair(0.79f, 0.88f);
 constexpr auto                    CONFIG_FILE_PATH                = "./config_main.json"; 
 const     std::string             EFFICIENCY_PLOT_IDENTIFIER      = "Efficiency";
 const     std::string             EFFICIENCY_NUMERATOR_IDENTIFIER = "Numhits";
 
-const bool CLUST_LOOP_REQUESTED = true;
+const bool CLUST_LOOP_REQUESTED = false;
 const bool TRAJ_LOOP_REQUESTED  = true;
 
 void                                        testSaveFolders(const JSON& config);
@@ -73,6 +73,8 @@ void                                        readInFilesAndAddToChain(const JSON&
 std::map<std::string, std::shared_ptr<TH1>> processHistogramDefinitions(const JSON& config, const std::string& configKey, const std::string& innerKey);
 TH1*                                        getEfficiencyNumeratorHisto(const std::map<std::string, std::shared_ptr<TH1>>& histograms, const std::string& efficiencyHistoName);
 TGraphAsymmErrors*                          getGraphForEfficiencyWithAsymmetricErrors(const TH1D& efficiencyHistogram, const TH1D& numHitsHistogram);
+void                                        addLegend(TH1* histogram);
+void                                        addLegend(TH1* histogram, TGraphAsymmErrors* graph);
 
 int main(int argc, char** argv) try
 {
@@ -96,7 +98,7 @@ int main(int argc, char** argv) try
 	// Histogram definitions
 	std::cout << process_prompt << "Loading histogram definitions... ";
 	std::map<std::string, std::shared_ptr<TH1>> histograms(processHistogramDefinitions(config, "histogram_definition_list", "histogram_definitions"));
-	std::cout << process_prompt << "Done." << std::endl;
+	std::cout << "Done." << std::endl;
 	// Modules
 	ClusterOccupancyModule  clusterOccupancyModule (histograms, clusterField);
 	FilterCalibrationModule filterCalibrationModule(histograms, eventField, trajField);
@@ -260,7 +262,8 @@ int main(int argc, char** argv) try
 		constexpr int PHASE_SCENARIO = 1;
 		gStyle -> SetPalette(1);
 		gStyle -> SetNumberContours(999);
-		gStyle -> SetOptStat(1111);
+		// gStyle -> SetOptStat(1111);
+		gStyle -> SetOptStat(0);
 		gErrorIgnoreLevel = kError;
 		// histogram.SetTitleSize(22);
 		for(const auto& histogramPair: histograms)
@@ -311,11 +314,12 @@ int main(int argc, char** argv) try
 				{
 					dress_occup_plot(histo2D, plotOptions.layer, PHASE_SCENARIO);
 					canvas -> Update();
-					TPaveStats* stats = (TPaveStats*) histo2D -> GetListOfFunctions() -> FindObject("stats");
-					if(stats) stats -> Draw("SAME");
-					else std::cout << error_prompt << "Cannot redraw stats box for " << histo2D -> GetName() << ": no stats found. " << std::endl;
+					// TPaveStats* stats = (TPaveStats*) histo2D -> GetListOfFunctions() -> FindObject("stats");
+					// if(stats) stats -> Draw("SAME");
+					// else std::cout << error_prompt << "Cannot redraw stats box for " << histo2D -> GetName() << ": no stats found. " << std::endl;
 					// std::cout << debug_prompt << "Dress occup plot called with layer: " << plotOptions.layer << " and phase scenario: " << PHASE_SCENARIO << "." << std::endl;
 				}
+				addLegend(histo2D);
 			}
 			else 
 			{
@@ -331,6 +335,7 @@ int main(int argc, char** argv) try
 				if(histogramName.find(EFFICIENCY_PLOT_IDENTIFIER) != std::string::npos)
 				{
 					TGraphAsymmErrors* graph = getGraphForEfficiencyWithAsymmetricErrors(*dynamic_cast<TH1D*>(histogram), *dynamic_cast<TH1D*>(getEfficiencyNumeratorHisto(histograms, histogramName)));
+					graph -> SetName((histogramName + "AsGraph").c_str());
 					if(plotOptions.customTicks)
 					{
 						graph -> GetXaxis() -> SetNdivisions(plotOptions.xAxisDivisions);
@@ -342,20 +347,20 @@ int main(int argc, char** argv) try
 						{
 							graph -> GetXaxis() -> ChangeLabel(numBin + 1, -1, 0.025, -1, -1, -1, plotOptions.xAxisLabels[numBin].c_str());
 						}
-						if(std::string(graph -> GetTitle()).find("efficiency") != std::string::npos)
+						if(std::string(graph -> GetName()).find("Efficiency") != std::string::npos)
 						{
 							graph -> GetYaxis() -> SetRangeUser(EFFICIENCY_ZOOM_RANGE_1D.first, EFFICIENCY_ZOOM_RANGE_1D.second);
 						}
 					}
 					graph -> Draw("AP");
+					addLegend(histogram, graph);
 				}
 				else
 				{
 					dynamic_cast<TH1D*>(histogram) -> Draw("HIST");
+					addLegend(histogram);
 				}
 			}
-			// TText label;
-			// CanvasExtras::setLabelStyleNote(label);
 			canvas -> Update();
 			{
 				std::string epsFilename = (std::string(canvas -> GetTitle()) + ".eps");
@@ -572,4 +577,53 @@ TGraphAsymmErrors* getGraphForEfficiencyWithAsymmetricErrors(const TH1D& efficie
 	graph -> SetLineStyle(1);
 	return graph;
 	// const_cast<TH1D*>(&efficiencyHistogram) -> Draw("HIST");
+}
+
+void addLegend(TH1* histogram)
+{
+	histogram -> SetTitleSize(0);
+	TH2D* histo2D = dynamic_cast<TH2D*>(histogram);
+	TLegend* legend = new TLegend(0.45, 0.6, 0.8625, 0.9551);
+	if(histo2D != nullptr)
+	{
+		legend -> AddEntry(histogram -> GetName(), histogram -> GetTitle(), "");
+		legend -> AddEntry("", ("Entries: " + std::to_string(histogram -> GetEntries())).c_str(), "");
+		legend -> AddEntry("", ("X Mean: "    + std::to_string(histogram -> GetMean(1)  )).c_str(), "");
+		legend -> AddEntry("", ("X Std Dev: " + std::to_string(histogram -> GetStdDev(1))).c_str(), "");
+		legend -> AddEntry("", ("Y Mean: "    + std::to_string(histogram -> GetMean(2)  )).c_str(), "");
+		legend -> AddEntry("", ("Y Std Dev: " + std::to_string(histogram -> GetStdDev(2))).c_str(), "");
+	}
+	else
+	{
+		legend -> AddEntry(histogram -> GetName(), histogram -> GetTitle(), "cf");
+		legend -> AddEntry("", ("Entries: " + std::to_string(histogram -> GetEntries())).c_str(), "");
+		legend -> AddEntry("", ("Mean: "    + std::to_string(histogram -> GetMean(1)  )).c_str(), "");
+		legend -> AddEntry("", ("Std Dev: " + std::to_string(histogram -> GetStdDev(1))).c_str(), "");
+	}
+	legend -> SetBorderSize(1);
+	legend -> SetFillColor(10);
+	legend -> SetFillStyle(3001);
+	// legend -> SetFillStyle(1);
+	// legend -> SetFillColorAlpha(10, 0.5);
+	legend -> SetTextFont(42);
+	legend -> SetTextSize(0.02);
+	legend -> Draw();
+}
+
+void addLegend(TH1* histogram, TGraphAsymmErrors* graph)
+{
+	histogram -> SetTitleSize(0);
+	TLegend* legend = new TLegend(0.45, 0.6, 0.8625, 0.9551);
+	legend -> AddEntry(graph -> GetName(), graph -> GetTitle(), "pe");
+	legend -> AddEntry("", ("Entries: " + std::to_string(histogram -> GetEntries())).c_str(), ""); 
+	legend -> AddEntry("", ("Mean: "         + std::to_string(histogram -> GetMean(1)  )).c_str(), "");
+	legend -> AddEntry("", ("Std Dev: "      + std::to_string(histogram -> GetStdDev(1))).c_str(), "");
+	legend -> SetBorderSize(1);
+	// legend -> SetFillStyle(1);
+	// legend -> SetFillColorAlpha(10, 0.5);
+	legend -> SetFillColor(10);
+	legend -> SetFillStyle(3001);
+	legend -> SetTextFont(42);
+	legend -> SetTextSize(0.02);
+	legend -> Draw();
 }

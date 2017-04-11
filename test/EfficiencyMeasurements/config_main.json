@@ -1,5 +1,5 @@
 {
-	"input_files_list": "./input_lists/config_input_files_ttbar_nopileup.json",
+	"input_files_list": "./input_lists/config_input_files_dcoleff_85_pu_40.json",
 	"histogram_definition_list": "config_histogram_definitions.json",
 	"save_histograms_to_ntuple": true,
 	"ntuple_save_directory": ".",
