@@ -244,20 +244,26 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle, puInfoCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	// std::cout << "Handling simhits." << std::endl;
-	std::vector<edm::Handle<edm::PSimHitContainer>> simhitCollectionHandles(simhitCollectionTokens_.size());
+	std::vector<edm::Handle<edm::PSimHitContainer>> simhitCollectionHandles;
 	for(unsigned int numToken = 0; numToken < simhitCollectionTokens_.size(); ++numToken)
 	{
 		// std::cout << "NumToken: " << numToken << std::endl;
 		// try {iEvent.getByLabel(l1GTReadoutRecTag_,L1GTRR);} catch (...) {;}
-		iEvent.getByToken(simhitCollectionTokens_[numToken], simhitCollectionHandles[numToken]);
+		edm::Handle<edm::PSimHitContainer> handle;
+		iEvent.getByToken(simhitCollectionTokens_[numToken], handle);
+		simhitCollectionHandles.push_back(handle);
 	}
 	// std::cout << "Tokens fetched." << std::endl;
 	edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
 	iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
-	std::cout << "Saving digi plots..." << std::endl;
-	getDigiData(digiCollectionHandle);
-	std::cout << "Saving simhit plots..." << std::endl;
-	getSimhitData(simhitCollectionHandles);
+	if (digiCollectionHandle.isValid()) {
+		std::cout << "Saving digi plots..." << std::endl;
+		getDigiData(digiCollectionHandle);
+	}
+	if (simhitCollectionHandles.size()){
+		std::cout << "Saving simhit plots..." << std::endl;
+		getSimhitData(simhitCollectionHandles);
+	}
 #endif
 	// std::cout << "Disk 1 propagation check..." << std::endl;
 	// getDisk1PropagationData(trajTrackCollectionHandle);
