@@ -38,6 +38,11 @@ jegyzet.md
 *.sublime-*
 *.temp
 
+# Presentations
+test/EfficiencyMeasurements/EfficiencyPresentation_*
+test/EfficiencyMeasurements/CosmicsStatsPresentation_*
+
+
 # Instlumi and pileup maps
 # Resources/Sources/Includes/Histogram_generation/Fill_parameters/Instlumi_map/run_ls_instlumi_pileup_2012.txt
 # Resources/Sources/Includes/Histogram_generation/Fill_parameters/Instlumi_map/run_ls_instlumi_pileup_2015.txt

@@ -1,0 +1,331 @@
+\documentclass{beamer}
+
+\usetheme{Goettingen}
+
+\usepackage{color}
+
+\title{Plots for validation}
+
+% A subtitle is optional and this may be deleted
+\subtitle{Cosmics check plots}
+
+\author{A.~Hunyadi\inst{1,2} \and V.~Veszpremi\inst{1} \and J. Karancsi\inst{2}}
+
+\institute[] % (optional, but mostly needed)
+{
+  \inst{1}%
+  Wigner Research Centre for Physics, Budapest
+  \and
+  \inst{2}%
+  University of Debrecen, Debrecen
+}
+
+\date{Daily meeting, \today}
+
+\subject{Experimental Particle Physics}
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+\usepackage{grffile} % allow dots in file names
+\usepackage{array}
+% \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+\AtBeginSection{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+
+\begin{document}
+
+\begin{frame}
+  \vspace*{-0.3cm}
+  \titlepage
+  \vspace*{-0.5cm}
+  \begin{center}
+  \includegraphics[height=1.5cm]{Images/cms_logo.png}\hspace*{0.3cm}
+  \includegraphics[height=1.0cm]{Images/wigner_logo.png}\hspace*{0.4cm}
+  \includegraphics[height=1.5cm]{Images/egyetem_logo.png}
+  \end{center}
+\end{frame}
+
+\section{Closest hits}
+
+\begin{frame}{Rechit distance to closest cluster}{Total/Barrel/Forward}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/closest_hit_distance_to_traj._meas.,_barrel_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/closest_hit_distance_to_traj._meas.,_forward_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/closest_hit_distance_to_traj._meas._[no_cuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Forward plots}{Clusters, rechits, efficiency numhits, efficiency - phi vs z}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy,_phi_vs_z_-_forward.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy,_phi_vs_z_-_forward.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits_used_to_calc._eff.,_phi_vs_z_-_forward.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_phi_vs_z_-_forward.pdf}
+  \end{minipage}
+\end{frame}
+
+\section{Phi vs z level plots}
+
+\begin{frame}{Layer 1 plots}{Clusters, rechits, efficiency numhits, efficiency - phi vs z}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy,_phi_vs_z_-_layer_1.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy,_phi_vs_z_-_layer_1.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_1.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_phi_vs_z_-_layer_1.pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 2 plots}{Clusters, rechits, efficiency numhits, efficiency - phi vs z}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy,_phi_vs_z_-_layer_2.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy,_phi_vs_z_-_layer_2.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_2.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_phi_vs_z_-_layer_2.pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 3 plots}{Clusters, rechits, efficiency numhits, efficiency - phi vs z}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy,_phi_vs_z_-_layer_3.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy,_phi_vs_z_-_layer_3.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_3.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_phi_vs_z_-_layer_3.pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 4}{Clusters, rechits, efficiency numhits, efficiency - phi vs z}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy,_phi_vs_z_-_layer_4.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy,_phi_vs_z_-_layer_4.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_4.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_phi_vs_z_-_layer_4.pdf}
+  \end{minipage}
+\end{frame}
+
+\section{ROC level plots}
+
+\begin{frame}{Forward plots}{Clusters, rechits, efficiency numhits, efficiency - on ROCs}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy_on_the_ROCs_-_forward.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy_forward.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._tracks_used_to_calc._eff._fwd._[with_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/roc_efficiency_forward_[with_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 1 plots}{Clusters, rechits, efficiency numhits, efficiency - on ROCs}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy_on_the_ROCs_-_layer_1.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy_layer_1.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._tracks_used_to_calc._eff._l1._[with_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/roc_efficiency_layer_1_[with_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 2 plots}{Clusters, rechits, efficiency numhits, efficiency - on ROCs}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy_on_the_ROCs_-_layer_2.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy_layer_2.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._tracks_used_to_calc._eff._l2._[with_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/roc_efficiency_layer_2_[with_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 3 plots}{Clusters, rechits, efficiency numhits, efficiency - on ROCs}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy_on_the_ROCs_-_layer_3.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy_layer_3.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._tracks_used_to_calc._eff._l3._[with_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/roc_efficiency_layer_3_[with_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 4 plots}{Clusters, rechits, efficiency numhits, efficiency - on ROCs}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy_on_the_ROCs_-_layer_4.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy_layer_4.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._tracks_used_to_calc._eff._l4._[with_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/roc_efficiency_layer_4_[with_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{}
+    \vspace*{1.6cm}
+    \hspace*{0.55cm}\huge Thank you for your attention!
+\end{frame}
+
+ \end{document}

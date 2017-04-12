@@ -238,7 +238,7 @@
 		{
 			"type": "TH1D",
 			"name": "nMinus1D0ForwardEfficiency",
-			"title": "eff. vs d0 of forward hits [with other effcuts],d0 (cm);efficiency",
+			"title": "eff. vs d0 of forward hits [with other effcuts];d0 (cm);efficiency",
 			"nbinsx": 120,
 			"xMin": 0.0,
 			"xMax": 0.15,
@@ -1371,7 +1371,7 @@
 		{
 			"type": "TH1D",
 			"name": "nMinus1HitDistNumhits",
-			"title": "closest hit distance to track [with other effcuts];distance (cm)",
+			"title": "closest hit distance to traj. meas. [with other effcuts];distance (cm)",
 			"nbinsx": 100,
 			"xMin": 0.0,
 			"xMax": 0.12
@@ -1379,7 +1379,7 @@
 		{
 			"type": "TH1D",
 			"name": "nMinus1HitDistEfficiency",
-			"title": "eff. vs closest hit distance to track [with other effcuts];distance (cm);efficiency",
+			"title": "eff. vs closest hit distance to traj. meas. [with other effcuts];distance (cm);efficiency",
 			"nbinsx": 100,
 			"xMin": 0.0,
 			"xMax": 0.12
@@ -2975,7 +2975,7 @@
 		{
 			"type": "TH1D",
 			"name": "hitDistNumhitsPreCuts",
-			"title": "closest hit distance to track [no cuts];distance (cm)",
+			"title": "closest hit distance to traj. meas. [no cuts];distance (cm)",
 			"nbinsx": 100,
 			"xMin": 0.0,
 			"xMax": 0.12
@@ -2983,7 +2983,23 @@
 		{
 			"type": "TH1D",
 			"name": "hitDistEfficiencyPreCuts",
-			"title": "eff. vs closest hit distance to track [no cuts];distance (cm);efficiency",
+			"title": "eff. vs closest hit distance to traj. meas. [no cuts];distance (cm);efficiency",
+			"nbinsx": 100,
+			"xMin": 0.0,
+			"xMax": 0.12
+		},
+		{
+			"type": "TH1D",
+			"name": "hitDistNumhitsBarrelPreCuts",
+			"title": "closest hit distance to traj. meas., barrel [no cuts];distance (cm)",
+			"nbinsx": 100,
+			"xMin": 0.0,
+			"xMax": 0.12
+		},
+		{
+			"type": "TH1D",
+			"name": "hitDistNumhitsForwardPreCuts",
+			"title": "closest hit distance to traj. meas., forward [no cuts];distance (cm)",
 			"nbinsx": 100,
 			"xMin": 0.0,
 			"xMax": 0.12
@@ -2992,6 +3008,22 @@
 			"type": "TH1D",
 			"name": "cluDistNumhitsPreCuts",
 			"title": "closest cluster distance to traj. meas. [no cuts];distance (cm)",
+			"nbinsx": 90,
+			"xMin": 0.0,
+			"xMax": 0.025
+		},
+		{
+			"type": "TH1D",
+			"name": "cluDistNumhitsBarrelPreCuts",
+			"title": "closest cluster distance to traj. meas., barrel [no cuts];distance (cm)",
+			"nbinsx": 90,
+			"xMin": 0.0,
+			"xMax": 0.025
+		},
+		{
+			"type": "TH1D",
+			"name": "cluDistNumhitsForwardPreCuts",
+			"title": "closest cluster distance to traj. meas., forward [no cuts];distance (cm)",
 			"nbinsx": 90,
 			"xMin": 0.0,
 			"xMax": 0.025

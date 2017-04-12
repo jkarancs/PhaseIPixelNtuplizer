@@ -76,7 +76,7 @@ DISK1_PROPAGATION_CHECK_S = ./src/disk1PropagationCheck.$(SrcSuf)
 DISK1_PROPAGATION_CHECK_O = ./obj/disk1PropagationCheck.$(ObjSuf)
 DISK1_PROPAGATION_CHECK_A = ./bin/disk1PropagationCheck$(ExeSuf)
 OBJS     += $(DISK1_PROPAGATION_CHECK_O)
-PROGRAMS += $(DISK1_PROPAGATION_CHECK_A)
+PROGRAMS += $(DISK1_PROPAGATION_CHECK_A) 
 
 all: $(PROGRAMS)
 
@@ -196,6 +196,261 @@ $(DISK1_PROPAGATION_CHECK_O): $(DISK1_PROPAGATION_CHECK_S)
 	@printf "Compiling program: \"disk1PropagationCheck\"...\n"
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
+
+latex: LATEX_WORKING_DIRECTORY="EfficiencyPresentation"_`date "+%Y_%m_%d%n"`
+latex:
+	@echo "Project directory: "$(LATEX_WORKING_DIRECTORY)
+	@rm $(LATEX_WORKING_DIRECTORY) -rf
+	@mkdir $(LATEX_WORKING_DIRECTORY)
+	@cp Latex_templates/EfficiencyCutsPresentation/* $(LATEX_WORKING_DIRECTORY) -r
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && ln -s ../../../results/*.eps .
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits._used_to_calculate_efficiency,_layers_1-4,_disks_1-3_[with_cuts].eps to pdf..." && epstopdf num._hits._used_to_calculate_efficiency,_layers_1-4,_disks_1-3_[with_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_layers_1-4,_disks_1-3_[with_cuts].eps to pdf..." && epstopdf efficiency,_layers_1-4,_disks_1-3_[with_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_forward.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_forward.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_forward.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_forward.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_forward.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_forward.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_forward.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_forward.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_1.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_1.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_1.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_1.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_2.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_2.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_2.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_2.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_3.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_3.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_3.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_3.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_4.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_4.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_4.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_4.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_[no_cuts].eps to pdf..." && epstopdf lx_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_[with_other_effcuts].eps to pdf..." && epstopdf lx_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_[no_cuts].eps to pdf..." && epstopdf ly_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_[with_other_effcuts].eps to pdf..." && epstopdf ly_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_fwd._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_fwd._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_fwd._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_fwd._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_fwd._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_fwd._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_l1._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_l1._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_l2._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_l2._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_l3._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_l3._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_l4._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_l4._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_fwd._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_fwd._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_fwd._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_fwd._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_fwd._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_fwd._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_l1._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_l1._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_l2._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_l2._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_l3._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_l3._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_l4._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_l4._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_inner_l1._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_inner_l1._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_inner_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_inner_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_inner_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_inner_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_outer_l1._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_outer_l1._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_outer_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_outer_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_outer_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_outer_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_inner_l2._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_inner_l2._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_inner_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_inner_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_inner_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_inner_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_outer_l2._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_outer_l2._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_outer_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_outer_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_outer_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_outer_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_inner_l3._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_inner_l3._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_inner_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_inner_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_inner_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_inner_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_outer_l3._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_outer_l3._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_outer_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_outer_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_outer_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_outer_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_inner_l4._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_inner_l4._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_inner_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_inner_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_inner_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_inner_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_outer_l4._modules_[no_cuts].eps to pdf..." && epstopdf lx_on_outer_l4._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting lx_on_outer_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf lx_on_outer_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_lx_on_outer_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_lx_on_outer_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_inner_l1._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_inner_l1._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_inner_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_inner_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_inner_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_inner_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_outer_l1._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_outer_l1._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_outer_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_outer_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_outer_l1._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_outer_l1._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_inner_l2._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_inner_l2._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_inner_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_inner_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_inner_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_inner_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_outer_l2._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_outer_l2._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_outer_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_outer_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_outer_l2._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_outer_l2._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_inner_l3._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_inner_l3._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_inner_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_inner_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_inner_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_inner_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_outer_l3._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_outer_l3._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_outer_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_outer_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_outer_l3._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_outer_l3._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_inner_l4._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_inner_l4._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_inner_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_inner_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_inner_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_inner_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_outer_l4._modules_[no_cuts].eps to pdf..." && epstopdf ly_on_outer_l4._modules_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting ly_on_outer_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf ly_on_outer_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_ly_on_outer_l4._modules_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_ly_on_outer_l4._modules_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_lay1_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_lay1_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_lay1_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_lay1_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_lay1_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_lay1_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_lay2_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_lay2_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_lay2_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_lay2_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_lay2_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_lay2_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_lay3_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_lay3_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_lay3_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_lay3_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_lay3_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_lay3_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_lay4_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_lay4_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_lay4_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_lay4_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_lay4_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_lay4_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._1,_inner_mods._[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._1,_inner_mods._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._1,_inner_mods._[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._1,_inner_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_pos._lay._1,_inner_mods._[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_pos._lay._1,_inner_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._2,_inner_mods._[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._2,_inner_mods._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._2,_inner_mods._[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._2,_inner_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_pos._lay._2,_inner_mods._[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_pos._lay._2,_inner_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._3,_inner_mods._[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._3,_inner_mods._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._3,_inner_mods._[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._3,_inner_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_pos._lay._3,_inner_mods._[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_pos._lay._3,_inner_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._4,_inner_mods._[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._4,_inner_mods._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._4,_inner_mods._[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._4,_inner_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_pos._lay._4,_inner_mods._[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_pos._lay._4,_inner_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._1,_outer_mods._[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._1,_outer_mods._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._1,_outer_mods._[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._1,_outer_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_pos._lay._1,_outer_mods._[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_pos._lay._1,_outer_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._2,_outer_mods._[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._2,_outer_mods._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._2,_outer_mods._[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._2,_outer_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_pos._lay._2,_outer_mods._[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_pos._lay._2,_outer_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._3,_outer_mods._[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._3,_outer_mods._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._3,_outer_mods._[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._3,_outer_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_pos._lay._3,_outer_mods._[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_pos._lay._3,_outer_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._4,_outer_mods._[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._4,_outer_mods._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_pos._lay._4,_outer_mods._[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_pos._lay._4,_outer_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_pos._lay._4,_outer_mods._[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_pos._lay._4,_outer_mods._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_negative_z,_inner_ring,_panel_2_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_negative_z,_inner_ring,_panel_2_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_negative_z,_inner_ring,_panel_2_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_negative_z,_inner_ring,_panel_2_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_-_fwd,_negative_z,_inner_ring,_panel_2_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_-_fwd,_negative_z,_inner_ring,_panel_2_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_1_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_1_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_1_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_1_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_1_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_1_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_2_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_2_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_2_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_2_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_2_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_2_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_1_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_1_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_1_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_1_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_1_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_1_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_2_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_2_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_2_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_2_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_2_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_2_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_1_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_1_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_1_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_1_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_1_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_1_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_2_[no_cuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_2_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_2_[with_other_effcuts].eps to pdf..." && epstopdf num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_2_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_2_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_2_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting d0_of_barrel_hits_[no_cuts].eps to pdf..." && epstopdf d0_of_barrel_hits_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting d0_of_barrel_hits_[with_other_effcuts].eps to pdf..." && epstopdf d0_of_barrel_hits_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_d0_of_barrel_hits_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_d0_of_barrel_hits_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting d0_of_forward_hits_[no_cuts].eps to pdf..." && epstopdf d0_of_forward_hits_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting d0_of_forward_hits_[with_other_effcuts].eps to pdf..." && epstopdf d0_of_forward_hits_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_d0_of_forward_hits_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_d0_of_forward_hits_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting dz_of_barrel_hits_[no_cuts].eps to pdf..." && epstopdf dz_of_barrel_hits_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting dz_of_barrel_hits_[with_other_effcuts].eps to pdf..." && epstopdf dz_of_barrel_hits_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_dz_of_barrel_hits_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_dz_of_barrel_hits_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting dz_of_forward_hits_[no_cuts].eps to pdf..." && epstopdf dz_of_forward_hits_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting dz_of_forward_hits_[with_other_effcuts].eps to pdf..." && epstopdf dz_of_forward_hits_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_dz_of_forward_hits_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_dz_of_forward_hits_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting strip_hits_[no_cuts].eps to pdf..." && epstopdf strip_hits_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting strip_hits_[with_other_effcuts].eps to pdf..." && epstopdf strip_hits_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_n._strip_hits_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_n._strip_hits_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting parent_vertex_n._tracks_[no_cuts].eps to pdf..." && epstopdf parent_vertex_n._tracks_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting parent_vertex_n._tracks_[with_other_effcuts].eps to pdf..." && epstopdf parent_vertex_n._tracks_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_parent_vertex_n._tracks_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_parent_vertex_n._tracks_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_cluster_distance_to_traj._meas._[no_cuts].eps to pdf..." && epstopdf closest_cluster_distance_to_traj._meas._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_cluster_distance_to_traj._meas._[with_other_effcuts].eps to pdf..." && epstopdf closest_cluster_distance_to_traj._meas._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_closest_cluster_distance_to_traj._meas._[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_closest_cluster_distance_to_traj._meas._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_hit_distance_to_traj._meas._[no_cuts].eps to pdf..." && epstopdf closest_hit_distance_to_traj._meas._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_hit_distance_to_traj._meas._[with_other_effcuts].eps to pdf..." && epstopdf closest_hit_distance_to_traj._meas._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_closest_hit_distance_to_traj._meas._[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_closest_hit_distance_to_traj._meas._[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting pt_[no_cuts].eps to pdf..." && epstopdf pt_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting pt_[with_other_effcuts].eps to pdf..." && epstopdf pt_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting eff._vs_pt_[with_other_effcuts].eps to pdf..." && epstopdf eff._vs_pt_[with_other_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Cleaning up eps soft links..." && rm *.eps
+	@cd $(LATEX_WORKING_DIRECTORY) && pdflatex main.tex # needs to be done at least twice :S
+	@cd $(LATEX_WORKING_DIRECTORY) && pdflatex main.tex
+
+latex_cosmics: LATEX_WORKING_DIRECTORY="CosmicsStatsPresentation"_`date "+%Y_%m_%d%n"`
+latex_cosmics:
+	@echo "Project directory: "$(LATEX_WORKING_DIRECTORY)
+	@rm $(LATEX_WORKING_DIRECTORY) -rf
+	@mkdir $(LATEX_WORKING_DIRECTORY)
+	@cp Latex_templates/CosmicsPresentation/* $(LATEX_WORKING_DIRECTORY) -r
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && ln -s ../../../results/*.eps .
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_hit_distance_to_traj._meas.,_barrel_[no_cuts].eps to pdf..." && epstopdf closest_hit_distance_to_traj._meas.,_barrel_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_hit_distance_to_traj._meas.,_forward_[no_cuts].eps to pdf..." && epstopdf closest_hit_distance_to_traj._meas.,_forward_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_hit_distance_to_traj._meas._[no_cuts].eps to pdf..." && epstopdf closest_hit_distance_to_traj._meas._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_forward.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_forward.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_forward.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_forward.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_forward.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_forward.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_forward.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_forward.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_1.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_1.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_1.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_1.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_2.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_2.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_2.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_2.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_3.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_3.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_3.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_3.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_4.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_4.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_4.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_4.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy_on_the_ROCs_-_forward.eps to pdf..." && epstopdf cluster_occupancy_on_the_ROCs_-_forward.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy_forward.eps to pdf..." && epstopdf rechit_occupancy_forward.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._tracks_used_to_calc._eff._fwd._[with_effcuts].eps to pdf..." && epstopdf num._tracks_used_to_calc._eff._fwd._[with_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting roc_efficiency_forward_[with_effcuts].eps to pdf..." && epstopdf roc_efficiency_forward_[with_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy_on_the_ROCs_-_layer_1.eps to pdf..." && epstopdf cluster_occupancy_on_the_ROCs_-_layer_1.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy_layer_1.eps to pdf..." && epstopdf rechit_occupancy_layer_1.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._tracks_used_to_calc._eff._l1._[with_effcuts].eps to pdf..." && epstopdf num._tracks_used_to_calc._eff._l1._[with_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting roc_efficiency_layer_1_[with_effcuts].eps to pdf..." && epstopdf roc_efficiency_layer_1_[with_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy_on_the_ROCs_-_layer_2.eps to pdf..." && epstopdf cluster_occupancy_on_the_ROCs_-_layer_2.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy_layer_2.eps to pdf..." && epstopdf rechit_occupancy_layer_2.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._tracks_used_to_calc._eff._l2._[with_effcuts].eps to pdf..." && epstopdf num._tracks_used_to_calc._eff._l2._[with_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting roc_efficiency_layer_2_[with_effcuts].eps to pdf..." && epstopdf roc_efficiency_layer_2_[with_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy_on_the_ROCs_-_layer_3.eps to pdf..." && epstopdf cluster_occupancy_on_the_ROCs_-_layer_3.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy_layer_3.eps to pdf..." && epstopdf rechit_occupancy_layer_3.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._tracks_used_to_calc._eff._l3._[with_effcuts].eps to pdf..." && epstopdf num._tracks_used_to_calc._eff._l3._[with_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting roc_efficiency_layer_3_[with_effcuts].eps to pdf..." && epstopdf roc_efficiency_layer_3_[with_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy_on_the_ROCs_-_layer_4.eps to pdf..." && epstopdf cluster_occupancy_on_the_ROCs_-_layer_4.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy_layer_4.eps to pdf..." && epstopdf rechit_occupancy_layer_4.eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._tracks_used_to_calc._eff._l4._[with_effcuts].eps to pdf..." && epstopdf num._tracks_used_to_calc._eff._l4._[with_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting roc_efficiency_layer_4_[with_effcuts].eps to pdf..." && epstopdf roc_efficiency_layer_4_[with_effcuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Cleaning up eps soft links..." && rm *.eps
+	@cd $(LATEX_WORKING_DIRECTORY) && pdflatex main.tex # needs to be done at least twice :S
+	@cd $(LATEX_WORKING_DIRECTORY) && pdflatex main.tex
 
 clean:
 	@rm -f $(OBJS) $(PROGRAMS) core

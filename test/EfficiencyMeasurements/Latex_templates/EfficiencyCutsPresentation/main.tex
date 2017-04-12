@@ -1,0 +1,1151 @@
+\documentclass{beamer}
+
+\usetheme{Goettingen}
+
+\usepackage{color}
+
+\title{Plots for validation}
+
+% A subtitle is optional and this may be deleted
+\subtitle{Phase I Pixel efficiency - efficiency cuts\vspace*{-0.5cm}}
+
+\author{A.~Hunyadi\inst{1,2} \and V.~Veszpremi\inst{1} \and J. Karancsi\inst{2}}
+
+\institute[] % (optional, but mostly needed)
+{
+  \inst{1}%
+  Wigner Research Centre for Physics, Budapest
+  \and
+  \inst{2}%
+  University of Debrecen, Debrecen
+}
+
+\date{Daily meeting, \today}
+
+\subject{Experimental Particle Physics}
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+\usepackage{grffile} % allow dots in file names
+\usepackage{array}
+% \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+\AtBeginSection{
+  \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title}\insertsectionhead\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+}
+
+\begin{document}
+
+\begin{frame}
+  \vspace*{-0.3cm}
+  \titlepage
+  \vspace*{-0.5cm}
+  \begin{center}
+  \includegraphics[height=1.5cm]{Images/cms_logo.png}\hspace*{0.3cm}
+  \includegraphics[height=1.0cm]{Images/wigner_logo.png}\hspace*{0.4cm}
+  \includegraphics[height=1.5cm]{Images/egyetem_logo.png}
+  \end{center}
+\end{frame}
+
+\section{Validation plots}
+
+\begin{frame}{Efficiency measurements}{Number of hits used to calculate efficiency, efficiency}
+   % \vspace*{0.4cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits._used_to_calculate_efficiency,_layers_1-4,_disks_1-3_[with_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_layers_1-4,_disks_1-3_[with_cuts].pdf}
+  \end{minipage}%
+\end{frame}
+
+\begin{frame}{Forward}{Clusters, rechits, efficiency numhits, efficiency - phi vs z}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy,_phi_vs_z_-_forward.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy,_phi_vs_z_-_forward.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits_used_to_calc._eff.,_phi_vs_z_-_forward.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_phi_vs_z_-_forward.pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 1}{Clusters, rechits, efficiency numhits, efficiency - phi vs z}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy,_phi_vs_z_-_layer_1.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy,_phi_vs_z_-_layer_1.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_1.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_phi_vs_z_-_layer_1.pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 2}{Clusters, rechits, efficiency numhits, efficiency - phi vs z}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy,_phi_vs_z_-_layer_2.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy,_phi_vs_z_-_layer_2.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_2.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_phi_vs_z_-_layer_2.pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 3}{Clusters, rechits, efficiency numhits, efficiency - phi vs z}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy,_phi_vs_z_-_layer_3.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy,_phi_vs_z_-_layer_3.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_3.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_phi_vs_z_-_layer_3.pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 4}{Clusters, rechits, efficiency numhits, efficiency - phi vs z}
+   % \vspace*{0.4cm}
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/cluster_occupancy,_phi_vs_z_-_layer_4.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/rechit_occupancy,_phi_vs_z_-_layer_4.pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_4.pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/efficiency,_phi_vs_z_-_layer_4.pdf}
+  \end{minipage}
+\end{frame}
+
+\section{Lx and ly summary plots}
+
+\begin{frame}{Lx and ly summary plots}{Rechit dist. without cuts, rechit dist. and hit eff. with cuts}
+  % \vspace*{0.4cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/lx_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/lx_[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_[with_other_effcuts].pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/ly_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/ly_[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\section{Lx and ly on detector part level}
+
+\begin{frame}{Forward lx}{Lx distribution on the forward modules without and with cuts, efficiency versus lx}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_fwd._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_fwd._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_fwd._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 1 lx}{Lx distribution on layer 1 without and with cuts, efficiency versus lx}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_l1._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 2 lx}{Lx distribution on layer 2 without and with cuts, efficiency versus lx}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_l2._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 3 lx}{Lx distribution on layer 3 without and with cuts, efficiency versus lx}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_l3._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 4 lx}{Lx distribution on layer 4 without and with cuts, efficiency versus lx}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_l4._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Forward ly}{Ly distribution on the forward modules without and with cuts, efficiency versus ly}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_fwd._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_fwd._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_fwd._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 1 ly}{Ly distribution on layer 1 without and with cuts, efficiency versus ly}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_l1._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 2 ly}{Ly distribution on layer 2 without and with cuts, efficiency versus ly}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_l2._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 3 ly}{Ly distribution on layer 3 without and with cuts, efficiency versus ly}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_l3._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 4 ly}{Ly distribution on layer 4 without and with cuts, efficiency versus ly}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_l4._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\section{Barrel inner and outer module lx and ly comparisons} 
+
+\begin{frame}{Layer 1 lx}{Lx distribution on layer 1 without and with cuts, efficiency versus lx}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_inner_l1._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_inner_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_inner_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_outer_l1._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_outer_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_outer_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 2 lx}{Lx distribution on layer 2 without and with cuts, efficiency versus lx}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_inner_l2._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_inner_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_inner_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_outer_l2._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_outer_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_outer_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 3 lx}{Lx distribution on layer 3 without and with cuts, efficiency versus lx}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_inner_l3._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_inner_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_inner_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_outer_l3._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_outer_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_outer_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 4 lx}{Lx distribution on layer 4 without and with cuts, efficiency versus lx}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_inner_l4._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_inner_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_inner_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_outer_l4._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/lx_on_outer_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_lx_on_outer_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 1 ly}{Ly distribution on layer 1 without and with cuts, efficiency versus ly}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_inner_l1._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_inner_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_inner_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_outer_l1._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_outer_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_outer_l1._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 2 ly}{Ly distribution on layer 2 without and with cuts, efficiency versus ly}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_inner_l2._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_inner_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_inner_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_outer_l2._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_outer_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_outer_l2._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 3 ly}{Ly distribution on layer 3 without and with cuts, efficiency versus ly}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_inner_l3._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_inner_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_inner_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_outer_l3._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_outer_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_outer_l3._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\begin{frame}{Layer 4 ly}{Ly distribution on layer 4 without and with cuts, efficiency versus ly}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_inner_l4._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_inner_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_inner_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_outer_l4._modules_[no_cuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/ly_on_outer_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}%
+\hspace{0.01\textwidth}%
+\begin{minipage}{0.32\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{Images/Plots/eff._vs_ly_on_outer_l4._modules_[with_other_effcuts].pdf}
+\end{minipage}
+\end{frame}
+
+\section{Lx vs ly 2D summary plots}
+
+\begin{frame}{Rechit ly vs lx}{Layer 1, rechit dist. with and without cuts, hit eff.}
+  % \vspace*{0.4cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_lay1_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_lay1_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_lay1_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Layer 2, rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_lay2_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_lay2_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_lay2_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Layer 3, rechit dist. with and without cuts, hit eff.}
+  % \vspace*{0.4cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_lay3_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_lay3_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_lay3_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Layer 4, rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_lay4_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_lay4_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_lay4_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\section{Lx vs ly 2D plots with detailed detector part selection}
+
+\begin{frame}{Rechit ly vs lx}{Layer 1, inner modules, rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._1,_inner_mods._[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._1,_inner_mods._[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_pos._lay._1,_inner_mods._[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Layer 1, outer modules, rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._2,_inner_mods._[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._2,_inner_mods._[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_pos._lay._2,_inner_mods._[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Layer 2, inner modules, rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._3,_inner_mods._[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._3,_inner_mods._[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_pos._lay._3,_inner_mods._[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Layer 2, outer modules, rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._4,_inner_mods._[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._4,_inner_mods._[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_pos._lay._4,_inner_mods._[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Layer 3, inner modules, rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._1,_outer_mods._[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._1,_outer_mods._[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_pos._lay._1,_outer_mods._[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Layer 3, outer modules, rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._2,_outer_mods._[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._2,_outer_mods._[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_pos._lay._2,_outer_mods._[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Layer 4, inner modules, rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._3,_outer_mods._[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._3,_outer_mods._[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_pos._lay._3,_outer_mods._[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Layer 4, outer modules, rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._4,_outer_mods._[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_pos._lay._4,_outer_mods._[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_pos._lay._4,_outer_mods._[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Fwd. negative z side, inner ring, panel 2 rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_negative_z,_inner_ring,_panel_2_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_negative_z,_inner_ring,_panel_2_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_-_fwd,_negative_z,_inner_ring,_panel_2_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Fwd. negative z side, outer ring, panel 1 rechit dist. with and without cuts, hit eff.}
+  % \vspace*{0.4cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_1_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_1_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_1_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Fwd. negative z side, outer ring, panel 2 rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_2_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_2_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_-_fwd,_negative_z,_outer_ring,_panel_2_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Fwd. positive z side, inner ring, panel 1 rechit dist. with and without cuts, hit eff.}
+  % \vspace*{0.4cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_1_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_1_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_1_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Fwd. positive z side, inner ring, panel 2 rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_2_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_2_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_-_fwd,_positive_z,_inner_ring,_panel_2_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Fwd. positive z side, outer ring, panel 1 rechit dist. with and without cuts, hit eff.}
+  % \vspace*{0.4cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_1_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_1_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_1_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Rechit ly vs lx}{Fwd. positive z side, outer ring, panel 2 rechit dist. with and without cuts, hit eff.}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_2_[no_cuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/num._of_hits_vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_2_[with_other_effcuts].pdf}
+  \end{minipage}%
+  % \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_hit_position_-_fwd,_positive_z,_outer_ring,_panel_2_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\section{Parameter distributions for cut value selection}
+
+\begin{frame}{D0 rate, efficiency}{Track d0 on barrel and fwd., number of hits with and without cuts, efficiency}
+  % \vspace*{0.4cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/d0_of_barrel_hits_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/d0_of_barrel_hits_[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_d0_of_barrel_hits_[with_other_effcuts].pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/d0_of_forward_hits_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/d0_of_forward_hits_[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_d0_of_forward_hits_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{DZ rate, efficiency}{Track dz on barrel and fwd., number of hits with and without cuts, efficiency}
+  % \vspace*{0.4cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/dz_of_barrel_hits_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/dz_of_barrel_hits_[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_dz_of_barrel_hits_[with_other_effcuts].pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/dz_of_forward_hits_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/dz_of_forward_hits_[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_dz_of_forward_hits_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Striphits, parent vtx. ntracks.}{Num. track stiphits and parent vertex track mult., with and without cuts, efficiency}
+  % \vspace*{0.4cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/strip_hits_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/strip_hits_[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_n._strip_hits_[with_other_effcuts].pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/parent_vertex_n._tracks_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/parent_vertex_n._tracks_[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_parent_vertex_n._tracks_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Closest cluster distance}{Closest cluster and closest hit distance dist. with and without cuts, efficiency}
+  % \vspace*{0.4cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/closest_cluster_distance_to_traj._meas._[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/closest_cluster_distance_to_traj._meas._[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_closest_cluster_distance_to_traj._meas._[with_other_effcuts].pdf}
+  \end{minipage}
+  \vspace*{0.2cm}
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/closest_hit_distance_to_traj._meas._[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/closest_hit_distance_to_traj._meas._[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.32\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_closest_hit_distance_to_traj._meas._[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Pt}{Pt distribution with and without cuts, efficiency}
+    \centering
+  \begin{minipage}{0.35\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/pt_[no_cuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \vspace*{0.4cm}
+  \begin{minipage}{0.35\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/pt_[with_other_effcuts].pdf}
+  \end{minipage}%
+  \hspace{0.01\textwidth}%
+  \begin{minipage}{0.35\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{Images/Plots/eff._vs_pt_[with_other_effcuts].pdf}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{}
+    \vspace*{1.6cm}
+    \hspace*{0.55cm}\huge Thank you for your attention!
+\end{frame}
+
+% All of the following is optional and typically not needed. 
+\appendix
+\section<presentation>*{\appendixname}
+\subsection<presentation>*{For Further Reading}
+
+
+\end{document}

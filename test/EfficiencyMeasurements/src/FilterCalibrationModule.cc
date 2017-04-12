@@ -428,11 +428,16 @@ void FilterCalibrationModule::getHistogramsFromHistoMap(HistoMapType& histograms
 	nMinus1LocalPosEfficiencyOrientation7Disk3 = checkGetHistoFromMap("nMinus1LocalPosEfficiencyOrientation7Disk3");
 	nMinus1LocalPosNumhitsOrientation8Disk3    = checkGetHistoFromMap("nMinus1LocalPosNumhitsOrientation8Disk3");
 	nMinus1LocalPosEfficiencyOrientation8Disk3 = checkGetHistoFromMap("nMinus1LocalPosEfficiencyOrientation8Disk3");
+	cluDistNumhitsBarrelPreCuts                = checkGetHistoFromMap("cluDistNumhitsBarrelPreCuts");
+	cluDistNumhitsForwardPreCuts               = checkGetHistoFromMap("cluDistNumhitsForwardPreCuts");
+	hitDistNumhitsBarrelPreCuts                = checkGetHistoFromMap("hitDistNumhitsBarrelPreCuts");
+	hitDistNumhitsForwardPreCuts               = checkGetHistoFromMap("hitDistNumhitsForwardPreCuts");
 	std::cout << process_prompt << __PRETTY_FUNCTION__ << " successful." << std::endl;
 }
 
 void FilterCalibrationModule::fillHistograms()
 {
+	// FIXME: this recalculation should be obsolete now
 	const float d_cl = sqrt(trajField_.dx_cl * trajField_.dx_cl + trajField_.dy_cl * trajField_.dy_cl);
 	const float d_tr = sqrt(trajField_.dx_tr * trajField_.dx_tr + trajField_.dy_tr * trajField_.dy_tr);
 	const float phi  = atan2(gly_, glx_);
@@ -447,8 +452,24 @@ void FilterCalibrationModule::fillHistograms()
 	const int noDZCut        = nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut          && pixhitCut && lxFidCut && lyFidCut && valmisCut && hitsepCut;
 	const int noFidicualsCut = nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut                         && valmisCut && hitsepCut;
 	const int noHitsepCut    = nvtxCut && zerobiasCut && federrCut && hpCut && ptCut && nstripCut && d0Cut && dzCut && pixhitCut && lxFidCut && lyFidCut && valmisCut             ;
+	fillPairs(vtxNtrkNumhitsPreCuts,  vtxNtrkEfficiencyPreCuts, trk_.fromVtxNtrk, fillEfficiencyCondition                );
+	fillPairs(nMinus1VtxNtrkNumhits,  nMinus1VtxNtrkEfficiency, trk_.fromVtxNtrk, fillEfficiencyCondition, noVtxCut      );
+	fillPairs(ptNumhitsPreCuts,       ptEfficiencyPreCuts,      trk_.pt,          fillEfficiencyCondition                );
+	fillPairs(nMinus1PtNumhits,       nMinus1PtEfficiency,      trk_.pt,          fillEfficiencyCondition, noPtCut       );
+	fillPairs(lxNumhitsPreCuts,       lxEfficiencyPreCuts,      lx_,              fillEfficiencyCondition                );
+	fillPairs(nMinus1LxNumhits,       nMinus1LxEfficiency,      lx_,              fillEfficiencyCondition, noFidicualsCut);
+	fillPairs(lyNumhitsPreCuts,       lyEfficiencyPreCuts,      ly_,              fillEfficiencyCondition                );
+	fillPairs(nMinus1LyNumhits,       nMinus1LyEfficiency,      ly_,              fillEfficiencyCondition, noFidicualsCut);
+	fillPairs(stripNumhitsPreCuts,    stripEfficiencyPreCuts,   trk_.strip,       fillEfficiencyCondition                );
+	fillPairs(nMinus1stripNumhits,    nMinus1stripEfficiency,   trk_.strip,       fillEfficiencyCondition, noNStripCut   );
+	fillPairs(hitDistNumhitsPreCuts,  hitDistEfficiencyPreCuts, d_tr,             fillEfficiencyCondition                );
+	fillPairs(nMinus1HitDistNumhits,  nMinus1HitDistEfficiency, d_tr,             fillEfficiencyCondition, noHitsepCut   );
+	fillPairs(cluDistNumhitsPreCuts,  cluDistEfficiencyPreCuts, d_cl,             !missing_                              );
+	fillPairs(nMinus1CluDistNumhits,  nMinus1CluDistEfficiency, d_cl,             !missing_,               effCutAll     );
 	if(det_ == 0)
 	{
+		cluDistNumhitsBarrelPreCuts -> Fill(d_cl);
+		hitDistNumhitsBarrelPreCuts -> Fill(d_tr);
 		fillPairs(layersDisksNumhits,      layersDisksEfficiency,     layer_,  fillEfficiencyCondition);
 		fillPairs(d0BarrelNumhitsPreCuts,  d0BarrelEfficiencyPreCuts, trk_.d0, fillEfficiencyCondition);
 		fillPairs(dZBarrelNumhitsPreCuts,  dZBarrelEfficiencyPreCuts, trk_.dz, fillEfficiencyCondition);
@@ -589,6 +610,8 @@ void FilterCalibrationModule::fillHistograms()
 	}
 	if(det_ == 1)
 	{
+		cluDistNumhitsForwardPreCuts -> Fill(d_cl);
+		hitDistNumhitsForwardPreCuts -> Fill(d_tr);
 		const int panelOrientation = (side_ - 1) * 4 + std::abs(ring_ % 2) * 2 + panel_; // +Z, -Z, ring 1, ring 2, panel 1, panel 2
 		const int absDisk          = std::abs(disk_);
 		rechitOccupancy_fwd -> Fill(diskRingCoord_, bladePanelCoord_);
@@ -774,20 +797,6 @@ void FilterCalibrationModule::fillHistograms()
 			}
 		}
 	}
-	fillPairs(vtxNtrkNumhitsPreCuts,  vtxNtrkEfficiencyPreCuts, trk_.fromVtxNtrk, fillEfficiencyCondition                );
-	fillPairs(nMinus1VtxNtrkNumhits,  nMinus1VtxNtrkEfficiency, trk_.fromVtxNtrk, fillEfficiencyCondition, noVtxCut      );
-	fillPairs(ptNumhitsPreCuts,       ptEfficiencyPreCuts,      trk_.pt,          fillEfficiencyCondition                );
-	fillPairs(nMinus1PtNumhits,       nMinus1PtEfficiency,      trk_.pt,          fillEfficiencyCondition, noPtCut       );
-	fillPairs(lxNumhitsPreCuts,       lxEfficiencyPreCuts,      lx_,              fillEfficiencyCondition                );
-	fillPairs(nMinus1LxNumhits,       nMinus1LxEfficiency,      lx_,              fillEfficiencyCondition, noFidicualsCut);
-	fillPairs(lyNumhitsPreCuts,       lyEfficiencyPreCuts,      ly_,              fillEfficiencyCondition                );
-	fillPairs(nMinus1LyNumhits,       nMinus1LyEfficiency,      ly_,              fillEfficiencyCondition, noFidicualsCut);
-	fillPairs(stripNumhitsPreCuts,    stripEfficiencyPreCuts,   trk_.strip,       fillEfficiencyCondition                );
-	fillPairs(nMinus1stripNumhits,    nMinus1stripEfficiency,   trk_.strip,       fillEfficiencyCondition, noNStripCut   );
-	fillPairs(hitDistNumhitsPreCuts,  hitDistEfficiencyPreCuts, d_tr,             fillEfficiencyCondition                );
-	fillPairs(nMinus1HitDistNumhits,  nMinus1HitDistEfficiency, d_tr,             fillEfficiencyCondition, noHitsepCut   );
-	fillPairs(cluDistNumhitsPreCuts,  cluDistEfficiencyPreCuts, d_cl,             !missing_                              );
-	fillPairs(nMinus1CluDistNumhits,  nMinus1CluDistEfficiency, d_cl,             !missing_,               effCutAll     );
 	incrementCounters();
 }
 
@@ -909,6 +918,11 @@ void FilterCalibrationModule::calculateCuts()
 	// Fidicual cuts
 	lxFidCut = 1;
 	lyFidCut = 1;
+	if(det_ == 0)
+	{
+		lxFidCut = std::abs(lx_) < BARREL_MODULE_EDGE_X_CUT;
+		lyFidCut = std::abs(lx_) < BARREL_MODULE_EDGE_Y_CUT;
+	}
 	// Valmis cut
 	valmisCut = trajField_.validhit || trajField_.missing;
 	// Hitsep cut

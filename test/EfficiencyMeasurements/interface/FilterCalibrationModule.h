@@ -30,7 +30,9 @@ class FilterCalibrationModule
 		static constexpr float                TRACK_DZ_CUT_BARREL_N_MINUS_1_VAL  = 0.01f;
 		static constexpr float                TRACK_DZ_CUT_FORWARD_N_MINUS_1_VAL = 0.5f;
 		static constexpr float                MEAS_HITSEP_CUT_N_MINUS_1_VAL      = 0.01f;
-		static constexpr float                HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL   = 0.005f;
+		static constexpr float                HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL   = 0.10f;
+		static constexpr float                BARREL_MODULE_EDGE_X_CUT           = 0.6f;
+		static constexpr float                BARREL_MODULE_EDGE_Y_CUT           = 3.0f;
 
 		const EventData&       eventField_;
 		const TrajMeasurement& trajField_;
@@ -155,6 +157,8 @@ class FilterCalibrationModule
 		TH1* nMinus1LocalPosNumhitsOrientation1Disk2; TH1* nMinus1LocalPosEfficiencyOrientation1Disk2; TH1* nMinus1LocalPosNumhitsOrientation2Disk2; TH1* nMinus1LocalPosEfficiencyOrientation2Disk2; TH1* nMinus1LocalPosNumhitsOrientation3Disk2; TH1* nMinus1LocalPosEfficiencyOrientation3Disk2; TH1* nMinus1LocalPosNumhitsOrientation4Disk2; TH1* nMinus1LocalPosEfficiencyOrientation4Disk2; TH1* nMinus1LocalPosNumhitsOrientation5Disk2; TH1* nMinus1LocalPosEfficiencyOrientation5Disk2; TH1* nMinus1LocalPosNumhitsOrientation6Disk2; TH1* nMinus1LocalPosEfficiencyOrientation6Disk2; TH1* nMinus1LocalPosNumhitsOrientation7Disk2; TH1* nMinus1LocalPosEfficiencyOrientation7Disk2; TH1* nMinus1LocalPosNumhitsOrientation8Disk2; TH1* nMinus1LocalPosEfficiencyOrientation8Disk2;
 		TH1* localPosNumhitsOrientation1Disk3PreCuts; TH1* localPosEfficiencyOrientation1Disk3PreCuts; TH1* localPosNumhitsOrientation2Disk3PreCuts; TH1* localPosEfficiencyOrientation2Disk3PreCuts; TH1* localPosNumhitsOrientation3Disk3PreCuts; TH1* localPosEfficiencyOrientation3Disk3PreCuts; TH1* localPosNumhitsOrientation4Disk3PreCuts; TH1* localPosEfficiencyOrientation4Disk3PreCuts; TH1* localPosNumhitsOrientation5Disk3PreCuts; TH1* localPosEfficiencyOrientation5Disk3PreCuts; TH1* localPosNumhitsOrientation6Disk3PreCuts; TH1* localPosEfficiencyOrientation6Disk3PreCuts; TH1* localPosNumhitsOrientation7Disk3PreCuts; TH1* localPosEfficiencyOrientation7Disk3PreCuts; TH1* localPosNumhitsOrientation8Disk3PreCuts; TH1* localPosEfficiencyOrientation8Disk3PreCuts;
 		TH1* nMinus1LocalPosNumhitsOrientation1Disk3; TH1* nMinus1LocalPosEfficiencyOrientation1Disk3; TH1* nMinus1LocalPosNumhitsOrientation2Disk3; TH1* nMinus1LocalPosEfficiencyOrientation2Disk3; TH1* nMinus1LocalPosNumhitsOrientation3Disk3; TH1* nMinus1LocalPosEfficiencyOrientation3Disk3; TH1* nMinus1LocalPosNumhitsOrientation4Disk3; TH1* nMinus1LocalPosEfficiencyOrientation4Disk3; TH1* nMinus1LocalPosNumhitsOrientation5Disk3; TH1* nMinus1LocalPosEfficiencyOrientation5Disk3; TH1* nMinus1LocalPosNumhitsOrientation6Disk3; TH1* nMinus1LocalPosEfficiencyOrientation6Disk3; TH1* nMinus1LocalPosNumhitsOrientation7Disk3; TH1* nMinus1LocalPosEfficiencyOrientation7Disk3; TH1* nMinus1LocalPosNumhitsOrientation8Disk3; TH1* nMinus1LocalPosEfficiencyOrientation8Disk3;
+		TH1* cluDistNumhitsBarrelPreCuts;             TH1* cluDistNumhitsForwardPreCuts;
+		TH1* hitDistNumhitsBarrelPreCuts;             TH1* hitDistNumhitsForwardPreCuts;
 	public:
 		FilterCalibrationModule(HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
 		~FilterCalibrationModule() = default;
