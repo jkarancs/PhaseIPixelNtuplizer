@@ -114,14 +114,16 @@ void PhaseIPixelNtuplizer::beginJob()
 	rechitOccupancyROCBins_l2  = new TH2D("rechitOccupancyROCBins_l2",  "rechit occupancy on ROCS - layer 2",  72,   -4.5,   4.5,    58, -14.5,     14.5    );
 	rechitOccupancyROCBins_l3  = new TH2D("rechitOccupancyROCBins_l3",  "rechit occupancy on ROCS - layer 3",  72,   -4.5,   4.5,    90, -22.5,     22.5    );
 	rechitOccupancyROCBins_l4  = new TH2D("rechitOccupancyROCBins_l4",  "rechit occupancy on ROCS - layer 4",  72,   -4.5,   4.5,   130, -32.5,     32.5    );
-#endif
+	// FIXME
 	disk1PropagationEtaNumhits    = new TH1D("disk1PropagationEtaNumhits",    "disk1PropagationEtaNumhits",    100, -3.1415, 3.1415);
 	disk1PropagationEtaEfficiency = new TH1D("disk1PropagationEtaEfficiency", "disk1PropagationEtaEfficiency", 100, -3.1415, 3.1415);
+#endif
 }
 
 void PhaseIPixelNtuplizer::endJob() 
 {
 	std::cout << "Ntuplizer endjob step with outputFileName: \"" << ntupleOutputFilename_ << "\"." << std::endl;
+	ntupleOutputFile_ -> cd();
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	constexpr int PHASE_SCENARIO = 1;
 	gStyle -> SetPalette(1);
@@ -161,10 +163,11 @@ void PhaseIPixelNtuplizer::endJob()
 			}
 			dress_occup_plot((*histoIt), layer, PHASE_SCENARIO);
 		}
+		// (*histoIt) -> SetDirectory(ntupleOutputFile_);
 		(*histoIt) -> Write();
 		canvas     -> Write();
 	}
-#endif
+	// FIXME
 	const std::vector<TH1D*> disk1PropagationPlots =
 	{
 		disk1PropagationEtaNumhits,
@@ -179,6 +182,7 @@ void PhaseIPixelNtuplizer::endJob()
 		(*histoIt) -> Write();
 		canvas     -> Write();
 	}
+#endif
 	std::cout << "Writing plots to file: \"" << ntupleOutputFilename_ << "\"." << std::endl;
 	ntupleOutputFile_ -> Write();
 	std::cout << "Closing file: \"" << ntupleOutputFilename_ << "\"." << std::endl;
@@ -268,7 +272,6 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 #endif
 	std::cout << "Clusters: " << (clusterCollectionHandle.isValid() ? std::to_string(clusterCollectionHandle -> size()) : "invalid") << " ";
 	std::cout << "Tracks: " << (trajTrackCollectionHandle.isValid() ? std::to_string(trajTrackCollectionHandle -> size()) : "invalid") << " ";
-
 	getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle, puInfoCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	if (digiCollectionHandle.isValid())
@@ -946,6 +949,7 @@ std::vector<TrajectoryMeasurement> PhaseIPixelNtuplizer::getLayer1ExtrapolatedHi
 	return layerMeasurements -> measurements(*pixelBarrelLayer1, trajMeasurement.updatedState(), *trackerPropagator_, *chi2MeasurementEstimator_);
 }
 
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 // kiplotolom az összes olyan track etáját, amelyhez a layer 2-ről vagy a disk 1-ről sikeresen progagáltam a layer 1-re
 // van-e olyan track ami nagy étájú (nyalábhoz simul) és disk 2-n és disk 3-n van csak valid hitje
 // ha minden tracknek van layer 1-en hitje, akkor nem lehet trükközni
@@ -1008,6 +1012,7 @@ void PhaseIPixelNtuplizer::getDisk1PropagationData(const edm::Handle<TrajTrackAs
 	std::cout << "Number of hits on disk 1 when layer 1 propagation was used:       " << hitsDisk1WhenLayer1PropagationUsed      << std::endl;
 	std::cout << "Number of valid hits on disk 1 when layer 1 propagation was used: " << validhitsDisk1WhenLayer1PropagationUsed << std::endl;
 }
+#endif
 
 //////////////////////////////
 // Private member functions //
