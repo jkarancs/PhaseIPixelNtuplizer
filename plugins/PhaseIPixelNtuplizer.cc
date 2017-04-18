@@ -201,6 +201,19 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	LogDebug("step") << "Executing PhaseIPixelNtuplizer::analyze()..." << std::endl;
 	// FED errors
 	federrors_ = NtuplizerHelpers::getFedErrors(iEvent, rawDataErrorToken_);
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+	// Simhits
+	std::vector<edm::Handle<edm::PSimHitContainer>> simhitCollectionHandles;
+	for(unsigned int numToken = 0; numToken < simhitCollectionTokens_.size(); ++numToken)
+	{
+		edm::Handle<edm::PSimHitContainer> handle;
+		iEvent.getByToken(simhitCollectionTokens_[numToken], handle);
+		simhitCollectionHandles.push_back(handle);
+	}
+	// Digis
+	edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
+	iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
+#endif
 	// Get vertices
 	edm::Handle<reco::VertexCollection>      vertexCollectionHandle;
 	iEvent.getByToken(primaryVerticesToken_, vertexCollectionHandle);
@@ -248,24 +261,19 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	pixelClusterParameterEstimator_ = pixelClusterParameterEstimatorHandle.product();
 	// Initialize the object used to calculate module geometric informations
 	coord_.init(iSetup);
+	std::cout << "Event summary informations: " << std::endl;
+	std::cout << "Vertices: " << (vertexCollectionHandle.isValid() ? std::to_string(vertexCollectionHandle -> size()) : "invalid") << " ";
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+	std::cout << "Digis: " << (digiCollectionHandle.isValid()) << (digiCollectionHandle.isValid() ? std::to_string(digiCollectionHandle -> size()) : "invalid") << " ";
+#endif
+	std::cout << "Clusters: " << (clusterCollectionHandle.isValid() ? std::to_string(clusterCollectionHandle -> size()) : "invalid") << " ";
+	std::cout << "Tracks: " << (trajTrackCollectionHandle.isValid() ? std::to_string(trajTrackCollectionHandle -> size()) : "invalid") << " ";
+
 	getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle, puInfoCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-	// std::cout << "Handling simhits." << std::endl;
-	std::vector<edm::Handle<edm::PSimHitContainer>> simhitCollectionHandles;
-	for(unsigned int numToken = 0; numToken < simhitCollectionTokens_.size(); ++numToken)
-	{
-		// std::cout << "NumToken: " << numToken << std::endl;
-		// try {iEvent.getByLabel(l1GTReadoutRecTag_,L1GTRR);} catch (...) {;}
-		edm::Handle<edm::PSimHitContainer> handle;
-		iEvent.getByToken(simhitCollectionTokens_[numToken], handle);
-		simhitCollectionHandles.push_back(handle);
-	}
-	// std::cout << "Tokens fetched." << std::endl;
-	edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
-	iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
 	if (digiCollectionHandle.isValid())
 	{
-		std::cout << "Saving digi plots..." << std::endl;
+		std::cout << "Saving digis and creating digi plots..." << std::endl;
 		getDigiData(digiCollectionHandle);
 	}
 	if (simhitCollectionHandles.size())
@@ -274,31 +282,6 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 		getSimhitData(simhitCollectionHandles);
 	}
 #endif
-	// std::cout << "Disk 1 propagation check..." << std::endl;
-	// getDisk1PropagationData(trajTrackCollectionHandle);
-	// std::cout << "Done disk 1 propagation check." << std::endl;
-	// for(const auto& currentTrackKeypair: *trajTrackCollectionHandle)
-	// {
-	// 	static int numPrintout = 0;
-	// 	const edm::Ref<std::vector<Trajectory>> traj             = currentTrackKeypair.key;
-	// 	const reco::TrackRef                    track            = currentTrackKeypair.val;
-	// 	const auto&                             trajMeasurements = traj -> measurements();
-	// 	size_t numMissingHitsOnLayer2 = std::count_if(trajMeasurements.begin(), trajMeasurements.end(), [this] (const auto& meas)
-	// 	{
-	// 		ModuleData mod;
-	// 		this -> getModuleData(mod, 1, meas.recHit() -> geographicalId());
-	// 		return meas.recHit() -> getType() == TrackingRecHit::missing;
-	// 	});
-	// 	// if(!(track -> qualityMask() & 4)) continue;
-	// 	if(!numMissingHitsOnLayer2) continue;
-	// 	printTrackCompositionInfo(traj, track, clusterCollectionHandle, vertexCollectionHandle);
-	// 	// printTrackCompositionInfo(traj, track, clusterCollectionHandle, vertexCollectionHandle);
-	// 	if(numPrintout++ == 1000)
-	// 	{
-	// 		std::cout << "1000 printouts exceeded." << std::endl;
-	// 		break;
-	// 	}
-	// }
 	std::cout << "Saving clusters..." << std::endl;
 	getClustData(clusterCollectionHandle);
 	std::cout << "Saving trajecectory measurements and track data..." << std::endl;
@@ -461,15 +444,18 @@ int PhaseIPixelNtuplizer::getTriggerInfo(const edm::Event& iEvent, const edm::Ha
 
 float PhaseIPixelNtuplizer::getPileupInfo(const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle)
 {
+	static int reportNum = 0;
 	if(!puInfoCollectionHandle.isValid()) 
 	{
-		std::cout << "Warning: The provided pileup info is invalid." << std::endl;
+		if(reportNum++ < 100)
+			std::cout << "Warning: The provided pileup info is invalid." << std::endl;
 		return NOVAL_F;
 	}
 	auto zerothPileup = std::find_if(puInfoCollectionHandle -> rbegin(), puInfoCollectionHandle -> rend(), [] (const auto& puInfo) { return puInfo.getBunchCrossing() == 0; });
 	if(zerothPileup == puInfoCollectionHandle -> rend())
 	{
-		std::cout << "Error: Cannot find the in-time pileup info" << std::endl;
+		if(reportNum++ < 100)
+			std::cout << "Error: Cannot find the in-time pileup info." << std::endl;
 		return NOVAL_F;
 	}
 	return zerothPileup -> getTrueNumInteractions();
