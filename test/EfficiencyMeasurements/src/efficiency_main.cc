@@ -9,9 +9,6 @@
 // Data structure
 #include "../../../interface/DataStructures_v2.h"
 
-// Hitt efficiency calculation
-#include "../../../interface/PhaseITrackingEfficiencyFilters.h"
-
 // Utility
 #include "../interface/TestsCommon.h"
 #include "../interface/TTreeTools.h"
@@ -184,12 +181,13 @@ int main(int argc, char** argv) try
 			// printTrajFieldInfo(trajField);
 			// std::cout << "quality_1:      "  << (&trajField) -> trk.quality << "." << std::endl;
 			// std::cout << "Ptr trajField: " << &trajField << std::endl;
-			PhaseITrackingEfficiencyFilters efficiencyFilters(&eventField, &trajField, &(trajField.trk));
+			// PhaseITrackingEfficiencyFilters efficiencyFilters(&eventField, &trajField, &(trajField.trk));
 			// std::cin.get();
 			// Checking the layer number
 			if(layer == NOVAL_I) continue;
 			if(layer < 1 || 5 < layer) { std::cout << error_prompt << "Bad layer number: " << layer << "." << std::endl; continue; }
-			if(efficiencyFilters.performAllEfficiencyCuts() == false) continue;
+			// if(efficiencyFilters.performAllEfficiencyCuts() == false) continue;
+			std::cout << "No efficiency filters were set up." << std::endl; exit(-1);
 			// Efficiency denominators
 			totalHitsVsLadderVsModule[layer - 1] -> Fill(ladder, module);
 			totalHitsVsLadder        [layer - 1] -> Fill(ladder);

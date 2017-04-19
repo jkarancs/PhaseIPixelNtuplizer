@@ -13,30 +13,11 @@ constexpr float                FilterCalibrationModule::TRACK_DZ_CUT_BARREL_N_MI
 constexpr float                FilterCalibrationModule::TRACK_DZ_CUT_FORWARD_N_MINUS_1_VAL;
 constexpr float                FilterCalibrationModule::MEAS_HITSEP_CUT_N_MINUS_1_VAL;
 constexpr float                FilterCalibrationModule::HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL;
+constexpr float                FilterCalibrationModule::BARREL_MODULE_EDGE_X_CUT;
+constexpr float                FilterCalibrationModule::BARREL_MODULE_EDGE_Y_CUT;
 
 FilterCalibrationModule::FilterCalibrationModule(HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg): 
-	eventField_      (eventFieldArg),
-	trajField_       (trajFieldArg),
-	det_             (trajField_.mod_on.det),
-	layer_           (trajField_.mod_on.layer),
-	flipped_         (trajField_.mod_on.flipped),
-	side_            (trajField_.mod_on.side),
-	disk_            (trajField_.mod_on.disk),
-	blade_           (trajField_.mod_on.blade),
-	panel_           (trajField_.mod_on.panel),
-	ring_            (trajField_.mod_on.ring),
-	missing_         (trajField_.missing),
-	ladderCoord_     (trajField_.mod_on.ladder_coord),
-	moduleCoord_     (trajField_.mod_on.module_coord),
-	bladePanelCoord_ (trajField_.mod_on.blade_panel_coord),
-	diskRingCoord_   (trajField_.mod_on.disk_ring_coord),
-	lx_              (trajField_.lx),
-	ly_              (trajField_.ly),
-	lz_              (trajField_.lz),
-	glx_             (trajField_.glx),
-	gly_             (trajField_.gly),
-	glz_             (trajField_.glz),
-	trk_             (trajField_.trk)
+	TrajMeasHistogramFillerModule(histogramsArg, eventFieldArg, trajFieldArg)
 {
 	getHistogramsFromHistoMap(histogramsArg);
 }
@@ -480,7 +461,7 @@ void FilterCalibrationModule::fillHistograms()
 			rechitOccupancy_l1 -> Fill(moduleCoord_, ladderCoord_);
 			rechitPhiVsZ_l1    -> Fill(glz_, phi);
 			fillPairs(rocNumhitsWithCuts_l1,          rocEfficiencyWithCuts_l1,          moduleCoord_, ladderCoord_, fillEfficiencyCondition, effCutAll     );
-			fillPairs(sensorNumhitsWithCutsPhiVsZ_l1, sensorEfficiencyWithCutsPhiVsZ_l1, glz_,         phi,          fillEfficiencyCondition                );
+			fillPairs(sensorNumhitsWithCutsPhiVsZ_l1, sensorEfficiencyWithCutsPhiVsZ_l1, glz_,         phi,          fillEfficiencyCondition, effCutAll     );
 			fillPairs(localPosNumhitsLay1PreCuts,     localPosEfficiencyLay1PreCuts,     lx_,          ly_,          fillEfficiencyCondition                );
 			fillPairs(nMinus1LocalPosNumhitsLay1,     nMinus1LocalPosEfficiencyLay1,     lx_,          ly_,          fillEfficiencyCondition, noFidicualsCut);
 			fillPairs(lxNumhitsPreCuts_l1,            lxEfficiencyPreCuts_l1,            lx_,                        fillEfficiencyCondition                );
@@ -519,7 +500,7 @@ void FilterCalibrationModule::fillHistograms()
 			rechitOccupancy_l2 -> Fill(moduleCoord_, ladderCoord_);
 			rechitPhiVsZ_l2    -> Fill(glz_, phi);
 			fillPairs(rocNumhitsWithCuts_l2,          rocEfficiencyWithCuts_l2,          moduleCoord_, ladderCoord_, fillEfficiencyCondition, effCutAll     );
-			fillPairs(sensorNumhitsWithCutsPhiVsZ_l2, sensorEfficiencyWithCutsPhiVsZ_l2, glz_,         phi,          fillEfficiencyCondition                );
+			fillPairs(sensorNumhitsWithCutsPhiVsZ_l2, sensorEfficiencyWithCutsPhiVsZ_l2, glz_,         phi,          fillEfficiencyCondition, effCutAll     );
 			fillPairs(localPosNumhitsLay2PreCuts,     localPosEfficiencyLay2PreCuts,     lx_,          ly_,          fillEfficiencyCondition                );
 			fillPairs(nMinus1LocalPosNumhitsLay2,     nMinus1LocalPosEfficiencyLay2,     lx_,          ly_,          fillEfficiencyCondition, noFidicualsCut);
 			fillPairs(lxNumhitsPreCuts_l2,            lxEfficiencyPreCuts_l2,            lx_,                        fillEfficiencyCondition                );
@@ -550,7 +531,7 @@ void FilterCalibrationModule::fillHistograms()
 			rechitOccupancy_l3 -> Fill(moduleCoord_, ladderCoord_);
 			rechitPhiVsZ_l3    -> Fill(glz_, phi);
 			fillPairs(rocNumhitsWithCuts_l3,          rocEfficiencyWithCuts_l3,          moduleCoord_, ladderCoord_, fillEfficiencyCondition, effCutAll     );
-			fillPairs(sensorNumhitsWithCutsPhiVsZ_l3, sensorEfficiencyWithCutsPhiVsZ_l3, glz_,         phi,          fillEfficiencyCondition                );
+			fillPairs(sensorNumhitsWithCutsPhiVsZ_l3, sensorEfficiencyWithCutsPhiVsZ_l3, glz_,         phi,          fillEfficiencyCondition, effCutAll     );
 			fillPairs(localPosNumhitsLay3PreCuts,     localPosEfficiencyLay3PreCuts,     lx_,          ly_,          fillEfficiencyCondition                );
 			fillPairs(nMinus1LocalPosNumhitsLay3,     nMinus1LocalPosEfficiencyLay3,     lx_,          ly_,          fillEfficiencyCondition, noFidicualsCut);
 			fillPairs(lxNumhitsPreCuts_l3,            lxEfficiencyPreCuts_l3,            lx_,                        fillEfficiencyCondition                );
@@ -581,7 +562,7 @@ void FilterCalibrationModule::fillHistograms()
 			rechitOccupancy_l4 -> Fill(moduleCoord_, ladderCoord_);
 			rechitPhiVsZ_l4    -> Fill(glz_, phi);
 			fillPairs(rocNumhitsWithCuts_l4,          rocEfficiencyWithCuts_l4,          moduleCoord_, ladderCoord_, fillEfficiencyCondition, effCutAll     );
-			fillPairs(sensorNumhitsWithCutsPhiVsZ_l4, sensorEfficiencyWithCutsPhiVsZ_l4, glz_,         phi,          fillEfficiencyCondition                );
+			fillPairs(sensorNumhitsWithCutsPhiVsZ_l4, sensorEfficiencyWithCutsPhiVsZ_l4, glz_,         phi,          fillEfficiencyCondition, effCutAll     );
 			fillPairs(localPosNumhitsLay4PreCuts,     localPosEfficiencyLay4PreCuts,     lx_,          ly_,          fillEfficiencyCondition                );
 			fillPairs(nMinus1LocalPosNumhitsLay4,     nMinus1LocalPosEfficiencyLay4,     lx_,          ly_,          fillEfficiencyCondition, noFidicualsCut);
 			fillPairs(lxNumhitsPreCuts_l4,            lxEfficiencyPreCuts_l4,            lx_,                        fillEfficiencyCondition                );
@@ -617,7 +598,7 @@ void FilterCalibrationModule::fillHistograms()
 		rechitOccupancy_fwd -> Fill(diskRingCoord_, bladePanelCoord_);
 		rechitPhiVsZ_fwd -> Fill(glz_, phi);
 		fillPairs(layersDisksNumhits,              layersDisksEfficiency,              absDisk + 4,                      fillEfficiencyCondition                );
-		fillPairs(sensorNumhitsWithCutsPhiVsZ_fwd, sensorEfficiencyWithCutsPhiVsZ_fwd, glz_,           phi,              fillEfficiencyCondition                );
+		fillPairs(sensorNumhitsWithCutsPhiVsZ_fwd, sensorEfficiencyWithCutsPhiVsZ_fwd, glz_,           phi,              fillEfficiencyCondition, effCutAll     );
 		fillPairs(d0ForwardNumhitsPreCuts,         d0ForwardEfficiencyPreCuts,         trk_.d0,                          fillEfficiencyCondition                );
 		fillPairs(dZForwardNumhitsPreCuts,         dZForwardEfficiencyPreCuts,         trk_.dz,                          fillEfficiencyCondition                );
 		fillPairs(nMinus1D0ForwardNumhits,         nMinus1D0ForwardEfficiency,         trk_.d0,                          fillEfficiencyCondition, noD0Cut       );
@@ -837,32 +818,6 @@ void FilterCalibrationModule::printCutValues()
 	std::cout << "valmisCut:   " << valmisCut   << std::endl;
 	std::cout << "hitsepCut:   " << hitsepCut   << std::endl;
 	std::cout << " --- End cut values --- " << std::endl;
-}
-
-
-void FilterCalibrationModule::fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const int& cuts)
-{
-	if(!cuts) return;
-	numHitsHisto -> Fill(xFill);
-	if(fillEfficiencyCondition) efficiencyHisto -> Fill(xFill);
-}
-void FilterCalibrationModule::fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts)
-{
-	for(const auto& cut: cuts) if(!cut) return;
-	numHitsHisto -> Fill(xFill);
-	if(fillEfficiencyCondition) efficiencyHisto -> Fill(xFill);
-}
-void FilterCalibrationModule::fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const int& cuts)
-{
-	if(!cuts) return;
-	numHitsHisto -> Fill(xFill, yFill);
-	if(fillEfficiencyCondition) efficiencyHisto -> Fill(xFill, yFill);
-}
-void FilterCalibrationModule::fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts)
-{
-	for(const auto& cut: cuts) if(!cut) return;
-	numHitsHisto -> Fill(xFill, yFill);
-	if(fillEfficiencyCondition) efficiencyHisto -> Fill(xFill, yFill);
 }
 
 void FilterCalibrationModule::calculateCuts()

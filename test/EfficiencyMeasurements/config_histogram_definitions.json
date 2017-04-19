@@ -1390,7 +1390,7 @@
 			"title": "closest cluster distance to traj. meas. [with other effcuts];distance (cm)",
 			"nbinsx": 90,
 			"xMin": 0.0,
-			"xMax": 0.25
+			"xMax": 0.025
 		},
 		{
 			"type": "TH1D",
@@ -1398,13 +1398,13 @@
 			"title": "eff. vs closest cluster distance to traj. meas. [with other effcuts];distance (cm);efficiency",
 			"nbinsx": 90,
 			"xMin": 0.0,
-			"xMax": 0.25
+			"xMax": 0.025
 		},
 
 		{
 			"type": "TH2D",
 			"name": "rechitOccupancy_fwd",
-			"title": "rechit occupancy forward;;disk, ring;blade, panel",
+			"title": "rechit occupancy forward;disk, ring;blade, panel",
 			"nbinsx": 112,
 			"xMin": -3.5,
 			"xMax": 3.5,

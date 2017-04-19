@@ -34,13 +34,17 @@ CANVASEXTRAS_S = ./src/CanvasExtras.$(SrcSuf)
 CANVASEXTRAS_O = ./obj/CanvasExtras.$(ObjSuf)
 OBJS     += $(CANVASEXTRAS_O)
 
-EFFICIENCY_FILTERS_S = ../../src/PhaseITrackingEfficiencyFilters.$(SrcSuf)
-EFFICIENCY_FILTERS_O = ./obj/PhaseITrackingEfficiencyFilters.$(ObjSuf)
-OBJS     += $(EFFICIENCY_FILTERS_O)
+TRAJMEAS_HISTOGRAM_FILLER_MODULE_S = ./src/TrajMeasHistogramFillerModule.$(SrcSuf)
+TRAJMEAS_HISTOGRAM_FILLER_MODULE_O = ./obj/TrajMeasHistogramFillerModule.$(ObjSuf)
+OBJS     += $(TRAJMEAS_HISTOGRAM_FILLER_MODULE_O)
 
 FILTERCALIBRATION_MODULE_S = ./src/FilterCalibrationModule.$(SrcSuf)
 FILTERCALIBRATION_MODULE_O = ./obj/FilterCalibrationModule.$(ObjSuf)
 OBJS     += $(FILTERCALIBRATION_MODULE_O)
+
+COSMIC_TRAJMEAS_HISTOS_MODULE_S = ./src/CosmicTrajMeasHistosModule.$(SrcSuf)
+COSMIC_TRAJMEAS_HISTOS_MODULE_O = ./obj/CosmicTrajMeasHistosModule.$(ObjSuf)
+OBJS     += $(COSMIC_TRAJMEAS_HISTOS_MODULE_O)
 
 CLUSTEROCCUPANCY_MODULE_S = ./src/ClusterOccupancyModule.$(SrcSuf)
 CLUSTEROCCUPANCY_MODULE_O = ./obj/ClusterOccupancyModule.$(ObjSuf)
@@ -66,6 +70,12 @@ EFFICIENCY_FILTERCALIBRATION_A = ./bin/efficiency_filterCalibration$(ExeSuf)
 OBJS     += $(EFFICIENCY_FILTERCALIBRATION_O)
 PROGRAMS += $(EFFICIENCY_FILTERCALIBRATION_A)
 
+COSMIC_MUON_PLOTTER_S = ./src/cosmicMuonPlotter.$(SrcSuf)
+COSMIC_MUON_PLOTTER_O = ./obj/cosmicMuonPlotter.$(ObjSuf)
+COSMIC_MUON_PLOTTER_A = ./bin/cosmicMuonPlotter$(ExeSuf)
+OBJS     += $(COSMIC_MUON_PLOTTER_O)
+PROGRAMS += $(COSMIC_MUON_PLOTTER_A)
+
 MERGE_SIMHIT_PLOTS_S = ./src/mergeSimhitPlots.$(SrcSuf)
 MERGE_SIMHIT_PLOTS_O = ./obj/mergeSimhitPlots.$(ObjSuf)
 MERGE_SIMHIT_PLOTS_A = ./bin/mergeSimhitPlots$(ExeSuf)
@@ -82,35 +92,42 @@ all: $(PROGRAMS)
 
 # Executables
 
-$(EFFICIENCY_MAIN_A): $(EFFICIENCY_MAIN_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O)
+$(EFFICIENCY_MAIN_A): $(EFFICIENCY_MAIN_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O)
 	@printf "Compiling done, linking efficiency_main...\n"
 	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
 	$(MT_EXE)
 	@echo "Succesful make..."
 	@echo "...$@ is ready to use."
 
-$(EFFICIENCY_MULTIHITMEAS_A): $(EFFICIENCY_MULTIHITMEAS_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O)
+$(EFFICIENCY_MULTIHITMEAS_A): $(EFFICIENCY_MULTIHITMEAS_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O)
 	@printf "Compiling done, linking efficiency_multiHitMeas...\n"
 	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
 	$(MT_EXE)
 	@echo "Succesful make..."
 	@echo "...$@ is ready to use."
 
-$(EFFICIENCY_FILTERCALIBRATION_A): $(EFFICIENCY_FILTERCALIBRATION_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
+$(EFFICIENCY_FILTERCALIBRATION_A): $(EFFICIENCY_FILTERCALIBRATION_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(TRAJMEAS_HISTOGRAM_FILLER_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
 	@printf "Compiling done, linking efficiency_filterCalibration...\n"
 	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
 	$(MT_EXE)
 	@echo "Succesful make..."
 	@echo "...$@ is ready to use."
 
-$(MERGE_SIMHIT_PLOTS_A): $(MERGE_SIMHIT_PLOTS_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
+$(COSMIC_MUON_PLOTTER_A): $(COSMIC_MUON_PLOTTER_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(TRAJMEAS_HISTOGRAM_FILLER_MODULE_O) $(COSMIC_TRAJMEAS_HISTOS_MODULE_O)
+	@printf "Compiling done, linking cosmicMuonPlotter...\n"
+	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
+	$(MT_EXE)
+	@echo "Succesful make..."
+	@echo "...$@ is ready to use."
+
+$(MERGE_SIMHIT_PLOTS_A): $(MERGE_SIMHIT_PLOTS_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(TRAJMEAS_HISTOGRAM_FILLER_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
 	@printf "Compiling done, linking mergeSimhitPlots...\n"
 	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
 	$(MT_EXE)
 	@echo "Succesful make..."
 	@echo "...$@ is ready to use."
 
-$(DISK1_PROPAGATION_CHECK_A): $(DISK1_PROPAGATION_CHECK_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(EFFICIENCY_FILTERS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
+$(DISK1_PROPAGATION_CHECK_A): $(DISK1_PROPAGATION_CHECK_O) $(CONSOLECOLORS_O) $(CONSOLEACTOR_O) $(COMMONACTORS_O) $(TIMER_O) $(TIMERCOL_O) $(TTREETOOLS_O) $(CANVASEXTRAS_O) $(CLUSTEROCCUPANCY_MODULE_O) $(TRAJMEAS_HISTOGRAM_FILLER_MODULE_O) $(FILTERCALIBRATION_MODULE_O)
 	@printf "Compiling done, linking disk1PropagationCheck...\n"
 	@$(LD) $(LDFLAGS) -Wall -Wshadow $^ $(LIBS) $(OutPutOpt)$@
 	$(MT_EXE)
@@ -155,13 +172,18 @@ $(CANVASEXTRAS_O): $(CANVASEXTRAS_S)
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 
-$(EFFICIENCY_FILTERS_O): $(EFFICIENCY_FILTERS_S)
-	@printf "Compiling utility: \"PhaseITrackingEfficiencyFilters\"...\n"
+$(TRAJMEAS_HISTOGRAM_FILLER_MODULE_O): $(TRAJMEAS_HISTOGRAM_FILLER_MODULE_S)
+	@printf "Compiling utility: \"TrajMeasHistogramFillerModule\"...\n"
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 
 $(FILTERCALIBRATION_MODULE_O): $(FILTERCALIBRATION_MODULE_S)
 	@printf "Compiling utility: \"FilterCalibrationModule\"...\n"
+	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
+	@printf "Done.\n"
+
+$(COSMIC_TRAJMEAS_HISTOS_MODULE_O): $(COSMIC_TRAJMEAS_HISTOS_MODULE_S)
+	@printf "Compiling utility: \"CosmicTrajMeasHistosModule\"...\n"
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 
@@ -184,6 +206,11 @@ $(EFFICIENCY_MULTIHITMEAS_O): $(EFFICIENCY_MULTIHITMEAS_S)
 
 $(EFFICIENCY_FILTERCALIBRATION_O): $(EFFICIENCY_FILTERCALIBRATION_S)
 	@printf "Compiling program: \"efficiency_filterCalibration\"...\n"
+	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
+	@printf "Done.\n"
+
+$(COSMIC_MUON_PLOTTER_O): $(COSMIC_MUON_PLOTTER_S)
+	@printf "Compiling program: \"cosmicMuonPlotter\"...\n"
 	@$(CXX) $(CXXFLAGS) $(LIBS) -c $< $(OutPutOpt)$@
 	@printf "Done.\n"
 
@@ -405,9 +432,9 @@ latex_cosmics:
 	@mkdir $(LATEX_WORKING_DIRECTORY)
 	@cp Latex_templates/CosmicsPresentation/* $(LATEX_WORKING_DIRECTORY) -r
 	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && ln -s ../../../results/*.eps .
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_hit_distance_to_traj._meas.,_barrel_[no_cuts].eps to pdf..." && epstopdf closest_hit_distance_to_traj._meas.,_barrel_[no_cuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_hit_distance_to_traj._meas.,_forward_[no_cuts].eps to pdf..." && epstopdf closest_hit_distance_to_traj._meas.,_forward_[no_cuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_hit_distance_to_traj._meas._[no_cuts].eps to pdf..." && epstopdf closest_hit_distance_to_traj._meas._[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_cluster_distance_to_traj._meas.,_barrel_[no_cuts].eps to pdf..." && epstopdf closest_cluster_distance_to_traj._meas.,_barrel_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_cluster_distance_to_traj._meas.,_forward_[no_cuts].eps to pdf..." && epstopdf closest_cluster_distance_to_traj._meas.,_forward_[no_cuts].eps
+	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_cluster_distance_to_traj._meas._[no_cuts].eps to pdf..." && epstopdf closest_cluster_distance_to_traj._meas._[no_cuts].eps
 	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_forward.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_forward.eps
 	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_forward.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_forward.eps
 	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_forward.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_forward.eps

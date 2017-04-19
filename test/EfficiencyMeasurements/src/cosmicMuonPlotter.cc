@@ -9,9 +9,6 @@
 // Data structure
 #include "../../../interface/DataStructures_v4.h"
 
-// Hitt efficiency calculation
-#include "../../../interface/PhaseITrackingEfficiencyFilters.h"
-
 // Utility
 #include "../interface/TestsCommon.h"
 #include "../interface/TTreeTools.h"
@@ -20,7 +17,7 @@
 #include "../interface/TimerColored.h"
 #include "../interface/ProgressBar.h"
 #include "../interface/common_functions_jkarancs.h"
-#include "../interface/FilterCalibrationModule.h"
+#include "../interface/CosmicTrajMeasHistosModule.h"
 #include "../interface/ClusterOccupancyModule.h"
 #include "../interface/WilsonScoreInterval.h"
 
@@ -59,11 +56,11 @@ constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE_1D = {0.95,  1.005};
 constexpr std::pair<float, float> EFFICIENCY_ZOOM_RANGE_2D = {0.945, 1.000};
 
 // const std::pair<float, float>  LAYER_MODULE_LABEL_POS      = std::make_pair(0.79f, 0.88f);
-constexpr auto                    CONFIG_FILE_PATH                = "./config_main.json"; 
+constexpr auto                    CONFIG_FILE_PATH                = "./config_cosmics_main.json"; 
 const     std::string             EFFICIENCY_PLOT_IDENTIFIER      = "Efficiency";
 const     std::string             EFFICIENCY_NUMERATOR_IDENTIFIER = "Numhits";
 
-const bool CLUST_LOOP_REQUESTED = false;
+const bool CLUST_LOOP_REQUESTED = true;
 const bool TRAJ_LOOP_REQUESTED  = true;
 
 void                                        testSaveFolders(const JSON& config);
@@ -86,9 +83,8 @@ int main(int argc, char** argv) try
 	std::cout << "Done." << std::endl;
 	testSaveFolders(config);
 	TimerColored timer(timer_prompt);
-	// TApplication* theApp = new TApplication("App", &argc, argv);
 	TFile* histogramsNtuple = generateOutputNtuple(config);
-	gROOT->SetBatch(kFALSE);
+	gROOT -> SetBatch(kFALSE);
 	EventData       eventField;
 	Cluster         clusterField;
 	TrajMeasurement trajField;
@@ -100,8 +96,8 @@ int main(int argc, char** argv) try
 	std::map<std::string, std::shared_ptr<TH1>> histograms(processHistogramDefinitions(config, "histogram_definition_list", "histogram_definitions"));
 	std::cout << "Done." << std::endl;
 	// Modules
-	ClusterOccupancyModule  clusterOccupancyModule (histograms, clusterField);
-	FilterCalibrationModule filterCalibrationModule(histograms, eventField, trajField);
+	ClusterOccupancyModule     clusterOccupancyModule (histograms, clusterField);
+	CosmicTrajMeasHistosModule cosmicTrajMeasHistosModule(histograms, eventField, trajField);
 	//////////////////
 	// Cluster loop //
 	//////////////////
@@ -166,7 +162,7 @@ int main(int argc, char** argv) try
 		{
 			trajTreeChain -> GetEntry(entryIndex);
 			// printTrajFieldInfoTrajOnly(trajField);
-			filterCalibrationModule.fillHistograms();
+			cosmicTrajMeasHistosModule.fillHistograms();
 			if(entryIndex % progressBarUpdateInterval == 0)
 			{
 				progressBar.update(progressBarUpdateBy);
@@ -176,7 +172,7 @@ int main(int argc, char** argv) try
 		}
 		std::cout << std::endl;
 		timer.printSeconds("Loop done. Took about: ", " second(s).");
-		filterCalibrationModule.printCounters();
+		cosmicTrajMeasHistosModule.printCounters();
 	}
 	catch(const std::exception& e)
 	{
@@ -266,14 +262,16 @@ int main(int argc, char** argv) try
 		gStyle -> SetOptStat(0);
 		gErrorIgnoreLevel = kError;
 		// histogram.SetTitleSize(22);
-		for(const auto& histogramPair: histograms)
+		std::vector<std::string> histogramsToSaveNames = {"clusterOccupancy_l1", "clusterOccupancy_l2", "clusterOccupancy_l3", "clusterOccupancy_l4", "clusterOccupancy_fwd", "clusterPhiVsZ_fwd", "clusterPhiVsZ_l1", "clusterPhiVsZ_l2", "clusterPhiVsZ_l3", "clusterPhiVsZ_l4", "cluDistNumhitsPreCuts", "cluDistNumhitsBarrelPreCuts", "cluDistNumhitsForwardPreCuts", "rechitPhiVsZ_l1", "rechitPhiVsZ_l2", "rechitPhiVsZ_l3", "rechitPhiVsZ_l4", "rechitPhiVsZ_fwd", "rechitOccupancy_l1", "rechitOccupancy_l2", "rechitOccupancy_l3", "rechitOccupancy_l4", "rechitOccupancy_fwd", "sensorNumhitsWithCutsPhiVsZ_l1", "sensorNumhitsWithCutsPhiVsZ_l2", "sensorNumhitsWithCutsPhiVsZ_l3", "sensorNumhitsWithCutsPhiVsZ_l4", "sensorNumhitsWithCutsPhiVsZ_fwd", "rocNumhitsWithCuts_l1", "rocNumhitsWithCuts_l2", "rocNumhitsWithCuts_l3", "rocNumhitsWithCuts_l4", "rocNumhitsWithCuts_fwd", "sensorEfficiencyWithCutsPhiVsZ_l1", "sensorEfficiencyWithCutsPhiVsZ_l2", "sensorEfficiencyWithCutsPhiVsZ_l3", "sensorEfficiencyWithCutsPhiVsZ_l4", "sensorEfficiencyWithCutsPhiVsZ_fwd", "rocEfficiencyWithCuts_l1", "rocEfficiencyWithCuts_l2", "rocEfficiencyWithCuts_l3", "rocEfficiencyWithCuts_l4", "rocEfficiencyWithCuts_fwd" };
+		for(const auto& histogramName: histogramsToSaveNames)
 		{
-			const std::string& histogramName = histogramPair.first;
-			TH1*               histogram     = histogramPair.second.get();
+			TH1* histogram = histograms.at(histogramName).get();
+			std::string xAxisTitle = histogram -> GetXaxis() -> GetTitle();
+			std::string yAxisTitle = histogram -> GetYaxis() -> GetTitle();
 			if(histogram -> GetEntries() == 0)
 			{
-				std::cout << process_prompt << histogramName << " has no entries. It will not be saved." << std::endl;
-				continue;
+				std::cout << process_prompt << "Info: " << histogramName << " has no entries." << std::endl;
+				// continue;
 			}
 			const PlotOptions& plotOptions   = plotOptionsMap.at(histogramName);
 			TCanvas* canvas;
@@ -303,21 +301,16 @@ int main(int argc, char** argv) try
 					histogram -> GetXaxis() -> ChangeLabel(numBin + 1, -1, 0.025, -1, -1, -1, plotOptions.xAxisLabels[numBin].c_str());
 				}
 			}
-			// std::cout << "Histogram name: "    << histogramName << std::endl;
-			// std::cout << "Number of entries: " << histogram -> GetEntries() << std::endl; 
 			TH2D* histo2D = dynamic_cast<TH2D*>(histogram);
 			if(histo2D != nullptr)
 			{
-				// std::cout << debug_prompt << "2D plot found, name: " << histogramName << " dressPlot value: " << plotOptions.dressPlot << std::endl;
+				histo2D -> GetXaxis() -> SetTitle(xAxisTitle.c_str());
+				histo2D -> GetYaxis() -> SetTitle(yAxisTitle.c_str());
 				histo2D -> Draw("COLZ");
 				if(plotOptions.dressPlot)
 				{
 					dress_occup_plot(histo2D, plotOptions.layer, PHASE_SCENARIO);
 					canvas -> Update();
-					// TPaveStats* stats = (TPaveStats*) histo2D -> GetListOfFunctions() -> FindObject("stats");
-					// if(stats) stats -> Draw("SAME");
-					// else std::cout << error_prompt << "Cannot redraw stats box for " << histo2D -> GetName() << ": no stats found. " << std::endl;
-					// std::cout << debug_prompt << "Dress occup plot called with layer: " << plotOptions.layer << " and phase scenario: " << PHASE_SCENARIO << "." << std::endl;
 				}
 				addLegend(histo2D);
 			}
@@ -328,10 +321,6 @@ int main(int argc, char** argv) try
 				{
 					std::cout << error_prompt << " error while typecasting for drawing." << std::endl;
 				}
-				// else
-				// {
-					// std::cout << "Drawn with entries: " << dynamic_cast<TH1D*>(histogram) -> GetEntries() << std::endl;
-				// }
 				if(histogramName.find(EFFICIENCY_PLOT_IDENTIFIER) != std::string::npos)
 				{
 					TGraphAsymmErrors* graph = getGraphForEfficiencyWithAsymmetricErrors(*dynamic_cast<TH1D*>(histogram), *dynamic_cast<TH1D*>(getEfficiencyNumeratorHisto(histograms, histogramName)));
@@ -357,7 +346,10 @@ int main(int argc, char** argv) try
 				}
 				else
 				{
-					dynamic_cast<TH1D*>(histogram) -> Draw("HIST");
+					auto histo1D = dynamic_cast<TH1D*>(histogram);
+					histo1D -> GetXaxis() -> SetTitle(xAxisTitle.c_str());
+					histo1D -> GetYaxis() -> SetTitle(yAxisTitle.c_str());
+					histo1D -> Draw("HIST");
 					addLegend(histogram);
 				}
 			}
@@ -387,7 +379,6 @@ int main(int argc, char** argv) try
 		std::cout << error_prompt << "While saving histograms: " << e.what() << " exception occured." << std::endl;
 		exit(-1);
 	}
-	// theApp -> Run();
 	if(histogramsNtuple)
 	{
 		std::cout << process_prompt << "Saving histograms in: " << config["ntuple_save_directory"] << "/" << config["ntuple_name"] << "... ";
@@ -396,7 +387,6 @@ int main(int argc, char** argv) try
 		std::cout << "Done." << std::endl;
 	}
 	std::cout << process_prompt << argv[0] << " terminated succesfully." << std::endl;
-	std::cin.get();	
 	return 0;
 }
 catch(const std::exception& e)
