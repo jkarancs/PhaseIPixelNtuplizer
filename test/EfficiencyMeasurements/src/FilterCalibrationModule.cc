@@ -16,24 +16,15 @@ constexpr float                FilterCalibrationModule::HIT_CLUST_NEAR_CUT_N_MIN
 constexpr float                FilterCalibrationModule::BARREL_MODULE_EDGE_X_CUT;
 constexpr float                FilterCalibrationModule::BARREL_MODULE_EDGE_Y_CUT;
 
-FilterCalibrationModule::FilterCalibrationModule(HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg): 
+FilterCalibrationModule::FilterCalibrationModule(const HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg): 
 	TrajMeasHistogramFillerModule(histogramsArg, eventFieldArg, trajFieldArg)
 {
 	getHistogramsFromHistoMap(histogramsArg);
 }
 
-void FilterCalibrationModule::getHistogramsFromHistoMap(HistoMapType& histogramsArg)
+void FilterCalibrationModule::getHistogramsFromHistoMap(const HistoMapType& histogramsArg)
 {
-	auto checkGetHistoFromMap = [&] (const std::string& name) -> TH1*
-	{
-		try { return histogramsArg.at(name).get(); }
-		catch(const std::out_of_range& e)
-		{
-			std::cout << error_prompt << e.what() << " in " << __PRETTY_FUNCTION__ << " while looking for: " << name << "." << std::endl;
-			exit(-1);
-			return nullptr;
-		}
-	};
+	auto checkGetHistoFromMap = [&] (const std::string& name) -> TH1* {return this -> checkGetHistoFromMap(histogramsArg, name);};
 	layersDisksNumhits                         = checkGetHistoFromMap("layersDisksNumhits");
 	layersDisksEfficiency                      = checkGetHistoFromMap("layersDisksEfficiency");
 	rechitOccupancy_l1                         = checkGetHistoFromMap("rechitOccupancy_l1");

@@ -33,10 +33,11 @@ class CosmicTrajMeasHistosModule: public TrajMeasHistogramFillerModule
 		int lyFidCut_counter_    = 0;
 		int effCutAll_counter_   = 0;
 	public:
-		CosmicTrajMeasHistosModule(HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
+		CosmicTrajMeasHistosModule(const HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
 		~CosmicTrajMeasHistosModule() = default;
-		void getHistogramsFromHistoMap(HistoMapType& histogramsArg);
+		void getHistogramsFromHistoMap(const HistoMapType& histogramsArg);
 		void fillHistograms();
+		void postLoopScaleAveragesSpecialEfficiencies();
 		void printCounters();
 		void printCutValues();
 	private:

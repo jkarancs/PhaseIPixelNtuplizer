@@ -159,7 +159,8 @@ void downscale1DHistogram(TH1D* toDownscale, const TH1D* downscaleFactors)
 		toDownscale -> SetBinContent(binNum, originalBinContent / binDownscaleFactor);
 		// std::cout << "Efficiency bin content after scaling : " << toDownscale -> GetBinContent(binNum) << std::endl;
 	}
-};
+}
+
 void downscale2DHistogram(TH2D* toDownscale, const TH2D* downscaleFactors)
 {
 	const auto& nBinsX = toDownscale -> GetNbinsX();
@@ -186,6 +187,6 @@ void downscale2DHistogram(TH2D* toDownscale, const TH2D* downscaleFactors)
 			}
 		}
 	}
-};
+}
 
 #endif // TESTS_COMMON_H

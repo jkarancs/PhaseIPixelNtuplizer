@@ -24,6 +24,8 @@ class TrajMeasHistogramFillerModule
 		const int&       det_;
 		const int&       layer_;
 		const int&       flipped_;
+		const int&       module_;
+		const int&       ladder_;
 		const int&       side_;
 		const int&       disk_;
 		const int&       blade_;
@@ -109,15 +111,25 @@ class TrajMeasHistogramFillerModule
 		TH1* nMinus1LocalPosNumhitsOrientation1Disk3; TH1* nMinus1LocalPosEfficiencyOrientation1Disk3; TH1* nMinus1LocalPosNumhitsOrientation2Disk3; TH1* nMinus1LocalPosEfficiencyOrientation2Disk3; TH1* nMinus1LocalPosNumhitsOrientation3Disk3; TH1* nMinus1LocalPosEfficiencyOrientation3Disk3; TH1* nMinus1LocalPosNumhitsOrientation4Disk3; TH1* nMinus1LocalPosEfficiencyOrientation4Disk3; TH1* nMinus1LocalPosNumhitsOrientation5Disk3; TH1* nMinus1LocalPosEfficiencyOrientation5Disk3; TH1* nMinus1LocalPosNumhitsOrientation6Disk3; TH1* nMinus1LocalPosEfficiencyOrientation6Disk3; TH1* nMinus1LocalPosNumhitsOrientation7Disk3; TH1* nMinus1LocalPosEfficiencyOrientation7Disk3; TH1* nMinus1LocalPosNumhitsOrientation8Disk3; TH1* nMinus1LocalPosEfficiencyOrientation8Disk3;
 		TH1* cluDistNumhitsBarrelPreCuts;             TH1* cluDistNumhitsForwardPreCuts;
 		TH1* hitDistNumhitsBarrelPreCuts;             TH1* hitDistNumhitsForwardPreCuts;
+		TH1* cosmicsRingNumhits;                      TH1* cosmicsRingNumhitsWithAssociatedCluster; TH1* cosmicsRingNumhitsDxyClLessThan1_0;
+		TH1* cosmicsRingEffDxyClLessThan0_5;
+		TH1* cosmicsRingsAverageDx;                   TH1* cosmicsRingsAverageDy;
+		TH1* cosmicsRowVsColDxyClLessThan0_5;
+		TH1* rechitGlyVsGlx_barrel;
+		TH1* rechitGlyVsGlx_fwd_disk1;                TH1* rechitGlyVsGlx_positiveZ_fwd_disk1;         TH1* rechitGlyVsGlx_negativeZ_fwd_disk1;
+		TH1* rechitGlyVsGlx_fwd_disk2;                TH1* rechitGlyVsGlx_positiveZ_fwd_disk2;         TH1* rechitGlyVsGlx_negativeZ_fwd_disk2;
+		TH1* rechitGlyVsGlx_fwd_disk3;                TH1* rechitGlyVsGlx_positiveZ_fwd_disk3;         TH1* rechitGlyVsGlx_negativeZ_fwd_disk3;
+		TH1* associatedClusterXDistance;              TH1* associatedClusterYDistance;
 	public:
-		TrajMeasHistogramFillerModule(HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
+		TrajMeasHistogramFillerModule(const HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
 		~TrajMeasHistogramFillerModule() = default;
-		virtual void getHistogramsFromHistoMap(HistoMapType& histogramsArg);
+		virtual void getHistogramsFromHistoMap(const HistoMapType& histogramsArg);
 		virtual void fillHistograms() = 0;
 	protected:
-		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const int& cuts = 1);
-		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts);
-		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const int& cuts = 1);
-		void fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts);
+		TH1*         checkGetHistoFromMap(const HistoMapType& histogramsArg, const std::string& name);
+		void         fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const int& cuts = 1);
+		void         fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts);
+		void         fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const int& cuts = 1);
+		void         fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const float& yFill, const int& fillEfficiencyCondition, const std::initializer_list<int>& cuts);
 		virtual void calculateCuts() = 0;
 };

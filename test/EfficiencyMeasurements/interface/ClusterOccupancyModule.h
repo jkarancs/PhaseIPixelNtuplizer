@@ -23,6 +23,7 @@ class ClusterOccupancyModule
 		// Shortcuts
 		const int&       det_;
 		const int&       layer_;
+		const int&       disk_;
 		const float&     ladderCoord_;
 		const float&     moduleCoord_;
 		const float&     bladePanelCoord_;
@@ -41,6 +42,16 @@ class ClusterOccupancyModule
 		TH1* clusterPhiVsZ_l2;
 		TH1* clusterPhiVsZ_l3;
 		TH1* clusterPhiVsZ_l4;
+		TH1* clusterGlyVsGlx_barrel;
+		TH1* clusterGlyVsGlx_fwd_disk1;
+		TH1* clusterGlyVsGlx_positiveZ_fwd_disk1;
+		TH1* clusterGlyVsGlx_negativeZ_fwd_disk1;
+		TH1* clusterGlyVsGlx_fwd_disk2;
+		TH1* clusterGlyVsGlx_positiveZ_fwd_disk2;
+		TH1* clusterGlyVsGlx_negativeZ_fwd_disk2;
+		TH1* clusterGlyVsGlx_fwd_disk3;
+		TH1* clusterGlyVsGlx_positiveZ_fwd_disk3;
+		TH1* clusterGlyVsGlx_negativeZ_fwd_disk3;
 	public:
 		ClusterOccupancyModule(HistoMapType& histogramsArg, const Cluster& clusterFieldArg);
 		~ClusterOccupancyModule() = default;

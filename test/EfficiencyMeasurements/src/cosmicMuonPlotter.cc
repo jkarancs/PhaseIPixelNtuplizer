@@ -60,6 +60,12 @@ constexpr auto                    CONFIG_FILE_PATH                = "./config_co
 const     std::string             EFFICIENCY_PLOT_IDENTIFIER      = "Efficiency";
 const     std::string             EFFICIENCY_NUMERATOR_IDENTIFIER = "Numhits";
 
+const std::vector<std::string>    HISTOGRAMS_TO_SAVE_NAMES = {"clusterOccupancy_l1", "clusterOccupancy_l2", "clusterOccupancy_l3", "clusterOccupancy_l4", "clusterOccupancy_fwd", "clusterPhiVsZ_fwd", "clusterPhiVsZ_l1", "clusterPhiVsZ_l2", "clusterPhiVsZ_l3", "clusterPhiVsZ_l4", "rechitPhiVsZ_l1", "rechitPhiVsZ_l2", "rechitPhiVsZ_l3", "rechitPhiVsZ_l4", "rechitPhiVsZ_fwd", "rechitOccupancy_l1", "rechitOccupancy_l2", "rechitOccupancy_l3", "rechitOccupancy_l4", "rechitOccupancy_fwd", "sensorEfficiencyWithCutsPhiVsZ_l1", "sensorEfficiencyWithCutsPhiVsZ_l2", "sensorEfficiencyWithCutsPhiVsZ_l3", "sensorEfficiencyWithCutsPhiVsZ_l4", "sensorEfficiencyWithCutsPhiVsZ_fwd", "rocEfficiencyWithCuts_l1", "rocEfficiencyWithCuts_l2", "rocEfficiencyWithCuts_l3", "rocEfficiencyWithCuts_l4", "rocEfficiencyWithCuts_fwd", "cosmicsRingNumhits", "cosmicsRingNumhitsWithAssociatedCluster", "cosmicsRingNumhitsDxyClLessThan1_0", "cosmicsRingEffDxyClLessThan0_5", "cosmicsRingsAverageDx", "cosmicsRingsAverageDy", "cosmicsRowVsColDxyClLessThan0_5", "rechitGlyVsGlx_barrel", "rechitGlyVsGlx_fwd_disk1", "rechitGlyVsGlx_positiveZ_fwd_disk1", "rechitGlyVsGlx_negativeZ_fwd_disk1", "rechitGlyVsGlx_fwd_disk2", "rechitGlyVsGlx_positiveZ_fwd_disk2", "rechitGlyVsGlx_negativeZ_fwd_disk2", "rechitGlyVsGlx_fwd_disk3", "rechitGlyVsGlx_positiveZ_fwd_disk3", "rechitGlyVsGlx_negativeZ_fwd_disk3", "associatedClusterXDistance", "associatedClusterYDistance"};
+// Removed:
+// "cluDistNumhitsPreCuts",
+// "cluDistNumhitsBarrelPreCuts",
+// "cluDistNumhitsForwardPreCuts",
+
 const bool CLUST_LOOP_REQUESTED = true;
 const bool TRAJ_LOOP_REQUESTED  = true;
 
@@ -91,6 +97,24 @@ int main(int argc, char** argv) try
 	// trajTreeChain -> Draw("d_cl >> hsqrt(1000, 0.0, 500.0)");
 	// std::cout << "Running the app." << std::endl;
 	// theApp -> Run();
+	// Run number and wbc setting
+	bool filterForRunNumberPresent = config.at("filter_for_runs");
+	int  runNumberLowerBound = NOVAL_I;
+	int  runNumberUpperBound = NOVAL_I;
+	bool singleRun = false;
+	std::string WBCSetting  = "WBC";
+	if(filterForRunNumberPresent)
+	{
+		runNumberLowerBound  = config.at("run_filter_lower_bound").get<int>();
+		runNumberUpperBound  = config.at("run_filter_upper_bound").get<int>();
+		WBCSetting          += config.at("WBC_setting");
+		if(runNumberLowerBound + 1 == runNumberUpperBound) singleRun = true;
+		if(runNumberUpperBound <= runNumberLowerBound)
+		{
+			std::cout << error_prompt << "Inconsistent run filter setup." << std::endl;
+			exit(-1);
+		}
+	}
 	// Histogram definitions
 	std::cout << process_prompt << "Loading histogram definitions... ";
 	std::map<std::string, std::shared_ptr<TH1>> histograms(processHistogramDefinitions(config, "histogram_definition_list", "histogram_definitions"));
@@ -120,6 +144,7 @@ int main(int argc, char** argv) try
 		for(Long64_t entryIndex = 0; entryIndex < clustTreeNumEntries; ++entryIndex)
 		{
 			clustTreeChain -> GetEntry(entryIndex);
+			if(filterForRunNumberPresent) if(eventField.run <  runNumberLowerBound || runNumberUpperBound <= eventField.run) continue;
 			clusterOccupancyModule.fillHistograms();
 			if(entryIndex % progressBarUpdateInterval == 0)
 			{
@@ -161,6 +186,7 @@ int main(int argc, char** argv) try
 		for(Long64_t entryIndex = 0; entryIndex < trajTreeNumEntries; ++entryIndex)
 		{
 			trajTreeChain -> GetEntry(entryIndex);
+			if(filterForRunNumberPresent) if(eventField.run <  runNumberLowerBound || runNumberUpperBound <= eventField.run) continue;
 			// printTrajFieldInfoTrajOnly(trajField);
 			cosmicTrajMeasHistosModule.fillHistograms();
 			if(entryIndex % progressBarUpdateInterval == 0)
@@ -179,10 +205,23 @@ int main(int argc, char** argv) try
 		std::cout << error_prompt << "In the traj meas loop: " << e.what() << " exception occured." << std::endl;
 		exit(-1);
 	}
+	///////////////////////////////////////
+	// Print Info about empty histograms //
+	///////////////////////////////////////
+	for(const auto& histogramName: HISTOGRAMS_TO_SAVE_NAMES)
+	{
+		TH1* histogram = histograms.at(histogramName).get();
+		if(histogram -> GetEntries() == 0)
+		{
+			std::cout << process_prompt << "Info: " << histogramName << " has no entries." << std::endl;
+			// continue;
+		}
+	}
 	////////////////////////////
 	// Scale Efficiency plots //
 	////////////////////////////
 	{
+		cosmicTrajMeasHistosModule.postLoopScaleAveragesSpecialEfficiencies();
 		for(const auto& histogramPair: histograms)
 		{
 			std::string efficiencyHistoName = histogramPair.first;
@@ -259,21 +298,22 @@ int main(int argc, char** argv) try
 		gStyle -> SetPalette(1);
 		gStyle -> SetNumberContours(999);
 		// gStyle -> SetOptStat(1111);
-		gStyle -> SetOptStat(0);
+		gStyle -> SetOptStat(1111111);
+		// gStyle -> SetOptStat(0);
 		gErrorIgnoreLevel = kError;
 		// histogram.SetTitleSize(22);
-		std::vector<std::string> histogramsToSaveNames = {"clusterOccupancy_l1", "clusterOccupancy_l2", "clusterOccupancy_l3", "clusterOccupancy_l4", "clusterOccupancy_fwd", "clusterPhiVsZ_fwd", "clusterPhiVsZ_l1", "clusterPhiVsZ_l2", "clusterPhiVsZ_l3", "clusterPhiVsZ_l4", "cluDistNumhitsPreCuts", "cluDistNumhitsBarrelPreCuts", "cluDistNumhitsForwardPreCuts", "rechitPhiVsZ_l1", "rechitPhiVsZ_l2", "rechitPhiVsZ_l3", "rechitPhiVsZ_l4", "rechitPhiVsZ_fwd", "rechitOccupancy_l1", "rechitOccupancy_l2", "rechitOccupancy_l3", "rechitOccupancy_l4", "rechitOccupancy_fwd", "sensorNumhitsWithCutsPhiVsZ_l1", "sensorNumhitsWithCutsPhiVsZ_l2", "sensorNumhitsWithCutsPhiVsZ_l3", "sensorNumhitsWithCutsPhiVsZ_l4", "sensorNumhitsWithCutsPhiVsZ_fwd", "rocNumhitsWithCuts_l1", "rocNumhitsWithCuts_l2", "rocNumhitsWithCuts_l3", "rocNumhitsWithCuts_l4", "rocNumhitsWithCuts_fwd", "sensorEfficiencyWithCutsPhiVsZ_l1", "sensorEfficiencyWithCutsPhiVsZ_l2", "sensorEfficiencyWithCutsPhiVsZ_l3", "sensorEfficiencyWithCutsPhiVsZ_l4", "sensorEfficiencyWithCutsPhiVsZ_fwd", "rocEfficiencyWithCuts_l1", "rocEfficiencyWithCuts_l2", "rocEfficiencyWithCuts_l3", "rocEfficiencyWithCuts_l4", "rocEfficiencyWithCuts_fwd" };
-		for(const auto& histogramName: histogramsToSaveNames)
+		for(const auto& histogramName: HISTOGRAMS_TO_SAVE_NAMES)
 		{
-			TH1* histogram = histograms.at(histogramName).get();
-			std::string xAxisTitle = histogram -> GetXaxis() -> GetTitle();
-			std::string yAxisTitle = histogram -> GetYaxis() -> GetTitle();
-			if(histogram -> GetEntries() == 0)
+			TH1* histogram                 = histograms.at(histogramName).get();
+			std::string originalHistoTitle = histogram -> GetTitle();
+			std::string xAxisTitle         = histogram -> GetXaxis() -> GetTitle();
+			std::string yAxisTitle         = histogram -> GetYaxis() -> GetTitle();
+			const PlotOptions& plotOptions = plotOptionsMap.at(histogramName);
+			if(filterForRunNumberPresent)
 			{
-				std::cout << process_prompt << "Info: " << histogramName << " has no entries." << std::endl;
-				// continue;
+				if(singleRun) histogram -> SetTitle(("RUN: " + std::to_string(runNumberLowerBound) + "_" + WBCSetting + ": " + originalHistoTitle).c_str());
+				else          histogram -> SetTitle(("RUNS: [ " + std::to_string(runNumberLowerBound) + "-" + std::to_string(runNumberUpperBound - 1) + "]_" + WBCSetting + ": " + originalHistoTitle).c_str());
 			}
-			const PlotOptions& plotOptions   = plotOptionsMap.at(histogramName);
 			TCanvas* canvas;
 			int histoSizeX = 800;
 			int histoSizeY = 800;
@@ -312,7 +352,7 @@ int main(int argc, char** argv) try
 					dress_occup_plot(histo2D, plotOptions.layer, PHASE_SCENARIO);
 					canvas -> Update();
 				}
-				addLegend(histo2D);
+				// addLegend(histo2D);
 			}
 			else 
 			{
@@ -342,7 +382,7 @@ int main(int argc, char** argv) try
 						}
 					}
 					graph -> Draw("AP");
-					addLegend(histogram, graph);
+					// addLegend(histogram, graph);
 				}
 				else
 				{
@@ -350,7 +390,7 @@ int main(int argc, char** argv) try
 					histo1D -> GetXaxis() -> SetTitle(xAxisTitle.c_str());
 					histo1D -> GetYaxis() -> SetTitle(yAxisTitle.c_str());
 					histo1D -> Draw("HIST");
-					addLegend(histogram);
+					// addLegend(histogram);
 				}
 			}
 			gPad -> Update();

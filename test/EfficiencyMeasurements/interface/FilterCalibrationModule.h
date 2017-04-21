@@ -68,9 +68,9 @@ class FilterCalibrationModule: public TrajMeasHistogramFillerModule
 		int effCutAll_counter_   = 0;
 		// Histograms
 	public:
-		FilterCalibrationModule(HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
+		FilterCalibrationModule(const HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
 		~FilterCalibrationModule() = default;
-		virtual void getHistogramsFromHistoMap(HistoMapType& histogramsArg);
+		virtual void getHistogramsFromHistoMap(const HistoMapType& histogramsArg);
 		virtual void fillHistograms();
 		void printCounters();
 		void printCutValues();

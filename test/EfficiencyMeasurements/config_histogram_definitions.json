@@ -4686,6 +4686,301 @@
 			"histo_size_y": 624,
 			"custom_ticks": 1,
 			"x_axis_divisions": -503
+		},
+		{
+			"type": "TH1D",
+			"name": "cosmicsRingNumhits",
+			"title": "num. rechits on barrel rings;ring;num. hits",
+			"nbinsx": 9,
+			"xMin": -4.5,
+			"xMax": 4.5
+		},
+		{
+			"type": "TH1D",
+			"name": "cosmicsRingNumhitsWithAssociatedCluster",
+			"title": "num. rechits on barrel rings;ring;num. hits",
+			"nbinsx": 9,
+			"xMin": -4.5,
+			"xMax": 4.5
+		},
+		{
+			"type": "TH1D",
+			"name": "cosmicsRingNumhitsDxyClLessThan1_0",
+			"title": "rechits, cluster within 1cm;ring;num. hits",
+			"nbinsx": 9,
+			"xMin": -4.5,
+			"xMax": 4.5
+		},
+		{
+			"type": "TH1D",
+			"name": "cosmicsRingEffDxyClLessThan0_5",
+			"title": "cluster within 5 mm (for each direction);ring;efficiency",
+			"nbinsx": 9,
+			"xMin": -4.5,
+			"xMax": 4.5
+		},
+		{
+			"type": "TH1D",
+			"name": "cosmicsRingsAverageDx",
+			"title": "avg. cluster x distance on barrel rings;ring;#Delta X",
+			"nbinsx": 9,
+			"xMin": -4.5,
+			"xMax": 4.5
+		},
+		{
+			"type": "TH1D",
+			"name": "cosmicsRingsAverageDy",
+			"title": "avg. cluster y distance on barrel rings;ring;#Delta Y",
+			"nbinsx": 9,
+			"xMin": -4.5,
+			"xMax": 4.5
+		},
+		{
+			"type": "TH2D",
+			"name": "cosmicsRowVsColDxyClLessThan0_5",
+			"title": "rechit pixel clusters, cluster within 5 mm;row;col",
+			"nbinsx": 416,
+			"xMin": 0,
+			"xMax": 416,
+			"nbinsy": 160,
+			"yMin": 0,
+			"yMax": 160
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitGlyVsGlx_barrel",
+			"title": "rechit occupancy, Y vs X - barrel;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitGlyVsGlx_fwd_disk1",
+			"title": "rechit occupancy, Y vs X - forward, disk 1;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitGlyVsGlx_positiveZ_fwd_disk1",
+			"title": "rechit occupancy, Y vs X - positive z, forward, disk 1;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitGlyVsGlx_negativeZ_fwd_disk1",
+			"title": "rechit occupancy, Y vs X - negative z, forward, disk 1;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitGlyVsGlx_fwd_disk2",
+			"title": "rechit occupancy, Y vs X - forward, disk 2;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitGlyVsGlx_positiveZ_fwd_disk2",
+			"title": "rechit occupancy, Y vs X - positive z, forward, disk 2;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitGlyVsGlx_negativeZ_fwd_disk2",
+			"title": "rechit occupancy, Y vs X - negative z, forward, disk 2;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitGlyVsGlx_fwd_disk3",
+			"title": "rechit occupancy, Y vs X - forward, disk 3;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitGlyVsGlx_positiveZ_fwd_disk3",
+			"title": "rechit occupancy, Y vs X - positive z, forward, disk 3;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "rechitGlyVsGlx_negativeZ_fwd_disk3",
+			"title": "rechit occupancy, Y vs X - negative z, forward, disk 3;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH1D",
+			"name": "associatedClusterXDistance",
+			"title": "associated clust. x distance;#Delta x (cm)",
+			"nbinsx": 200,
+			"xMin": -2.0,
+			"xMax": 2.0
+		},
+		{
+			"type": "TH1D",
+			"name": "associatedClusterYDistance",
+			"title": "associated clust. Y distance;#Delta y (cm)",
+			"nbinsx": 200,
+			"xMin": -2.0,
+			"xMax": 2.0
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterGlyVsGlx_barrel",
+			"title": "cluster occupancy, Y vs X - barrel;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterGlyVsGlx_fwd_disk1",
+			"title": "cluster occupancy, Y vs X - forward, disk 1;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterGlyVsGlx_positiveZ_fwd_disk1",
+			"title": "cluster occupancy, Y vs X - positive z, forward, disk 1;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterGlyVsGlx_negativeZ_fwd_disk1",
+			"title": "cluster occupancy, Y vs X - negative z, forward, disk 1;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterGlyVsGlx_fwd_disk2",
+			"title": "cluster occupancy, Y vs X - forward, disk 2;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterGlyVsGlx_positiveZ_fwd_disk2",
+			"title": "cluster occupancy, Y vs X - positive z, forward, disk 2;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterGlyVsGlx_negativeZ_fwd_disk2",
+			"title": "cluster occupancy, Y vs X - negative z, forward, disk 2;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterGlyVsGlx_fwd_disk3",
+			"title": "cluster occupancy, Y vs X - forward, disk 3;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterGlyVsGlx_positiveZ_fwd_disk3",
+			"title": "cluster occupancy, Y vs X - positive z, forward, disk 3;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
+		},
+		{
+			"type": "TH2D",
+			"name": "clusterGlyVsGlx_negativeZ_fwd_disk3",
+			"title": "cluster occupancy, Y vs X - negative z, forward, disk 3;global x (cm);global y (cm)",
+			"nbinsx": 300,
+			"xMin": -16.2,
+			"xMax": 16.2,
+			"nbinsy": 300,
+			"yMin": -16.2,
+			"yMax": 16.2
 		}
 	]
 }

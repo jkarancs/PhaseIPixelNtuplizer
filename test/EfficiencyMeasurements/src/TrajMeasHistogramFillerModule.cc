@@ -1,11 +1,13 @@
 #include "../interface/TrajMeasHistogramFillerModule.h"
 
-TrajMeasHistogramFillerModule::TrajMeasHistogramFillerModule(HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg): 
+TrajMeasHistogramFillerModule::TrajMeasHistogramFillerModule(const HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg): 
 	eventField_      (eventFieldArg),
 	trajField_       (trajFieldArg),
 	det_             (trajField_.mod_on.det),
 	layer_           (trajField_.mod_on.layer),
 	flipped_         (trajField_.mod_on.flipped),
+	module_          (trajField_.mod_on.module),
+	ladder_          (trajField_.mod_on.ladder),
 	side_            (trajField_.mod_on.side),
 	disk_            (trajField_.mod_on.disk),
 	blade_           (trajField_.mod_on.blade),
@@ -27,18 +29,9 @@ TrajMeasHistogramFillerModule::TrajMeasHistogramFillerModule(HistoMapType& histo
 	getHistogramsFromHistoMap(histogramsArg);
 }
 
-void TrajMeasHistogramFillerModule::getHistogramsFromHistoMap(HistoMapType& histogramsArg)
+void TrajMeasHistogramFillerModule::getHistogramsFromHistoMap(const HistoMapType& histogramsArg)
 {
-	auto checkGetHistoFromMap = [&] (const std::string& name) -> TH1*
-	{
-		try { return histogramsArg.at(name).get(); }
-		catch(const std::out_of_range& e)
-		{
-			std::cout << error_prompt << e.what() << " in " << __PRETTY_FUNCTION__ << " while looking for: " << name << "." << std::endl;
-			exit(-1);
-			return nullptr;
-		}
-	};
+	auto checkGetHistoFromMap = [&] (const std::string& name) -> TH1* {return this -> checkGetHistoFromMap(histogramsArg, name);};
 	layersDisksNumhits                         = checkGetHistoFromMap("layersDisksNumhits");
 	layersDisksEfficiency                      = checkGetHistoFromMap("layersDisksEfficiency");
 	rechitOccupancy_l1                         = checkGetHistoFromMap("rechitOccupancy_l1");
@@ -418,7 +411,37 @@ void TrajMeasHistogramFillerModule::getHistogramsFromHistoMap(HistoMapType& hist
 	cluDistNumhitsForwardPreCuts               = checkGetHistoFromMap("cluDistNumhitsForwardPreCuts");
 	hitDistNumhitsBarrelPreCuts                = checkGetHistoFromMap("hitDistNumhitsBarrelPreCuts");
 	hitDistNumhitsForwardPreCuts               = checkGetHistoFromMap("hitDistNumhitsForwardPreCuts");
+	cosmicsRingNumhits                         = checkGetHistoFromMap("cosmicsRingNumhits");
+	cosmicsRingNumhitsWithAssociatedCluster    = checkGetHistoFromMap("cosmicsRingNumhitsWithAssociatedCluster");
+	cosmicsRingEffDxyClLessThan0_5             = checkGetHistoFromMap("cosmicsRingEffDxyClLessThan0_5");
+	cosmicsRingNumhitsDxyClLessThan1_0         = checkGetHistoFromMap("cosmicsRingNumhitsDxyClLessThan1_0");
+	cosmicsRingsAverageDx                      = checkGetHistoFromMap("cosmicsRingsAverageDx");
+	cosmicsRingsAverageDy                      = checkGetHistoFromMap("cosmicsRingsAverageDy");
+	cosmicsRowVsColDxyClLessThan0_5            = checkGetHistoFromMap("cosmicsRowVsColDxyClLessThan0_5");
+	rechitGlyVsGlx_barrel                      = checkGetHistoFromMap("rechitGlyVsGlx_barrel");
+	rechitGlyVsGlx_fwd_disk1                   = checkGetHistoFromMap("rechitGlyVsGlx_fwd_disk1");
+	rechitGlyVsGlx_positiveZ_fwd_disk1         = checkGetHistoFromMap("rechitGlyVsGlx_positiveZ_fwd_disk1");
+	rechitGlyVsGlx_negativeZ_fwd_disk1         = checkGetHistoFromMap("rechitGlyVsGlx_negativeZ_fwd_disk1");
+	rechitGlyVsGlx_fwd_disk2                   = checkGetHistoFromMap("rechitGlyVsGlx_fwd_disk2");
+	rechitGlyVsGlx_positiveZ_fwd_disk2         = checkGetHistoFromMap("rechitGlyVsGlx_positiveZ_fwd_disk2");
+	rechitGlyVsGlx_negativeZ_fwd_disk2         = checkGetHistoFromMap("rechitGlyVsGlx_negativeZ_fwd_disk2");
+	rechitGlyVsGlx_fwd_disk3                   = checkGetHistoFromMap("rechitGlyVsGlx_fwd_disk3");
+	rechitGlyVsGlx_positiveZ_fwd_disk3         = checkGetHistoFromMap("rechitGlyVsGlx_positiveZ_fwd_disk3");
+	rechitGlyVsGlx_negativeZ_fwd_disk3         = checkGetHistoFromMap("rechitGlyVsGlx_negativeZ_fwd_disk3");
+	associatedClusterXDistance                 = checkGetHistoFromMap("associatedClusterXDistance");
+	associatedClusterYDistance                 = checkGetHistoFromMap("associatedClusterYDistance");
 	std::cout << process_prompt << __PRETTY_FUNCTION__ << " successful." << std::endl;
+}
+
+TH1* TrajMeasHistogramFillerModule::checkGetHistoFromMap(const HistoMapType& histogramsArg, const std::string& name) try
+{
+	return histogramsArg.at(name).get();
+}
+catch(const std::out_of_range& e)
+{
+	std::cout << error_prompt << e.what() << " in " << __PRETTY_FUNCTION__ << " while looking for: " << name << "." << std::endl;
+	exit(-1);
+	return nullptr;
 }
 
 void TrajMeasHistogramFillerModule::fillPairs(TH1* numHitsHisto, TH1* efficiencyHisto, const float& xFill, const int& fillEfficiencyCondition, const int& cuts)

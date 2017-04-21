@@ -1,6 +1,10 @@
 {
 	"input_files_list": "./input_lists/config_input_files_test.json",
 	"histogram_definition_list": "config_histogram_definitions.json",
+	"filter_for_runs": true,
+	"run_filter_lower_bound": 291881,
+	"run_filter_upper_bound": 291882,
+	"WBC_setting": "164++12ns",
 	"save_histograms_to_ntuple": true,
 	"ntuple_save_directory": ".",
 	"ntuple_name": "histograms.root",
