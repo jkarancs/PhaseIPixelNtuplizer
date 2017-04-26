@@ -60,13 +60,13 @@ constexpr auto                    CONFIG_FILE_PATH                = "./config_co
 const     std::string             EFFICIENCY_PLOT_IDENTIFIER      = "Efficiency";
 const     std::string             EFFICIENCY_NUMERATOR_IDENTIFIER = "Numhits";
 
-const std::vector<std::string>    HISTOGRAMS_TO_SAVE_NAMES = {"clusterOccupancy_l1", "clusterOccupancy_l2", "clusterOccupancy_l3", "clusterOccupancy_l4", "clusterOccupancy_fwd", "clusterPhiVsZ_fwd", "clusterPhiVsZ_l1", "clusterPhiVsZ_l2", "clusterPhiVsZ_l3", "clusterPhiVsZ_l4", "rechitPhiVsZ_l1", "rechitPhiVsZ_l2", "rechitPhiVsZ_l3", "rechitPhiVsZ_l4", "rechitPhiVsZ_fwd", "rechitOccupancy_l1", "rechitOccupancy_l2", "rechitOccupancy_l3", "rechitOccupancy_l4", "rechitOccupancy_fwd", "sensorEfficiencyWithCutsPhiVsZ_l1", "sensorEfficiencyWithCutsPhiVsZ_l2", "sensorEfficiencyWithCutsPhiVsZ_l3", "sensorEfficiencyWithCutsPhiVsZ_l4", "sensorEfficiencyWithCutsPhiVsZ_fwd", "rocEfficiencyWithCuts_l1", "rocEfficiencyWithCuts_l2", "rocEfficiencyWithCuts_l3", "rocEfficiencyWithCuts_l4", "rocEfficiencyWithCuts_fwd", "cosmicsRingNumhits", "cosmicsRingNumhitsWithAssociatedCluster", "cosmicsRingNumhitsDxyClLessThan1_0", "cosmicsRingEffDxyClLessThan0_5", "cosmicsRingsAverageDx", "cosmicsRingsAverageDy", "cosmicsRowVsColDxyClLessThan0_5", "rechitGlyVsGlx_barrel", "rechitGlyVsGlx_fwd_disk1", "rechitGlyVsGlx_positiveZ_fwd_disk1", "rechitGlyVsGlx_negativeZ_fwd_disk1", "rechitGlyVsGlx_fwd_disk2", "rechitGlyVsGlx_positiveZ_fwd_disk2", "rechitGlyVsGlx_negativeZ_fwd_disk2", "rechitGlyVsGlx_fwd_disk3", "rechitGlyVsGlx_positiveZ_fwd_disk3", "rechitGlyVsGlx_negativeZ_fwd_disk3", "associatedClusterXDistance", "associatedClusterYDistance"};
+const std::vector<std::string>    HISTOGRAMS_TO_SAVE_NAMES = {"clusterOccupancy_l1", "clusterOccupancy_l2", "clusterOccupancy_l3", "clusterOccupancy_l4", "clusterOccupancy_fwd", "clusterPhiVsZ_fwd", "clusterPhiVsZ_l1", "clusterPhiVsZ_l2", "clusterPhiVsZ_l3", "clusterPhiVsZ_l4", "rechitPhiVsZ_l1", "clusterGlyVsGlx_barrel", "clusterGlyVsGlx_fwd_disk1", "clusterGlyVsGlx_positiveZ_fwd_disk1", "clusterGlyVsGlx_negativeZ_fwd_disk1", "clusterGlyVsGlx_fwd_disk2", "clusterGlyVsGlx_positiveZ_fwd_disk2", "clusterGlyVsGlx_negativeZ_fwd_disk2", "clusterGlyVsGlx_fwd_disk3", "clusterGlyVsGlx_positiveZ_fwd_disk3", "clusterGlyVsGlx_negativeZ_fwd_disk3", "rechitPhiVsZ_l2", "rechitPhiVsZ_l3", "rechitPhiVsZ_l4", "rechitPhiVsZ_fwd", "rechitOccupancy_l1", "rechitOccupancy_l2", "rechitOccupancy_l3", "rechitOccupancy_l4", "rechitOccupancy_fwd", "sensorEfficiencyWithCutsPhiVsZ_l1", "sensorEfficiencyWithCutsPhiVsZ_l2", "sensorEfficiencyWithCutsPhiVsZ_l3", "sensorEfficiencyWithCutsPhiVsZ_l4", "sensorEfficiencyWithCutsPhiVsZ_fwd", "rocEfficiencyWithCuts_l1", "rocEfficiencyWithCuts_l2", "rocEfficiencyWithCuts_l3", "rocEfficiencyWithCuts_l4", "rocEfficiencyWithCuts_fwd", "cosmicsRingNumhits", "cosmicsRingNumhitsWithAssociatedCluster", "cosmicsRingNumhitsDxyClLessThan1_0", "cosmicsRingEffDxyClLessThan0_5", "cosmicsRingsAverageDx", "cosmicsRingsAverageDy", "cosmicsRowVsColDxyClLessThan0_5", "rechitGlyVsGlx_barrel", "rechitGlyVsGlx_fwd_disk1", "rechitGlyVsGlx_positiveZ_fwd_disk1", "rechitGlyVsGlx_negativeZ_fwd_disk1", "rechitGlyVsGlx_fwd_disk2", "rechitGlyVsGlx_positiveZ_fwd_disk2", "rechitGlyVsGlx_negativeZ_fwd_disk2", "rechitGlyVsGlx_fwd_disk3", "rechitGlyVsGlx_positiveZ_fwd_disk3", "rechitGlyVsGlx_negativeZ_fwd_disk3", "associatedClusterXDistanceTotal", "associatedClusterYDistanceTotal", "associatedClusterXDistanceBarrel", "associatedClusterYDistanceBarrel", "associatedClusterXDistanceForward", "associatedClusterYDistanceForward"};
 // Removed:
 // "cluDistNumhitsPreCuts",
 // "cluDistNumhitsBarrelPreCuts",
 // "cluDistNumhitsForwardPreCuts",
 
-const bool CLUST_LOOP_REQUESTED = true;
+const bool CLUST_LOOP_REQUESTED = false;
 const bool TRAJ_LOOP_REQUESTED  = true;
 
 void                                        testSaveFolders(const JSON& config);
@@ -140,18 +140,26 @@ int main(int argc, char** argv) try
 		ProgressBar progressBar;
 		const int    progressBarUpdateInterval = 10000;
 		const double progressBarUpdateBy       = progressBarUpdateInterval / static_cast<double>(clustTreeNumEntries) * 100;
-		timer.restart("Measuring the time required for looping on the clusters...");
-		for(Long64_t entryIndex = 0; entryIndex < clustTreeNumEntries; ++entryIndex)
+		auto  updateAndPrintProgress =  [&] (const int& entryIndex)
 		{
-			clustTreeChain -> GetEntry(entryIndex);
-			if(filterForRunNumberPresent) if(eventField.run <  runNumberLowerBound || runNumberUpperBound <= eventField.run) continue;
-			clusterOccupancyModule.fillHistograms();
 			if(entryIndex % progressBarUpdateInterval == 0)
 			{
 				progressBar.update(progressBarUpdateBy);
 				progressBar.print();
 				std::cout << " -- Estimated time left: " << std::setw(6) << std::fixed << std::setprecision(1) << timer.getSecondsElapsed() * (1 / progressBar.getProgressionRate() - 1) << " second(s).";
 			}
+		};
+		timer.restart("Measuring the time required for looping on the clusters...");
+		for(Long64_t entryIndex = 0; entryIndex < clustTreeNumEntries; ++entryIndex)
+		{
+			clustTreeChain -> GetEntry(entryIndex);
+			if(filterForRunNumberPresent) if(eventField.run <  runNumberLowerBound || runNumberUpperBound <= eventField.run)
+			{
+				updateAndPrintProgress(entryIndex);
+				continue;
+			}
+			clusterOccupancyModule.fillHistograms();
+			updateAndPrintProgress(entryIndex);
 		}
 		std::cout << std::endl;
 		timer.printSeconds("Loop done. Took about: ", " second(s).");
@@ -171,9 +179,11 @@ int main(int argc, char** argv) try
 		// Trajectory measurement tree
 		trajTreeChain -> SetBranchAddress("event",  &eventField);
 		// trajTreeChain -> SetBranchAddress("mod",    &(trajField.mod));
-		trajTreeChain -> SetBranchAddress("mod_on", &(trajField.mod_on));
-		trajTreeChain -> SetBranchAddress("clust",  &(trajField.clu));
-		trajTreeChain -> SetBranchAddress("track",  &(trajField.trk));
+		trajTreeChain -> SetBranchAddress("mod_on",    &(trajField.mod_on));
+		trajTreeChain -> SetBranchAddress("clust",     &(trajField.clu));
+		trajTreeChain -> SetBranchAddress("track",     &(trajField.trk));
+		trajTreeChain -> SetBranchAddress("clust_pix", &(trajField.clu.pix));
+
 		trajTreeChain -> SetBranchAddress("traj",   &trajField);
 		// check if data is present
 		Long64_t trajTreeNumEntries  = trajTreeChain  -> GetEntries();
@@ -182,19 +192,27 @@ int main(int argc, char** argv) try
 		ProgressBar progressBar;
 		const int    progressBarUpdateInterval = 10000;
 		const double progressBarUpdateBy       = progressBarUpdateInterval / static_cast<double>(trajTreeNumEntries) * 100;
-		timer.restart("Measuring the time required for looping on the trajectory measurements...");
-		for(Long64_t entryIndex = 0; entryIndex < trajTreeNumEntries; ++entryIndex)
+		auto  updateAndPrintProgress =  [&] (const int& entryIndex)
 		{
-			trajTreeChain -> GetEntry(entryIndex);
-			if(filterForRunNumberPresent) if(eventField.run <  runNumberLowerBound || runNumberUpperBound <= eventField.run) continue;
-			// printTrajFieldInfoTrajOnly(trajField);
-			cosmicTrajMeasHistosModule.fillHistograms();
 			if(entryIndex % progressBarUpdateInterval == 0)
 			{
 				progressBar.update(progressBarUpdateBy);
 				progressBar.print();
 				std::cout << " -- Estimated time left: " << std::setw(6) << std::fixed << std::setprecision(1) << timer.getSecondsElapsed() * (1 / progressBar.getProgressionRate() - 1) << " second(s).";
 			}
+		};
+		timer.restart("Measuring the time required for looping on the trajectory measurements...");
+		for(Long64_t entryIndex = 0; entryIndex < trajTreeNumEntries; ++entryIndex)
+		{
+			trajTreeChain -> GetEntry(entryIndex);
+			if(filterForRunNumberPresent) if(eventField.run <  runNumberLowerBound || runNumberUpperBound <= eventField.run)
+			{
+				updateAndPrintProgress(entryIndex);
+				continue;
+			}
+			// printTrajFieldInfoTrajOnly(trajField);
+			cosmicTrajMeasHistosModule.fillHistograms();
+			updateAndPrintProgress(entryIndex);
 		}
 		std::cout << std::endl;
 		timer.printSeconds("Loop done. Took about: ", " second(s).");
@@ -298,7 +316,7 @@ int main(int argc, char** argv) try
 		gStyle -> SetPalette(1);
 		gStyle -> SetNumberContours(999);
 		// gStyle -> SetOptStat(1111);
-		gStyle -> SetOptStat(1111111);
+		gStyle -> SetOptStat(1112211); // Integral overflow Underflow RMS (value 2: +error) Mean (value 2: +error) Entries Title
 		// gStyle -> SetOptStat(0);
 		gErrorIgnoreLevel = kError;
 		// histogram.SetTitleSize(22);
@@ -383,6 +401,10 @@ int main(int argc, char** argv) try
 					}
 					graph -> Draw("AP");
 					// addLegend(histogram, graph);
+					if(config["save_histograms_to_ntuple"] == true)
+					{
+						graph -> Write();
+					}
 				}
 				else
 				{
@@ -395,6 +417,10 @@ int main(int argc, char** argv) try
 			}
 			gPad -> Update();
 			canvas -> Update();
+			if(config["save_histograms_to_ntuple"] == true)
+			{
+				histogram -> Write();
+			}
 			// static int print = 0;
 			// if(print++ == 0) canvas -> SaveAs("CanvasTest.C");
 			{
@@ -409,10 +435,6 @@ int main(int argc, char** argv) try
 			}
 		}
 		gErrorIgnoreLevel = kPrint;
-		if(config["save_histograms_to_ntuple"] == true)
-		{
-			for(const auto& histogramPair: histograms) if(histogramPair.second -> GetEntries()) histogramPair.second -> Write();
-		}
 	}
 	catch(const std::exception& e)
 	{

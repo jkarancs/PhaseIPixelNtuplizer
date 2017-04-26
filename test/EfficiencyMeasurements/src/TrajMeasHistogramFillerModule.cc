@@ -31,7 +31,7 @@ TrajMeasHistogramFillerModule::TrajMeasHistogramFillerModule(const HistoMapType&
 
 void TrajMeasHistogramFillerModule::getHistogramsFromHistoMap(const HistoMapType& histogramsArg)
 {
-	auto checkGetHistoFromMap = [&] (const std::string& name) -> TH1* {return this -> checkGetHistoFromMap(histogramsArg, name);};
+	auto checkGetHistoFromMap                  = [&] (const std::string& name) -> TH1* {return this -> checkGetHistoFromMap(histogramsArg, name);};
 	layersDisksNumhits                         = checkGetHistoFromMap("layersDisksNumhits");
 	layersDisksEfficiency                      = checkGetHistoFromMap("layersDisksEfficiency");
 	rechitOccupancy_l1                         = checkGetHistoFromMap("rechitOccupancy_l1");
@@ -428,8 +428,12 @@ void TrajMeasHistogramFillerModule::getHistogramsFromHistoMap(const HistoMapType
 	rechitGlyVsGlx_fwd_disk3                   = checkGetHistoFromMap("rechitGlyVsGlx_fwd_disk3");
 	rechitGlyVsGlx_positiveZ_fwd_disk3         = checkGetHistoFromMap("rechitGlyVsGlx_positiveZ_fwd_disk3");
 	rechitGlyVsGlx_negativeZ_fwd_disk3         = checkGetHistoFromMap("rechitGlyVsGlx_negativeZ_fwd_disk3");
-	associatedClusterXDistance                 = checkGetHistoFromMap("associatedClusterXDistance");
-	associatedClusterYDistance                 = checkGetHistoFromMap("associatedClusterYDistance");
+	associatedClusterXDistanceTotal            = checkGetHistoFromMap("associatedClusterXDistanceTotal");
+	associatedClusterYDistanceTotal            = checkGetHistoFromMap("associatedClusterYDistanceTotal");
+	associatedClusterXDistanceBarrel           = checkGetHistoFromMap("associatedClusterXDistanceBarrel");
+	associatedClusterYDistanceBarrel           = checkGetHistoFromMap("associatedClusterYDistanceBarrel");
+	associatedClusterXDistanceForward          = checkGetHistoFromMap("associatedClusterXDistanceForward");
+	associatedClusterYDistanceForward          = checkGetHistoFromMap("associatedClusterYDistanceForward");
 	std::cout << process_prompt << __PRETTY_FUNCTION__ << " successful." << std::endl;
 }
 

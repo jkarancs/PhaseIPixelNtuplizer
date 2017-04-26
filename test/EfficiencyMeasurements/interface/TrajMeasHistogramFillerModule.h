@@ -111,7 +111,7 @@ class TrajMeasHistogramFillerModule
 		TH1* nMinus1LocalPosNumhitsOrientation1Disk3; TH1* nMinus1LocalPosEfficiencyOrientation1Disk3; TH1* nMinus1LocalPosNumhitsOrientation2Disk3; TH1* nMinus1LocalPosEfficiencyOrientation2Disk3; TH1* nMinus1LocalPosNumhitsOrientation3Disk3; TH1* nMinus1LocalPosEfficiencyOrientation3Disk3; TH1* nMinus1LocalPosNumhitsOrientation4Disk3; TH1* nMinus1LocalPosEfficiencyOrientation4Disk3; TH1* nMinus1LocalPosNumhitsOrientation5Disk3; TH1* nMinus1LocalPosEfficiencyOrientation5Disk3; TH1* nMinus1LocalPosNumhitsOrientation6Disk3; TH1* nMinus1LocalPosEfficiencyOrientation6Disk3; TH1* nMinus1LocalPosNumhitsOrientation7Disk3; TH1* nMinus1LocalPosEfficiencyOrientation7Disk3; TH1* nMinus1LocalPosNumhitsOrientation8Disk3; TH1* nMinus1LocalPosEfficiencyOrientation8Disk3;
 		TH1* cluDistNumhitsBarrelPreCuts;             TH1* cluDistNumhitsForwardPreCuts;
 		TH1* hitDistNumhitsBarrelPreCuts;             TH1* hitDistNumhitsForwardPreCuts;
-		TH1* cosmicsRingNumhits;                      TH1* cosmicsRingNumhitsWithAssociatedCluster; TH1* cosmicsRingNumhitsDxyClLessThan1_0;
+		TH1* cosmicsRingNumhits;                      TH1* cosmicsRingNumhitsWithAssociatedCluster;    TH1* cosmicsRingNumhitsDxyClLessThan1_0;
 		TH1* cosmicsRingEffDxyClLessThan0_5;
 		TH1* cosmicsRingsAverageDx;                   TH1* cosmicsRingsAverageDy;
 		TH1* cosmicsRowVsColDxyClLessThan0_5;
@@ -119,7 +119,9 @@ class TrajMeasHistogramFillerModule
 		TH1* rechitGlyVsGlx_fwd_disk1;                TH1* rechitGlyVsGlx_positiveZ_fwd_disk1;         TH1* rechitGlyVsGlx_negativeZ_fwd_disk1;
 		TH1* rechitGlyVsGlx_fwd_disk2;                TH1* rechitGlyVsGlx_positiveZ_fwd_disk2;         TH1* rechitGlyVsGlx_negativeZ_fwd_disk2;
 		TH1* rechitGlyVsGlx_fwd_disk3;                TH1* rechitGlyVsGlx_positiveZ_fwd_disk3;         TH1* rechitGlyVsGlx_negativeZ_fwd_disk3;
-		TH1* associatedClusterXDistance;              TH1* associatedClusterYDistance;
+		TH1* associatedClusterXDistanceTotal;         TH1* associatedClusterYDistanceTotal;
+		TH1* associatedClusterXDistanceBarrel;        TH1* associatedClusterYDistanceBarrel;
+		TH1* associatedClusterXDistanceForward;       TH1* associatedClusterYDistanceForward;
 	public:
 		TrajMeasHistogramFillerModule(const HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
 		~TrajMeasHistogramFillerModule() = default;

@@ -4858,16 +4858,48 @@
 		},
 		{
 			"type": "TH1D",
-			"name": "associatedClusterXDistance",
-			"title": "associated clust. x distance;#Delta x (cm)",
+			"name": "associatedClusterXDistanceTotal",
+			"title": "associated clust. x distance, barrel + fwd;#Delta x (cm)",
 			"nbinsx": 200,
 			"xMin": -2.0,
 			"xMax": 2.0
 		},
 		{
 			"type": "TH1D",
-			"name": "associatedClusterYDistance",
-			"title": "associated clust. Y distance;#Delta y (cm)",
+			"name": "associatedClusterYDistanceTotal",
+			"title": "associated clust. Y distance, barrel + fwd;#Delta y (cm)",
+			"nbinsx": 200,
+			"xMin": -2.0,
+			"xMax": 2.0
+		},
+		{
+			"type": "TH1D",
+			"name": "associatedClusterXDistanceBarrel",
+			"title": "associated clust. x distance, barrel only;#Delta x (cm)",
+			"nbinsx": 200,
+			"xMin": -2.0,
+			"xMax": 2.0
+		},
+		{
+			"type": "TH1D",
+			"name": "associatedClusterYDistanceBarrel",
+			"title": "associated clust. Y distance, barrel only;#Delta y (cm)",
+			"nbinsx": 200,
+			"xMin": -2.0,
+			"xMax": 2.0
+		},
+		{
+			"type": "TH1D",
+			"name": "associatedClusterXDistanceForward",
+			"title": "associated clust. x distance, forward only;#Delta x (cm)",
+			"nbinsx": 200,
+			"xMin": -2.0,
+			"xMax": 2.0
+		},
+		{
+			"type": "TH1D",
+			"name": "associatedClusterYDistanceForward",
+			"title": "associated clust. Y distance, forward only;#Delta y (cm)",
 			"nbinsx": 200,
 			"xMin": -2.0,
 			"xMax": 2.0
