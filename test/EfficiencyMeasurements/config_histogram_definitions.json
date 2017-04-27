@@ -4722,7 +4722,7 @@
 		{
 			"type": "TH1D",
 			"name": "cosmicsRingsAverageDx",
-			"title": "avg. cluster x distance on barrel rings;ring;#Delta X",
+			"title": "avg. cluster X distance on barrel rings;ring;#Delta X",
 			"nbinsx": 9,
 			"xMin": -4.5,
 			"xMax": 4.5
@@ -4730,7 +4730,7 @@
 		{
 			"type": "TH1D",
 			"name": "cosmicsRingsAverageDy",
-			"title": "avg. cluster y distance on barrel rings;ring;#Delta Y",
+			"title": "avg. cluster Y distance on barrel rings;ring;#Delta Y",
 			"nbinsx": 9,
 			"xMin": -4.5,
 			"xMax": 4.5
@@ -4859,7 +4859,7 @@
 		{
 			"type": "TH1D",
 			"name": "associatedClusterXDistanceTotal",
-			"title": "associated clust. x distance, barrel + fwd;#Delta x (cm)",
+			"title": "associated clust. X distance, barrel + fwd;#Delta x (cm)",
 			"nbinsx": 200,
 			"xMin": -2.0,
 			"xMax": 2.0
@@ -4875,7 +4875,7 @@
 		{
 			"type": "TH1D",
 			"name": "associatedClusterXDistanceBarrel",
-			"title": "associated clust. x distance, barrel only;#Delta x (cm)",
+			"title": "associated clust. X distance, barrel only;#Delta x (cm)",
 			"nbinsx": 200,
 			"xMin": -2.0,
 			"xMax": 2.0
@@ -4891,7 +4891,7 @@
 		{
 			"type": "TH1D",
 			"name": "associatedClusterXDistanceForward",
-			"title": "associated clust. x distance, forward only;#Delta x (cm)",
+			"title": "associated clust. X distance, forward only;#Delta x (cm)",
 			"nbinsx": 200,
 			"xMin": -2.0,
 			"xMax": 2.0

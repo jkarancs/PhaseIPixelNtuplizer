@@ -425,60 +425,6 @@ latex:
 	@cd $(LATEX_WORKING_DIRECTORY) && pdflatex main.tex # needs to be done at least twice :S
 	@cd $(LATEX_WORKING_DIRECTORY) && pdflatex main.tex
 
-latex_cosmics: LATEX_WORKING_DIRECTORY="CosmicsStatsPresentation"_`date "+%Y_%m_%d%n"`
-latex_cosmics:
-	@echo "Project directory: "$(LATEX_WORKING_DIRECTORY)
-	@rm $(LATEX_WORKING_DIRECTORY) -rf
-	@mkdir $(LATEX_WORKING_DIRECTORY)
-	@cp Latex_templates/CosmicsPresentation/* $(LATEX_WORKING_DIRECTORY) -r
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && ln -s ../../../results/*.eps .
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_cluster_distance_to_traj._meas.,_barrel_[no_cuts].eps to pdf..." && epstopdf closest_cluster_distance_to_traj._meas.,_barrel_[no_cuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_cluster_distance_to_traj._meas.,_forward_[no_cuts].eps to pdf..." && epstopdf closest_cluster_distance_to_traj._meas.,_forward_[no_cuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting closest_cluster_distance_to_traj._meas._[no_cuts].eps to pdf..." && epstopdf closest_cluster_distance_to_traj._meas._[no_cuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_forward.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_forward.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_forward.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_forward.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_forward.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_forward.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_forward.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_forward.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_1.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_1.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_1.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_1.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_1.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_2.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_2.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_2.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_2.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_2.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_3.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_3.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_3.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_3.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_3.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf cluster_occupancy,_phi_vs_z_-_layer_4.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf rechit_occupancy,_phi_vs_z_-_layer_4.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf num._hits_used_to_calc._eff.,_phi_vs_z_-_layer_4.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting efficiency,_phi_vs_z_-_layer_4.eps to pdf..." && epstopdf efficiency,_phi_vs_z_-_layer_4.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy_on_the_ROCs_-_forward.eps to pdf..." && epstopdf cluster_occupancy_on_the_ROCs_-_forward.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy_forward.eps to pdf..." && epstopdf rechit_occupancy_forward.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._tracks_used_to_calc._eff._fwd._[with_effcuts].eps to pdf..." && epstopdf num._tracks_used_to_calc._eff._fwd._[with_effcuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting roc_efficiency_forward_[with_effcuts].eps to pdf..." && epstopdf roc_efficiency_forward_[with_effcuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy_on_the_ROCs_-_layer_1.eps to pdf..." && epstopdf cluster_occupancy_on_the_ROCs_-_layer_1.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy_layer_1.eps to pdf..." && epstopdf rechit_occupancy_layer_1.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._tracks_used_to_calc._eff._l1._[with_effcuts].eps to pdf..." && epstopdf num._tracks_used_to_calc._eff._l1._[with_effcuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting roc_efficiency_layer_1_[with_effcuts].eps to pdf..." && epstopdf roc_efficiency_layer_1_[with_effcuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy_on_the_ROCs_-_layer_2.eps to pdf..." && epstopdf cluster_occupancy_on_the_ROCs_-_layer_2.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy_layer_2.eps to pdf..." && epstopdf rechit_occupancy_layer_2.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._tracks_used_to_calc._eff._l2._[with_effcuts].eps to pdf..." && epstopdf num._tracks_used_to_calc._eff._l2._[with_effcuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting roc_efficiency_layer_2_[with_effcuts].eps to pdf..." && epstopdf roc_efficiency_layer_2_[with_effcuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy_on_the_ROCs_-_layer_3.eps to pdf..." && epstopdf cluster_occupancy_on_the_ROCs_-_layer_3.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy_layer_3.eps to pdf..." && epstopdf rechit_occupancy_layer_3.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._tracks_used_to_calc._eff._l3._[with_effcuts].eps to pdf..." && epstopdf num._tracks_used_to_calc._eff._l3._[with_effcuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting roc_efficiency_layer_3_[with_effcuts].eps to pdf..." && epstopdf roc_efficiency_layer_3_[with_effcuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting cluster_occupancy_on_the_ROCs_-_layer_4.eps to pdf..." && epstopdf cluster_occupancy_on_the_ROCs_-_layer_4.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting rechit_occupancy_layer_4.eps to pdf..." && epstopdf rechit_occupancy_layer_4.eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting num._tracks_used_to_calc._eff._l4._[with_effcuts].eps to pdf..." && epstopdf num._tracks_used_to_calc._eff._l4._[with_effcuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Converting roc_efficiency_layer_4_[with_effcuts].eps to pdf..." && epstopdf roc_efficiency_layer_4_[with_effcuts].eps
-	@cd $(LATEX_WORKING_DIRECTORY)/Images/Plots && echo "Cleaning up eps soft links..." && rm *.eps
-	@cd $(LATEX_WORKING_DIRECTORY) && pdflatex main.tex # needs to be done at least twice :S
-	@cd $(LATEX_WORKING_DIRECTORY) && pdflatex main.tex
-
 clean:
 	@rm -f $(OBJS) $(PROGRAMS) core
 

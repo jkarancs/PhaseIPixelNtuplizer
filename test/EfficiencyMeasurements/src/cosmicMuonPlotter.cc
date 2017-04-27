@@ -66,7 +66,7 @@ const std::vector<std::string>    HISTOGRAMS_TO_SAVE_NAMES = {"clusterOccupancy_
 // "cluDistNumhitsBarrelPreCuts",
 // "cluDistNumhitsForwardPreCuts",
 
-const bool CLUST_LOOP_REQUESTED = false;
+const bool CLUST_LOOP_REQUESTED = true;
 const bool TRAJ_LOOP_REQUESTED  = true;
 
 void                                        testSaveFolders(const JSON& config);
