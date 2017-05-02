@@ -44,19 +44,23 @@ ClusterOccupancyModule::ClusterOccupancyModule(HistoMapType& histogramsArg, cons
 	clusterGlyVsGlx_fwd_disk3           = checkGetHistoFromMap("clusterGlyVsGlx_fwd_disk3");
 	clusterGlyVsGlx_positiveZ_fwd_disk3 = checkGetHistoFromMap("clusterGlyVsGlx_positiveZ_fwd_disk3");
 	clusterGlyVsGlx_negativeZ_fwd_disk3 = checkGetHistoFromMap("clusterGlyVsGlx_negativeZ_fwd_disk3");
+	clusterZ_total                      = checkGetHistoFromMap("clusterZ_total");
+	clusterZ_barrel                     = checkGetHistoFromMap("clusterZ_barrel");
+	clusterZ_forward                    = checkGetHistoFromMap("clusterZ_forward");
 }
 
 void ClusterOccupancyModule::fillHistograms()
 {
 	const float phi  = atan2(gly_, glx_);
+	clusterZ_total -> Fill(glz_);
 	if(det_ == 0)
 	{
 		clusterGlyVsGlx_barrel -> Fill(glx_, gly_);
+		clusterZ_barrel        -> Fill(glz_);
 		if(layer_ == 1)
 		{
 			clusterOccupancy_l1 -> Fill(moduleCoord_, ladderCoord_);
 			clusterPhiVsZ_l1    -> Fill(glz_, phi);
-			// std::cout << "glz_: " << glz_ << " phi: " << phi << std::endl; std::cin.get();
 		}
 		if(layer_ == 2)
 		{
@@ -73,12 +77,12 @@ void ClusterOccupancyModule::fillHistograms()
 			clusterOccupancy_l4 -> Fill(moduleCoord_, ladderCoord_);
 			clusterPhiVsZ_l4    -> Fill(glz_, phi);
 		}
-
 	}
 	if(det_ == 1)
 	{
 		clusterOccupancy_fwd -> Fill(diskRingCoord_, bladePanelCoord_);
-		clusterPhiVsZ_fwd -> Fill(glz_, phi);
+		clusterPhiVsZ_fwd    -> Fill(glz_, phi);
+		clusterZ_forward     -> Fill(glz_);
 		if(std::abs(disk_) == 1)
 		{
 			clusterGlyVsGlx_fwd_disk1 -> Fill(glx_, gly_);

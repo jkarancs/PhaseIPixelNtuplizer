@@ -1,6 +1,7 @@
 {
 	"input_files":
 	[
-		"/data/veszpv/Cosmics2017/Ntuple_Rereco_291877-291881.root"
+		"/data/gridout/ahunyadi/TTbar/PhaseINtuplizer/Run2_CMSSW90X/TTbar_90X_mcRun2_eff_85_NoPu_evt100000_Ntuples/170331_132353/0000/Ntuple_98.root",
+		"/data/gridout/ahunyadi/TTbar/PhaseINtuplizer/Run2_CMSSW90X/TTbar_90X_mcRun2_eff_85_NoPu_evt100000_Ntuples/170331_132353/0000/Ntuple_99.root"
 	]
 }

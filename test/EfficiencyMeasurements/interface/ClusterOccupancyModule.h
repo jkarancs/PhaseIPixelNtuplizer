@@ -52,6 +52,9 @@ class ClusterOccupancyModule
 		TH1* clusterGlyVsGlx_fwd_disk3;
 		TH1* clusterGlyVsGlx_positiveZ_fwd_disk3;
 		TH1* clusterGlyVsGlx_negativeZ_fwd_disk3;
+		TH1* clusterZ_total;
+		TH1* clusterZ_barrel;
+		TH1* clusterZ_forward;
 	public:
 		ClusterOccupancyModule(HistoMapType& histogramsArg, const Cluster& clusterFieldArg);
 		~ClusterOccupancyModule() = default;

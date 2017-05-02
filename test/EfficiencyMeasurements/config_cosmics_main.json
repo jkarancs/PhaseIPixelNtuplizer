@@ -1,13 +1,13 @@
 {
-	"input_files_list": "./input_lists/config_input_files_test.json",
+	"input_files_list": "./input_lists/config_input_files_cosmics_RERECO_291877-291881_v1.json",
 	"histogram_definition_list": "config_histogram_definitions.json",
 	"filter_for_runs": true,
-	"run_filter_lower_bound": 291881,
-	"run_filter_upper_bound": 291882,
-	"WBC_setting": "164++12ns",
+	"run_filter_lower_bound": 291877,
+	"run_filter_upper_bound": 291878,
+	"WBC_setting": "164++0ns",
 	"save_histograms_to_ntuple": true,
 	"ntuple_save_directory": ".",
-	"ntuple_name": "histograms.root",
+	"ntuple_name": "histograms_[291877-291878[.root",
 	"save_plots": true,
 	"plots_save_directory": "./results"
 }

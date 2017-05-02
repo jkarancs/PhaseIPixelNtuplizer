@@ -65,7 +65,9 @@ void CosmicTrajMeasHistosModule::getHistogramsFromHistoMap(const HistoMapType& h
 	cosmicsRingEffDxyClLessThan0_5          = checkGetHistoFromMap("cosmicsRingEffDxyClLessThan0_5");
 	cosmicsRingsAverageDx                   = checkGetHistoFromMap("cosmicsRingsAverageDx");
 	cosmicsRingsAverageDy                   = checkGetHistoFromMap("cosmicsRingsAverageDy");
-	cosmicsRowVsColDxyClLessThan0_5         = checkGetHistoFromMap("cosmicsRowVsColDxyClLessThan0_5");
+	cosmicsRowVsColDxyClLessThan0_5_total   = checkGetHistoFromMap("cosmicsRowVsColDxyClLessThan0_5_total");
+	cosmicsRowVsColDxyClLessThan0_5_barrel  = checkGetHistoFromMap("cosmicsRowVsColDxyClLessThan0_5_barrel");
+	cosmicsRowVsColDxyClLessThan0_5_forward = checkGetHistoFromMap("cosmicsRowVsColDxyClLessThan0_5_forward");
 	// Gly vs glx, barrel
 	rechitGlyVsGlx_barrel                   = checkGetHistoFromMap("rechitGlyVsGlx_barrel");
 	// Gly vs glx, fwd
@@ -79,12 +81,18 @@ void CosmicTrajMeasHistosModule::getHistogramsFromHistoMap(const HistoMapType& h
 	rechitGlyVsGlx_positiveZ_fwd_disk3      = checkGetHistoFromMap("rechitGlyVsGlx_positiveZ_fwd_disk3");
 	rechitGlyVsGlx_negativeZ_fwd_disk3      = checkGetHistoFromMap("rechitGlyVsGlx_negativeZ_fwd_disk3");
 	// Assodiated cluster distance
-	associatedClusterXDistanceTotal              = checkGetHistoFromMap("associatedClusterXDistanceTotal");
-	associatedClusterYDistanceTotal              = checkGetHistoFromMap("associatedClusterYDistanceTotal");
-	associatedClusterXDistanceBarrel              = checkGetHistoFromMap("associatedClusterXDistanceBarrel");
-	associatedClusterYDistanceBarrel              = checkGetHistoFromMap("associatedClusterYDistanceBarrel");
-	associatedClusterXDistanceForward              = checkGetHistoFromMap("associatedClusterXDistanceForward");
-	associatedClusterYDistanceForward              = checkGetHistoFromMap("associatedClusterYDistanceForward");
+	associatedClusterXDistanceTotal         = checkGetHistoFromMap("associatedClusterXDistanceTotal");
+	associatedClusterYDistanceTotal         = checkGetHistoFromMap("associatedClusterYDistanceTotal");
+	associatedClusterXDistanceBarrel        = checkGetHistoFromMap("associatedClusterXDistanceBarrel");
+	associatedClusterYDistanceBarrel        = checkGetHistoFromMap("associatedClusterYDistanceBarrel");
+	associatedClusterXDistanceForward       = checkGetHistoFromMap("associatedClusterXDistanceForward");
+	associatedClusterYDistanceForward       = checkGetHistoFromMap("associatedClusterYDistanceForward");
+	rechitZ_total                           = checkGetHistoFromMap("rechitZ_total");
+	rechitZ_barrel                          = checkGetHistoFromMap("rechitZ_barrel");
+	rechitZ_forward                         = checkGetHistoFromMap("rechitZ_forward");
+	rechitNormCharge_total                  = checkGetHistoFromMap("rechitNormCharge_total");
+	rechitNormCharge_barrel                 = checkGetHistoFromMap("rechitNormCharge_barrel");
+	rechitNormCharge_forward                = checkGetHistoFromMap("rechitNormCharge_forward");
 	std::cout << process_prompt << __PRETTY_FUNCTION__ << " successful." << std::endl;
 }
 
@@ -106,24 +114,31 @@ void CosmicTrajMeasHistosModule::fillHistograms()
 	const int    clust_near              = d_cl < HIT_CLUST_NEAR_CUT_N_MINUS_1_VAL;
 	const int    fillEfficiencyCondition = clust_near;
 	calculateCuts();
-	cluDistNumhitsPreCuts -> Fill(d_cl);
+	cluDistNumhitsPreCuts  -> Fill(d_cl);
+	rechitZ_total          -> Fill(glz_);
+	rechitNormCharge_total -> Fill(norm_charge_);
 	for(const auto& rowCol: trajField_.clu.pix)
 	{
 		if(clustWithin_0_5XY)
 		{
-			cosmicsRowVsColDxyClLessThan0_5 -> Fill(rowCol[1], rowCol[0]);
+			cosmicsRowVsColDxyClLessThan0_5_total -> Fill(rowCol[1], rowCol[0]);
+			if(det_ == 0) cosmicsRowVsColDxyClLessThan0_5_barrel  -> Fill(rowCol[1], rowCol[0]);
+			if(det_ == 1) cosmicsRowVsColDxyClLessThan0_5_forward -> Fill(rowCol[1], rowCol[0]);
 		}
 	}
 	if(clustWithin_1_0XY)
 	{
 		associatedClusterXDistanceTotal -> Fill(dx_cl);
 		associatedClusterYDistanceTotal -> Fill(dy_cl);
+
 	}
 	if(det_ == 0)
 	{
 		cluDistNumhitsBarrelPreCuts -> Fill(d_cl);
 		rechitGlyVsGlx_barrel       -> Fill(glx_, gly_);
 		cosmicsRingNumhits          -> Fill(module_);
+		rechitZ_barrel              -> Fill(glz_);
+		rechitNormCharge_barrel     -> Fill(norm_charge_);
 		if(hasAssociatedCluster)
 		{
 			cosmicsRingNumhitsWithAssociatedCluster -> Fill(module_);
@@ -174,6 +189,8 @@ void CosmicTrajMeasHistosModule::fillHistograms()
 		cluDistNumhitsForwardPreCuts -> Fill(d_cl);
 		rechitPhiVsZ_fwd             -> Fill(glz_, phi);
 		rechitOccupancy_fwd          -> Fill(diskRingCoord_, bladePanelCoord_);
+		rechitZ_forward              -> Fill(glz_);
+		rechitNormCharge_forward     -> Fill(norm_charge_);
 		fillPairs(sensorNumhitsWithCutsPhiVsZ_fwd, sensorEfficiencyWithCutsPhiVsZ_fwd, glz_,         phi,          fillEfficiencyCondition, effCutAll);
 		fillPairs(rocNumhitsWithCuts_fwd,          rocEfficiencyWithCuts_fwd,          moduleCoord_, ladderCoord_, fillEfficiencyCondition, effCutAll);
 		if(hasAssociatedCluster)

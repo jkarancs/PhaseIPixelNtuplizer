@@ -107,7 +107,7 @@
 		{
 			"type": "TH2D",
 			"name": "clusterPhiVsZ_fwd",
-			"title": "cluster occupancy, phi vs z - forward;z;phi;z;phi",
+			"title": "cluster occupancy, phi vs Z - forward;z;phi;z;phi",
 			"nbinsx": 150,
 			"xMin": -52.15,
 			"xMax": 52.15,
@@ -118,7 +118,7 @@
 		{
 			"type": "TH2D",
 			"name": "clusterPhiVsZ_l1",
-			"title": "cluster occupancy, phi vs z - layer 1;z;phi",
+			"title": "cluster occupancy, phi vs Z - layer 1;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -129,7 +129,7 @@
 		{
 			"type": "TH2D",
 			"name": "clusterPhiVsZ_l2",
-			"title": "cluster occupancy, phi vs z - layer 2;z;phi",
+			"title": "cluster occupancy, phi vs Z - layer 2;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -140,7 +140,7 @@
 		{
 			"type": "TH2D",
 			"name": "clusterPhiVsZ_l3",
-			"title": "cluster occupancy, phi vs z - layer 3;z;phi",
+			"title": "cluster occupancy, phi vs Z - layer 3;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -151,7 +151,7 @@
 		{
 			"type": "TH2D",
 			"name": "clusterPhiVsZ_l4",
-			"title": "cluster occupancy, phi vs z - layer 4;z;phi",
+			"title": "cluster occupancy, phi vs Z - layer 4;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1536,7 +1536,7 @@
 		{
 			"type": "TH2D",
 			"name": "rechitPhiVsZ_fwd",
-			"title": "rechit occupancy, phi vs z - forward;z;phi",
+			"title": "rechit occupancy, phi vs Z - forward;z;phi",
 			"nbinsx": 150,
 			"xMin": -52.15,
 			"xMax": 52.15,
@@ -1547,7 +1547,7 @@
 		{
 			"type": "TH2D",
 			"name": "rechitPhiVsZ_l1",
-			"title": "rechit occupancy, phi vs z - layer 1;z;phi",
+			"title": "rechit occupancy, phi vs Z - layer 1;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1558,7 +1558,7 @@
 		{
 			"type": "TH2D",
 			"name": "rechitPhiVsZ_l2",
-			"title": "rechit occupancy, phi vs z - layer 2;z;phi",
+			"title": "rechit occupancy, phi vs Z - layer 2;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1569,7 +1569,7 @@
 		{
 			"type": "TH2D",
 			"name": "rechitPhiVsZ_l3",
-			"title": "rechit occupancy, phi vs z - layer 3;z;phi",
+			"title": "rechit occupancy, phi vs Z - layer 3;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1580,7 +1580,7 @@
 		{
 			"type": "TH2D",
 			"name": "rechitPhiVsZ_l4",
-			"title": "rechit occupancy, phi vs z - layer 4;z;phi",
+			"title": "rechit occupancy, phi vs Z - layer 4;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1591,7 +1591,7 @@
 		{
 			"type": "TH2D",
 			"name": "sensorNumhitsWithCutsPhiVsZ_fwd",
-			"title": "num. hits used to calc. eff., phi vs z - forward;z;phi",
+			"title": "num. hits used to calc. eff., phi vs Z - forward;z;phi",
 			"nbinsx": 150,
 			"xMin": -52.15,
 			"xMax": 52.15,
@@ -1602,7 +1602,7 @@
 		{
 			"type": "TH2D",
 			"name": "sensorNumhitsWithCutsPhiVsZ_l1",
-			"title": "num. hits used to calc. eff., phi vs z - layer 1;z;phi",
+			"title": "num. hits used to calc. eff., phi vs Z - layer 1;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1613,7 +1613,7 @@
 		{
 			"type": "TH2D",
 			"name": "sensorNumhitsWithCutsPhiVsZ_l2",
-			"title": "num. hits used to calc. eff., phi vs z - layer 2;z;phi",
+			"title": "num. hits used to calc. eff., phi vs Z - layer 2;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1624,7 +1624,7 @@
 		{
 			"type": "TH2D",
 			"name": "sensorNumhitsWithCutsPhiVsZ_l3",
-			"title": "num. hits used to calc. eff., phi vs z - layer 3;z;phi",
+			"title": "num. hits used to calc. eff., phi vs Z - layer 3;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1635,7 +1635,7 @@
 		{
 			"type": "TH2D",
 			"name": "sensorNumhitsWithCutsPhiVsZ_l4",
-			"title": "num. hits used to calc. eff., phi vs z - layer 4;z;phi",
+			"title": "num. hits used to calc. eff., phi vs Z - layer 4;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1646,7 +1646,7 @@
 		{
 			"type": "TH2D",
 			"name": "sensorEfficiencyWithCutsPhiVsZ_fwd",
-			"title": "efficiency, phi vs z - forward;z;phi",
+			"title": "efficiency, phi vs Z - forward;z;phi",
 			"nbinsx": 150,
 			"xMin": -52.15,
 			"xMax": 52.15,
@@ -1657,7 +1657,7 @@
 		{
 			"type": "TH2D",
 			"name": "sensorEfficiencyWithCutsPhiVsZ_l1",
-			"title": "efficiency, phi vs z - layer 1;z;phi",
+			"title": "efficiency, phi vs Z - layer 1;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1668,7 +1668,7 @@
 		{
 			"type": "TH2D",
 			"name": "sensorEfficiencyWithCutsPhiVsZ_l2",
-			"title": "efficiency, phi vs z - layer 2;z;phi",
+			"title": "efficiency, phi vs Z - layer 2;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1679,7 +1679,7 @@
 		{
 			"type": "TH2D",
 			"name": "sensorEfficiencyWithCutsPhiVsZ_l3",
-			"title": "efficiency, phi vs z - layer 3;z;phi",
+			"title": "efficiency, phi vs Z - layer 3;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -1690,7 +1690,7 @@
 		{
 			"type": "TH2D",
 			"name": "sensorEfficiencyWithCutsPhiVsZ_l4",
-			"title": "efficiency, phi vs z - layer 4;z;phi",
+			"title": "efficiency, phi vs Z - layer 4;z;phi",
 			"nbinsx": 150,
 			"xMin": -26.7,
 			"xMax": 26.7,
@@ -4737,8 +4737,30 @@
 		},
 		{
 			"type": "TH2D",
-			"name": "cosmicsRowVsColDxyClLessThan0_5",
+			"name": "cosmicsRowVsColDxyClLessThan0_5_total",
 			"title": "rechit pixel clusters, cluster within 5 mm;row;col",
+			"nbinsx": 416,
+			"xMin": 0,
+			"xMax": 416,
+			"nbinsy": 160,
+			"yMin": 0,
+			"yMax": 160
+		},
+		{
+			"type": "TH2D",
+			"name": "cosmicsRowVsColDxyClLessThan0_5_barrel",
+			"title": "rechit pixel clusters, cluster within 5 mm, barrel only;row;col",
+			"nbinsx": 416,
+			"xMin": 0,
+			"xMax": 416,
+			"nbinsy": 160,
+			"yMin": 0,
+			"yMax": 160
+		},
+		{
+			"type": "TH2D",
+			"name": "cosmicsRowVsColDxyClLessThan0_5_forward",
+			"title": "rechit pixel clusters, cluster within 5 mm, forward only;row;col",
 			"nbinsx": 416,
 			"xMin": 0,
 			"xMax": 416,
@@ -5013,6 +5035,78 @@
 			"nbinsy": 300,
 			"yMin": -16.2,
 			"yMax": 16.2
+		},
+		{
+			"type": "TH1D",
+			"name": "clusterZ_total",
+			"title": "cluster Z distribution - barrel + forward",
+			"nbinsx": 150,
+			"xMin": -52.15,
+			"xMax": 52.15
+		},
+		{
+			"type": "TH1D",
+			"name": "clusterZ_barrel",
+			"title": "cluster Z distribution - barrel only",
+			"nbinsx": 150,
+			"xMin": -52.15,
+			"xMax": 52.15
+		},
+		{
+			"type": "TH1D",
+			"name": "clusterZ_forward",
+			"title": "cluster Z distribution - forward only",
+			"nbinsx": 150,
+			"xMin": -52.15,
+			"xMax": 52.15
+		},
+		{
+			"type": "TH1D",
+			"name": "rechitZ_total",
+			"title": "rechit Z distribution - barrel + forward",
+			"nbinsx": 150,
+			"xMin": -52.15,
+			"xMax": 52.15
+		},
+		{
+			"type": "TH1D",
+			"name": "rechitZ_barrel",
+			"title": "rechit Z distribution - barrel only",
+			"nbinsx": 150,
+			"xMin": -52.15,
+			"xMax": 52.15
+		},
+		{
+			"type": "TH1D",
+			"name": "rechitZ_forward",
+			"title": "rechit Z distribution - forward only",
+			"nbinsx": 150,
+			"xMin": -52.15,
+			"xMax": 52.15
+		},
+		{
+			"type": "TH1D",
+			"name": "rechitNormCharge_total",
+			"title": "norm. charge - barrel + forward",
+			"nbinsx": 250,
+			"xMin": 0,
+			"xMax": 200
+		},
+		{
+			"type": "TH1D",
+			"name": "rechitNormCharge_barrel",
+			"title": "norm. charge - barrel only",
+			"nbinsx": 250,
+			"xMin": 0,
+			"xMax": 200
+		},
+		{
+			"type": "TH1D",
+			"name": "rechitNormCharge_forward",
+			"title": "norm. charge - forward only",
+			"nbinsx": 250,
+			"xMin": 0,
+			"xMax": 200
 		}
 	]
 }

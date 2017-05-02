@@ -42,6 +42,7 @@ class TrajMeasHistogramFillerModule
 		const float&     glx_;
 		const float&     gly_;
 		const float&     glz_;
+		const float&     norm_charge_;
 		const TrackData& trk_;
 		// Histograms
 		TH1* layersDisksNumhits;                      TH1* layersDisksEfficiency;
@@ -114,7 +115,7 @@ class TrajMeasHistogramFillerModule
 		TH1* cosmicsRingNumhits;                      TH1* cosmicsRingNumhitsWithAssociatedCluster;    TH1* cosmicsRingNumhitsDxyClLessThan1_0;
 		TH1* cosmicsRingEffDxyClLessThan0_5;
 		TH1* cosmicsRingsAverageDx;                   TH1* cosmicsRingsAverageDy;
-		TH1* cosmicsRowVsColDxyClLessThan0_5;
+		TH1* cosmicsRowVsColDxyClLessThan0_5_total;   TH1* cosmicsRowVsColDxyClLessThan0_5_barrel;     TH1* cosmicsRowVsColDxyClLessThan0_5_forward;
 		TH1* rechitGlyVsGlx_barrel;
 		TH1* rechitGlyVsGlx_fwd_disk1;                TH1* rechitGlyVsGlx_positiveZ_fwd_disk1;         TH1* rechitGlyVsGlx_negativeZ_fwd_disk1;
 		TH1* rechitGlyVsGlx_fwd_disk2;                TH1* rechitGlyVsGlx_positiveZ_fwd_disk2;         TH1* rechitGlyVsGlx_negativeZ_fwd_disk2;
@@ -122,6 +123,8 @@ class TrajMeasHistogramFillerModule
 		TH1* associatedClusterXDistanceTotal;         TH1* associatedClusterYDistanceTotal;
 		TH1* associatedClusterXDistanceBarrel;        TH1* associatedClusterYDistanceBarrel;
 		TH1* associatedClusterXDistanceForward;       TH1* associatedClusterYDistanceForward;
+		TH1* rechitZ_total;                           TH1* rechitZ_barrel;                             TH1* rechitZ_forward;
+		TH1* rechitNormCharge_total;                  TH1* rechitNormCharge_barrel;                    TH1* rechitNormCharge_forward;
 	public:
 		TrajMeasHistogramFillerModule(const HistoMapType& histogramsArg, const EventData& eventFieldArg, const TrajMeasurement& trajFieldArg);
 		~TrajMeasHistogramFillerModule() = default;

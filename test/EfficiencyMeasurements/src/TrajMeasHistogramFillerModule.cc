@@ -24,6 +24,7 @@ TrajMeasHistogramFillerModule::TrajMeasHistogramFillerModule(const HistoMapType&
 	glx_             (trajField_.glx),
 	gly_             (trajField_.gly),
 	glz_             (trajField_.glz),
+	norm_charge_     (trajField_.norm_charge),
 	trk_             (trajField_.trk)
 {
 	getHistogramsFromHistoMap(histogramsArg);
@@ -417,7 +418,9 @@ void TrajMeasHistogramFillerModule::getHistogramsFromHistoMap(const HistoMapType
 	cosmicsRingNumhitsDxyClLessThan1_0         = checkGetHistoFromMap("cosmicsRingNumhitsDxyClLessThan1_0");
 	cosmicsRingsAverageDx                      = checkGetHistoFromMap("cosmicsRingsAverageDx");
 	cosmicsRingsAverageDy                      = checkGetHistoFromMap("cosmicsRingsAverageDy");
-	cosmicsRowVsColDxyClLessThan0_5            = checkGetHistoFromMap("cosmicsRowVsColDxyClLessThan0_5");
+	cosmicsRowVsColDxyClLessThan0_5_total      = checkGetHistoFromMap("cosmicsRowVsColDxyClLessThan0_5_total");
+	cosmicsRowVsColDxyClLessThan0_5_barrel     = checkGetHistoFromMap("cosmicsRowVsColDxyClLessThan0_5_barrel");
+	cosmicsRowVsColDxyClLessThan0_5_forward    = checkGetHistoFromMap("cosmicsRowVsColDxyClLessThan0_5_forward");
 	rechitGlyVsGlx_barrel                      = checkGetHistoFromMap("rechitGlyVsGlx_barrel");
 	rechitGlyVsGlx_fwd_disk1                   = checkGetHistoFromMap("rechitGlyVsGlx_fwd_disk1");
 	rechitGlyVsGlx_positiveZ_fwd_disk1         = checkGetHistoFromMap("rechitGlyVsGlx_positiveZ_fwd_disk1");
@@ -434,6 +437,12 @@ void TrajMeasHistogramFillerModule::getHistogramsFromHistoMap(const HistoMapType
 	associatedClusterYDistanceBarrel           = checkGetHistoFromMap("associatedClusterYDistanceBarrel");
 	associatedClusterXDistanceForward          = checkGetHistoFromMap("associatedClusterXDistanceForward");
 	associatedClusterYDistanceForward          = checkGetHistoFromMap("associatedClusterYDistanceForward");
+	rechitZ_total                              = checkGetHistoFromMap("rechitZ_total");
+	rechitZ_barrel                             = checkGetHistoFromMap("rechitZ_barrel");
+	rechitZ_forward                            = checkGetHistoFromMap("rechitZ_forward");
+	rechitNormCharge_total                     = checkGetHistoFromMap("rechitNormCharge_total");
+	rechitNormCharge_barrel                    = checkGetHistoFromMap("rechitNormCharge_barrel");
+	rechitNormCharge_forward                   = checkGetHistoFromMap("rechitNormCharge_forward");
 	std::cout << process_prompt << __PRETTY_FUNCTION__ << " successful." << std::endl;
 }
 
