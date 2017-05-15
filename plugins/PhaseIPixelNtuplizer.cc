@@ -3,7 +3,10 @@
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) : 
 	iConfig_(iConfig),
 	isEventFromMc_(-1),
-	clusterSaveDownscaling_(1)
+	isCocsmicTracking_(0),
+	clusterSaveDownscaling_(1),
+	minVertexSize_(15)
+
 {
 	// Tokens
 	rawDataErrorToken_            = consumes<edm::DetSetVector<SiPixelRawDataError>>(edm::InputTag("siPixelDigis"));
@@ -12,14 +15,19 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
 	pileupSummaryToken_           = consumes<std::vector<PileupSummaryInfo>>        (edm::InputTag("addPileupInfo"));
 	clustersToken_                = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
 	trajTrackCollectionToken_     = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
+	trajTrackCollectionToken_     = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
 	measurementTrackerEventToken_ = consumes<MeasurementTrackerEvent>(edm::InputTag("MeasurementTrackerEvent"));
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	pixelDigiCollectionToken_ = consumes<edm::DetSetVector<PixelDigi>>(edm::InputTag("simSiPixelDigis"));
-	simhitCollectionTokens_.push_back(consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelHighTof")));
-	simhitCollectionTokens_.push_back(consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelLowTof")));
-	simhitCollectionTokens_.push_back(consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapHighTof")));
-	simhitCollectionTokens_.push_back(consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapLowTof")));
+	simhitCollectionTokens_.insert(simhitCollectionTokens_.end(), 
+	{
+		consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelHighTof")),
+		consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelLowTof")),
+		consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapHighTof")),
+		consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapLowTof"))
+	});
 #endif
+	conditionsInRunBlockToken_ = mayConsume<edm::ConditionsInRunBlock, edm::InRun>(edm::InputTag("conditionsInEdm"));
 }
 
 PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer() {}
@@ -32,6 +40,11 @@ void PhaseIPixelNtuplizer::beginJob()
 	// Set output file name by either the fileName or outputFileName configuration field
 	ntupleOutputFilename_ = iConfig_.getUntrackedParameter<std::string>("fileName", "Ntuple.root");
 	if(iConfig_.exists("outputFileName")) ntupleOutputFilename_ = iConfig_.getParameter<std::string>("outputFileName");
+	if(iConfig_.exists("cosmics")) 
+	{
+		isCocsmicTracking_ = iConfig_.getParameter<int>("cosmics");
+		if(isCocsmicTracking_) std::cout << "Running with cosmics setting turned on.\n";
+	}
 	// Create output file
 	ntupleOutputFile_ = new TFile(ntupleOutputFilename_.c_str(), "RECREATE");
 	if(!(ntupleOutputFile_ -> IsOpen()))
@@ -47,7 +60,7 @@ void PhaseIPixelNtuplizer::beginJob()
 	clustTree_ = new TTree("clustTree", "Pixel clusters.");
 	trackTree_ = new TTree("trackTree", "The track in the event.");
 	trajTree_  = new TTree("trajTree",   "Trajectory measurements in the Pixel detector.");
-	nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree",   "The original trajectroy measurements replaced by propagated hits in the Pixel detector.");
+	nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree", "The original trajectroy measurements replaced by propagated hits in the Pixel detector.");
 	// Event tree
 	eventTree_ -> Branch("event", &evt_, evt_.list.c_str());
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
@@ -189,15 +202,22 @@ void PhaseIPixelNtuplizer::endJob()
 	ntupleOutputFile_ -> Close();
 }
 
-void PhaseIPixelNtuplizer::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {}
+void PhaseIPixelNtuplizer::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup)
+{
+	iRun.getByToken(conditionsInRunBlockToken_,  conditionsInRunBlock_);
+}
+
 void PhaseIPixelNtuplizer::endRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {}
 void PhaseIPixelNtuplizer::beginLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iSetup) {}
-void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iSetup) {}
+void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const& iLumi, edm::EventSetup const& iSetup)
+{
+	lumi_.time = iLumi.beginTime().unixTime();
+}
 
 void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 	// std::cout << "Analysis: " << std::endl;
-	if(isEventFromMc_ != (iEvent.id().run() == 1))
+	if(isEventFromMc_ != (iEvent.id().run() == 1)) // A message is printed every time a change in the data type occurs
 	{
 		isEventFromMc_ = iEvent.id().run() == 1;
 		std::cout << "Deduced data type: " << (isEventFromMc_ ? "MONTE-CARLO" : "REAL RAW DATA") << "." << std::endl;
@@ -207,12 +227,10 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	federrors_ = NtuplizerHelpers::getFedErrors(iEvent, rawDataErrorToken_);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	// Simhits
-	std::vector<edm::Handle<edm::PSimHitContainer>> simhitCollectionHandles;
+	std::vector<edm::Handle<edm::PSimHitContainer>> simhitCollectionHandles(simhitCollectionTokens_.size());
 	for(unsigned int numToken = 0; numToken < simhitCollectionTokens_.size(); ++numToken)
 	{
-		edm::Handle<edm::PSimHitContainer> handle;
-		iEvent.getByToken(simhitCollectionTokens_[numToken], handle);
-		simhitCollectionHandles.push_back(handle);
+		iEvent.getByToken(simhitCollectionTokens_[numToken], simhitCollectionHandles[numToken]);
 	}
 	// Digis
 	edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
@@ -274,21 +292,36 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	std::cout << "Tracks: " << (trajTrackCollectionHandle.isValid() ? std::to_string(trajTrackCollectionHandle -> size()) : "invalid") << " ";
 	getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle, puInfoCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-	if (digiCollectionHandle.isValid())
+	if(digiCollectionHandle.isValid())
 	{
 		std::cout << "Saving digis and creating digi plots..." << std::endl;
 		getDigiData(digiCollectionHandle);
 	}
-	if (simhitCollectionHandles.size())
+	int areAllSimhitHandlesValid = std::all_of(simhitCollectionHandles.begin(), simhitCollectionHandles.end(), [] (const edm::Handle<std::vector<PSimHit>>& handle) { return handle.isValid(); } );
+	if(areAllSimhitHandlesValid)
 	{
 		std::cout << "Saving simhit plots..." << std::endl;
 		getSimhitData(simhitCollectionHandles);
+	}
+	else
+	{
+		static int timesReported = 0;
+		if(timesReported < 10) std::cout << "Error in: " << __PRETTY_FUNCTION__ << ": One or more of the handles are invalid or missing! Skipping event. (Check the input products!)" << std::endl;
+		if(++timesReported == 10) std::cout << "Invalid handles were reported more than 10 times. Omitting further reports!" << std::endl;
+		return;
 	}
 #endif
 	std::cout << "Saving clusters..." << std::endl;
 	getClustData(clusterCollectionHandle);
 	std::cout << "Saving trajecectory measurements and track data..." << std::endl;
-	getTrajTrackData(vertexCollectionHandle, trajTrackCollectionHandle);
+	if(isCocsmicTracking_)
+	{
+		getTrajTrackDataCosmics(vertexCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
+	}
+	else
+	{
+		getTrajTrackData(vertexCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
+	}
 	std::cout << "The Phase1Ntuplizer data processing has been finished." << std::endl;
 }
 
@@ -320,14 +353,16 @@ void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handl
 	// Event info
 	// Set data holder object
 	evt_.init();
-	evt_.fill         = 0; // FIXME
 	evt_.run          = iEvent.id().run();
+	evt_.fill         = conditionsInRunBlock_ -> lhcFillNumber;
 	evt_.ls           = iEvent.luminosityBlock();
 	evt_.orb          = iEvent.orbitNumber();
 	evt_.bx           = iEvent.bunchCrossing();
 	evt_.evt          = iEvent.id().event();
 	evt_.trig         = getTriggerInfo(iEvent, triggerResultsHandle);
 	evt_.pileup       = getPileupInfo(puInfoCollectionHandle);
+	evt_.time         = lumi_.time;
+	std::cout << "Processing event of run: " << evt_.run << ", event: " << evt_.evt << ", orb: " << evt_.orb << ", bx: " << evt_.bx << "." << std::endl;
 	// Loop on vertices
 	evt_.nvtx    = 0;
 	evt_.vtxntrk = 0;
@@ -337,9 +372,9 @@ void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handl
 		if(!currentVertex.isValid()) continue;
 		// Check if it is the best vertex (largest trk number, preferably in the middle
 		if(
-			(currentVertex.tracksSize() > static_cast<size_t>(evt_.vtxntrk)) ||
-			(currentVertex.tracksSize() == static_cast<size_t>(evt_.vtxntrk) &&
-			 std::abs(currentVertex.z()) < std::abs(evt_.vtxZ)))
+			(currentVertex.tracksSize()  >  static_cast<size_t>(evt_.vtxntrk)) ||
+			(currentVertex.tracksSize()  == static_cast<size_t>(evt_.vtxntrk)  &&
+			 std::abs(currentVertex.z()) <  std::abs(evt_.vtxZ)))
 		{
 			evt_.vtxntrk = currentVertex.tracksSize();
 			evt_.vtxD0   = currentVertex.position().rho();
@@ -391,7 +426,7 @@ void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handl
 		// Discarding tracks without pixel measurements
 		if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
 		++evt_.ntracks;
-		for(const auto &measurement: traj->measurements())
+		for(const auto &measurement: traj -> measurements())
 		{
 			if(!measurement.updatedState().isValid()) continue;
 			DetId detId(measurement.recHit() -> geographicalId());
@@ -467,14 +502,6 @@ float PhaseIPixelNtuplizer::getPileupInfo(const edm::Handle<std::vector<PileupSu
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 void PhaseIPixelNtuplizer::getSimhitData(const std::vector<edm::Handle<edm::PSimHitContainer>>& simhitCollectionHandles)
 {
-	int invalidHandlesPresent = std::any_of(simhitCollectionHandles.begin(), simhitCollectionHandles.end(), [] (const edm::Handle<std::vector<PSimHit>>& handle) { return !(handle.isValid()); } );
-	if(invalidHandlesPresent)
-	{
-		static int timesReported = 0;
-		if(timesReported < 10) std::cout << "Error in: " << __PRETTY_FUNCTION__ << ": One or more of the handles are invalid or missing! Skipping event. (Check the input products!)" << std::endl;
-		if(++timesReported == 10) std::cout << "Invalid handles were reported more than 10 times. Omitting further reports!" << std::endl;
-		return;
-	}
 	int numSimHits = 0;
 	for(const auto& simhitCollectionHandle: simhitCollectionHandles) numSimHits += simhitCollectionHandle -> size();
 	std::cout << "Number of simhits present: " << numSimHits << std::endl;
@@ -651,8 +678,8 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackData(const edm
 		TrackData* trackField;
 		// Create new TrackData instance, when this trackRef is a new one,
 		// set track properties and zero out counters
-		try { trackField = &(trackDataCollection.at(track)); }
-		catch(std::out_of_range e)
+		auto trackFieldIt = trackDataCollection.find(track);
+		if(trackFieldIt == trackDataCollection.end())
 		{
 			// Initialize track data
 			TrackData newTrackData;
@@ -680,9 +707,9 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackData(const edm
 			newTrackData.eta     = track -> eta();
 			newTrackData.theta   = track -> theta();
 			newTrackData.phi     = track -> phi();
-			trackDataCollection.insert({track, std::move(newTrackData)});
-			trackField = &(trackDataCollection.at(track));
+			trackFieldIt = trackDataCollection.insert({track, std::move(newTrackData)}).first;
 		}
+		trackField = &(trackFieldIt -> second);
 		// Counted here:
 		// barrel hits, valid barrel hits, forward hits, valid forward hits,
 		// top of detector hits, top of detector hits, strip hits
@@ -761,7 +788,7 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackData(const edm
 	return trackDataCollection;
 }
 
-void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
+void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
 {
 	std::map<reco::TrackRef, TrackData> trackDataCollection(getTrackData(vertexCollectionHandle, trajTrackCollectionHandle));
 	// Trajectory measurement loop
@@ -773,12 +800,14 @@ void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollec
 		if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
 		track_ = trackDataCollection.at(track);
 		const auto& trajectoryMeasurements = traj -> measurements();
+		std::cout << "Searching for the first layer 1 trajectory measurements... ";
 		auto firstLayer1TrajMeasurementIt = std::find_if(trajectoryMeasurements.begin(), trajectoryMeasurements.end(), [&] (const TrajectoryMeasurement& measurement)
 		{
 			ModuleData mod;
 			getModuleData(mod, 1, measurement.recHit() -> geographicalId());
 			return mod.det == 0 && mod.layer == 1;
 		});
+		std::cout << "Done." << std::endl;
 		// std::cout << "***" << std::endl;
 		// std::cout << "Number of traj. measurements in track: " << std::distance(trajectoryMeasurements.begin(), trajectoryMeasurements.begin()) << std::endl;
 		// std::cout << "First layer 1 hit index:               " << std::distance(trajectoryMeasurements.begin(), firstLayer1TrajMeasurementIt)   << std::endl;
@@ -787,12 +816,12 @@ void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollec
 		// Save trajectory measurement data for non-layer 1 hits
 		for(auto measurementIt = trajectoryMeasurements.begin(); measurementIt != firstLayer1TrajMeasurementIt; measurementIt++)
 		{
-			checkAndSaveTrajMeasurementData(*measurementIt, trajTrackCollectionHandle, trajTree_);
+			checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle, trajTrackCollectionHandle, trajTree_);
 		}
 		// Save non-propagated hits as an additional tree
 		for(auto measurementIt = firstLayer1TrajMeasurementIt; measurementIt != trajectoryMeasurements.end(); measurementIt++)
 		{
-			checkAndSaveTrajMeasurementData(*measurementIt, trajTrackCollectionHandle, nonPropagatedExtraTrajTree_);
+			checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle, trajTrackCollectionHandle, nonPropagatedExtraTrajTree_);
 		}
 		// Check there are hits before the first layer 1 traj. measurement
 		if(firstLayer1TrajMeasurementIt == trajectoryMeasurements.begin()) continue;
@@ -805,12 +834,32 @@ void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollec
 		// Save propagated hits
 		for(auto measurementIt = extrapolatedHitsOnLayer1.begin(); measurementIt != extrapolatedHitsOnLayer1.end(); measurementIt++)
 		{
-			checkAndSaveTrajMeasurementData(*measurementIt, trajTrackCollectionHandle, trajTree_);
+			checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle, trajTrackCollectionHandle, trajTree_);
 		}
 	}
 }
 
-void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasurement& measurement, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, TTree* targetTree)
+void PhaseIPixelNtuplizer::getTrajTrackDataCosmics(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle)
+{
+	std::map<reco::TrackRef, TrackData> trackDataCollection(getTrackData(vertexCollectionHandle, trajTrackCollectionHandle));
+	// Trajectory measurement loop
+	for(const auto& currentTrackKeypair: *trajTrackCollectionHandle)
+	{
+		const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
+		const reco::TrackRef                    track = currentTrackKeypair.val;
+		// Discarding tracks without pixel measurements
+		if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
+		track_ = trackDataCollection.at(track);
+		const auto& trajectoryMeasurements = traj -> measurements();
+		for(auto measurementIt = trajectoryMeasurements.begin(); measurementIt != trajectoryMeasurements.end(); measurementIt++)
+		{
+			checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle, trajTrackCollectionHandle, trajTree_);
+		}
+	}
+
+}
+
+void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasurement& measurement, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, TTree* targetTree)
 {
 	traj_.init();
 	// Check if the measurement infos can be read
@@ -864,41 +913,53 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData(const TrajectoryMeasu
 		getRocData(traj_.mod,    0, detId, &missing_hit);
 		getRocData(traj_.mod_on, 1, detId, &missing_hit);
 	}
+	const SiPixelCluster* clust = nullptr;
 	// Read associated cluster parameters
 	if(recHit -> isValid() && recHit -> hit() != 0)
 	{
 		const SiPixelRecHit *hit = static_cast<const SiPixelRecHit*>(recHit -> hit());
-		SiPixelRecHit::ClusterRef const& clust = hit -> cluster();
-		if(clust.isNonnull())
+		traj_.clu.edge   = hit -> isOnEdge() ? 1 : 0;
+		traj_.clu.badpix = hit -> hasBadPixels() ? 1 : 0;
+		traj_.clu.tworoc = hit -> spansTwoROCs() ? 1 : 0;
+		clust = hit -> cluster().get();
+	}
+	else
+	{
+		if(clusterCollectionHandle.isValid())
 		{
-			LocalPoint clustLocalCoordinates;
-			std::tie(clustLocalCoordinates, std::ignore, std::ignore) = pixelClusterParameterEstimator_ -> getParameters(*clust, *geomDetUnit);
-			GlobalPoint clustGlobalCoordinates = geomDetUnit -> toGlobal(clustLocalCoordinates);
-			traj_.clu.charge = clust -> charge() / 1000.0f;
-			traj_.clu.size   = clust -> size();
-			traj_.clu.edge   = hit -> isOnEdge() ? 1 : 0;
-			traj_.clu.badpix = hit -> hasBadPixels() ? 1 : 0;
-			traj_.clu.tworoc = hit -> spansTwoROCs() ? 1 : 0;
-			traj_.clu.sizeX  = clust -> sizeX();
-			traj_.clu.sizeY  = clust -> sizeY();
-			traj_.clu.x      = clust -> x();
-			traj_.clu.y      = clust -> y();
-			traj_.clu.lx     = clustLocalCoordinates.x();
-			traj_.clu.ly     = clustLocalCoordinates.y();
-			traj_.clu.glx    = clustGlobalCoordinates.x();
-			traj_.clu.gly    = clustGlobalCoordinates.y();
-			traj_.clu.glz    = clustGlobalCoordinates.z();
-			for(int i = 0; i < clust -> size() && i < 1000; i++)
+			const edmNew::DetSetVector<SiPixelCluster>::const_iterator clustersOnDet = clusterCollectionHandle -> find(detId);
+			if(clustersOnDet != clusterCollectionHandle -> end())
 			{
-				traj_.clu.adc[i]    = static_cast<float>(clust -> pixelADC()[i]) / 1000.0f;
-				traj_.clu.pix[i][0] = ((clust -> pixels())[i]).x;
-				traj_.clu.pix[i][1] = ((clust -> pixels())[i]).y;
+				clust = getClosestClusterOnDetSetToPoint(*clustersOnDet, localPosition);
 			}
-			traj_.norm_charge = traj_.clu.charge * sqrt(1.0f / (1.0f / pow(tan(traj_.alpha), 2) + 1.0f / pow(tan(traj_.beta), 2) + 1.0f));
-			traj_.dx_cl       = std::abs(clustLocalCoordinates.x() - traj_.lx);
-			traj_.dy_cl       = std::abs(clustLocalCoordinates.y() - traj_.ly);
-			traj_.d_cl        = sqrt(traj_.dx_cl * traj_.dx_cl + traj_.dy_cl * traj_.dy_cl);
 		}
+	}
+	if(clust != nullptr)
+	{
+		LocalPoint clustLocalCoordinates;
+		std::tie(clustLocalCoordinates, std::ignore, std::ignore) = pixelClusterParameterEstimator_ -> getParameters(*clust, *geomDetUnit);
+		GlobalPoint clustGlobalCoordinates = geomDetUnit -> toGlobal(clustLocalCoordinates);
+		traj_.clu.charge = clust -> charge() / 1000.0f;
+		traj_.clu.size   = clust -> size();
+		traj_.clu.sizeX  = clust -> sizeX();
+		traj_.clu.sizeY  = clust -> sizeY();
+		traj_.clu.x      = clust -> x();
+		traj_.clu.y      = clust -> y();
+		traj_.clu.lx     = clustLocalCoordinates.x();
+		traj_.clu.ly     = clustLocalCoordinates.y();
+		traj_.clu.glx    = clustGlobalCoordinates.x();
+		traj_.clu.gly    = clustGlobalCoordinates.y();
+		traj_.clu.glz    = clustGlobalCoordinates.z();
+		for(int i = 0; i < clust -> size() && i < 1000; i++)
+		{
+			traj_.clu.adc[i]    = static_cast<float>(clust -> pixelADC()[i]) / 1000.0f;
+			traj_.clu.pix[i][0] = ((clust -> pixels())[i]).x;
+			traj_.clu.pix[i][1] = ((clust -> pixels())[i]).y;
+		}
+		traj_.norm_charge = traj_.clu.charge * sqrt(1.0f / (1.0f / pow(tan(traj_.alpha), 2) + 1.0f / pow(tan(traj_.beta), 2) + 1.0f));
+		traj_.dx_cl       = std::abs(clustLocalCoordinates.x() - traj_.lx);
+		traj_.dy_cl       = std::abs(clustLocalCoordinates.y() - traj_.ly);
+		traj_.d_cl        = sqrt(traj_.dx_cl * traj_.dx_cl + traj_.dy_cl * traj_.dy_cl);
 	}
 	else traj_.clu.init();
 	// Get closest other traj measurement
@@ -1515,6 +1576,7 @@ namespace NtuplizerHelpers
 	{
 		dx = NOVAL_F;
 		dy = NOVAL_F;
+		DetId detId = measurement.recHit() -> geographicalId();
 		std::vector<TrajectoryMeasurement>::const_iterator closestMeasurementIt = trajTrackCollectionHandle -> begin() -> key -> measurements().begin();
 		if(&*closestMeasurementIt == &measurement) ++closestMeasurementIt;
 		double closestTrajMeasurementDistanceSquared = trajMeasurementDistanceSquared(measurement, *closestMeasurementIt);
@@ -1523,6 +1585,7 @@ namespace NtuplizerHelpers
 			const edm::Ref<std::vector<Trajectory>> otherTraj = otherTrackKeypair.key;
 			for(auto otherTrajMeasurementIt = otherTraj -> measurements().begin(); otherTrajMeasurementIt != otherTraj -> measurements().end(); ++otherTrajMeasurementIt)
 			{
+				if(otherTrajMeasurementIt -> recHit() -> geographicalId() != detId) continue;
 				if(&*otherTrajMeasurementIt == &measurement) continue;
 				float distanceSquared = trajMeasurementDistanceSquared(measurement, *otherTrajMeasurementIt);
 				if(distanceSquared < closestTrajMeasurementDistanceSquared)
@@ -1534,25 +1597,6 @@ namespace NtuplizerHelpers
 		}
 		trajMeasurementDistance(measurement, *closestMeasurementIt, distance, dx, dy);
 	}
-	// THIS DOES NOT WORK !!!
-	// int getTrackParentVtxNumTracks(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const reco::TrackRef trackToFind)
-	// {
-	// 	const auto trackToFindAsPtr = trackToFind.get();
-	// 	std::cout << "Track ptr: " << trackToFindAsPtr << std::endl;
-	// 	for(const auto &currentVertex: *vertexCollectionHandle)
-	// 	{
-	// 		for(reco::Vertex::trackRef_iterator trackRefIt = currentVertex.tracks_begin(); trackRefIt != currentVertex.tracks_end(); ++trackRefIt)
-	// 		{
-	// 			const auto comparableVtxTrackPtr = trackRefIt -> get();
-	// 			std::cout << "Vertex track ptr: " << comparableVtxTrackPtr << std::endl;
-	// 			if(trackToFindAsPtr == comparableVtxTrackPtr)
-	// 			{
-	// 				return currentVertex.tracksSize();
-	// 			}
-	// 		}
-	// 	}	
-	// 	return NOVAL_I;
-	// } 
 } // NtuplizerHelpers
 
 

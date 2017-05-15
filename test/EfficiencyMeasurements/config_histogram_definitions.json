@@ -291,7 +291,7 @@
 		{
 			"type": "TH1D",
 			"name": "nMinus1LxEfficiency",
-			"title": "eff. vs lx [with other effcuts];lx (cm);efficiency;lx (cm);efficiency",
+			"title": "eff. vs lx [with other effcuts];lx (cm);efficiency",
 			"nbinsx": 40,
 			"xMin": -0.9,
 			"xMax": 0.9
@@ -1766,7 +1766,7 @@
 		},
 		{
 			"type": "TH1D",
-			"name": "vtxNtrkNumhitsPreCuts",
+			"name":  "vtxNtrkNumhitsPreCuts",
 			"title": "parent vertex n. tracks [no cuts];track number",
 			"nbinsx": 30,
 			"xMin": 0.0,

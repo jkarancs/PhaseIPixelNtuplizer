@@ -4,7 +4,7 @@
 #define ADD_CHECK_PLOTS_TO_NTUPLE
 
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-#pragma message("ADD_CHECK_PLOTS_TO_NTUPLE defined. Ignore this message if this is the intended behaviour (or if you don't know what this means).")
+#pragma message("ADD_CHECK_PLOTS_TO_NTUPLE defined. Ignore this message if this is the intended behaviour.")
 #else
 #pragma message("ADD_CHECK_PLOTS_TO_NTUPLE is NOT defined. No cluster occupancy plots will be generated in the ntuple file.")
 #endif
@@ -23,6 +23,7 @@
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #include "Geometry/TrackerNumberingBuilder/interface/GeometricDet.h"
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+#include "DataFormats/Common/interface/ConditionsInEdm.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
@@ -57,7 +58,7 @@
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
-#include "../interface/DataStructures_v4.h" // 2017 Mar 9, CMSSW_9_0_0_pre6
+#include "../interface/DataStructures_v5.h" // 2017 Mar 9, CMSSW_9_0_0_pre6
 
 // New class for plotting Phase 0/1 Geometry (Will be added to DQM later)
 #include "../interface/SiPixelCoordinates.h"
@@ -100,12 +101,16 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		edm::ParameterSet iConfig_;
 		// States
 		int isEventFromMc_;
+		int isCocsmicTracking_;
 		// Options
 		int                           clusterSaveDownscaling_;
-		TFile*                        ntupleOutputFile_;
-		std::vector<std::string>      triggerNames_;
-		edm::InputTag                 triggerTag_;
-		std::map<uint32_t, int>       federrors_;
+		int                           minVertexSize_;
+		// Misc. data
+		TFile*                                 ntupleOutputFile_;
+		edm::Handle<edm::ConditionsInRunBlock> conditionsInRunBlock_;
+		std::vector<std::string>               triggerNames_;
+		edm::InputTag                          triggerTag_;
+		std::map<uint32_t, int>                federrors_;
 		// Trees
 		TTree* eventTree_;
 		TTree* lumiTree_;
@@ -135,6 +140,7 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		edm::EDGetTokenT<edm::DetSetVector<PixelDigi>>           pixelDigiCollectionToken_;
 		std::vector<edm::EDGetTokenT<std::vector<PSimHit>>>      simhitCollectionTokens_;
 #endif
+		edm::EDGetTokenT<edm::ConditionsInRunBlock>              conditionsInRunBlockToken_;
 		// Tools
 		SiPixelCoordinates coord_;
 		const PixelClusterParameterEstimator* pixelClusterParameterEstimator_;
@@ -195,8 +201,9 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 #endif
 		void                                getClustData(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle);
 		std::map<reco::TrackRef, TrackData> getTrackData(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
-		void                                getTrajTrackData(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
-		void                                checkAndSaveTrajMeasurementData(const TrajectoryMeasurement& measurement, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, TTree* targetTree);
+		void                                getTrajTrackData       (const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
+		void                                getTrajTrackDataCosmics(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
+		void                                checkAndSaveTrajMeasurementData(const TrajectoryMeasurement& measurement, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, TTree* targetTree);
 		std::vector<TrajectoryMeasurement>  getLayer1ExtrapolatedHitsFromMeas(const TrajectoryMeasurement& trajMeasurement);
 		void                                getDisk1PropagationData(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
 		void                                handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::string msg);
@@ -207,15 +214,15 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		void                                getRocData(ModuleData &mod, bool online, const DetId &detId, const SiPixelCluster *cluster);
 		void                                getRocData(ModuleData &mod, bool online, const SiPixelRecHit *rechit);
 	private:
-		void                       propagateTrackToLayer1(const edm::Ref<std::vector<Trajectory>>& trajectory, const reco::TrackRef track);
+		void                  propagateTrackToLayer1(const edm::Ref<std::vector<Trajectory>>& trajectory, const reco::TrackRef track);
 		std::tuple<std::vector<TrajectoryMeasurement>::const_iterator, float> 
-			findMatchingTrajMeasurement(const GlobalPoint& referencePoint, const ModuleData& referenceModInfo, const std::vector<TrajectoryMeasurement>& possibleMatches);
-		const      SiPixelCluster* getClosestClusterOnDetSetToPoint(const edmNew::DetSet<SiPixelCluster>& clustersOnDet, const LocalPoint& referencePoint);
-		float                      trajMeasGlobalPointDistanceSquared(const TrajectoryMeasurement& trajMeasurement, const GlobalPoint& referencePoint);
-		float                      clusterPointDistanceSquared(const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
-		LocalPoint                 clusterPointDistanceVector (const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
-		float                      clusterPointDistance       (const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
-		void                       printTrackCompositionInfo(const edm::Ref<std::vector<Trajectory>>& trajectory, const reco::TrackRef& track, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>> clusterCollectionHandle, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle);
+			                  findMatchingTrajMeasurement(const GlobalPoint& referencePoint, const ModuleData& referenceModInfo, const std::vector<TrajectoryMeasurement>& possibleMatches);
+		const SiPixelCluster* getClosestClusterOnDetSetToPoint(const edmNew::DetSet<SiPixelCluster>& clustersOnDet, const LocalPoint& referencePoint);
+		float                 trajMeasGlobalPointDistanceSquared(const TrajectoryMeasurement& trajMeasurement, const GlobalPoint& referencePoint);
+		float                 clusterPointDistanceSquared(const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
+		LocalPoint            clusterPointDistanceVector (const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
+		float                 clusterPointDistance       (const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
+		void                  printTrackCompositionInfo(const edm::Ref<std::vector<Trajectory>>& trajectory, const reco::TrackRef& track, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>> clusterCollectionHandle, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle);
 };
 
 namespace NtuplizerHelpers 
