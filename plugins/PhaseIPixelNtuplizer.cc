@@ -12,7 +12,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
 	rawDataErrorToken_            = consumes<edm::DetSetVector<SiPixelRawDataError>>(edm::InputTag("siPixelDigis"));
 	primaryVerticesToken_         = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
 	triggerResultsToken_          = consumes<edm::TriggerResults>(triggerTag_);
-	pileupSummaryToken_           = consumes<std::vector<PileupSummaryInfo>>        (edm::InputTag("addPileupInfo"));
+	pileupSummaryToken_           = consumes<std::vector<PileupSummaryInfo>>(edm::InputTag("addPileupInfo"));
 	clustersToken_                = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
 	trajTrackCollectionToken_     = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
 	trajTrackCollectionToken_     = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
