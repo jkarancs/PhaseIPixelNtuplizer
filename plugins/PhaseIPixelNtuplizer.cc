@@ -12,7 +12,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
 	rawDataErrorToken_            = consumes<edm::DetSetVector<SiPixelRawDataError>>(edm::InputTag("siPixelDigis"));
 	primaryVerticesToken_         = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
 	triggerResultsToken_          = consumes<edm::TriggerResults>(triggerTag_);
-	pileupSummaryToken_           = consumes<std::vector<PileupSummaryInfo>>        (edm::InputTag("addPileupInfo"));
+	pileupSummaryToken_           = consumes<std::vector<PileupSummaryInfo>>(edm::InputTag("addPileupInfo"));
 	clustersToken_                = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
 	trajTrackCollectionToken_     = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
 	trajTrackCollectionToken_     = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
@@ -27,7 +27,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
 		consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapLowTof"))
 	});
 #endif
-	conditionsInRunBlockToken_ = mayConsume<edm::ConditionsInRunBlock, edm::InRun>(edm::InputTag("conditionsInEdm"));
+//	conditionsInRunBlockToken_ = mayConsume<edm::ConditionsInRunBlock, edm::InRun>(edm::InputTag("conditionsInEdm"));
 }
 
 PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer() {}
@@ -204,7 +204,7 @@ void PhaseIPixelNtuplizer::endJob()
 
 void PhaseIPixelNtuplizer::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup)
 {
-	iRun.getByToken(conditionsInRunBlockToken_,  conditionsInRunBlock_);
+	// iRun.getByToken(conditionsInRunBlockToken_,  conditionsInRunBlock_);
 }
 
 void PhaseIPixelNtuplizer::endRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {}
@@ -354,7 +354,7 @@ void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handl
 	// Set data holder object
 	evt_.init();
 	evt_.run          = iEvent.id().run();
-	evt_.fill         = conditionsInRunBlock_ -> lhcFillNumber;
+	//evt_.fill         = conditionsInRunBlock_ -> lhcFillNumber;
 	evt_.ls           = iEvent.luminosityBlock();
 	evt_.orb          = iEvent.orbitNumber();
 	evt_.bx           = iEvent.bunchCrossing();
