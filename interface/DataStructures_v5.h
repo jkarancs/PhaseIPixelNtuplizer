@@ -70,18 +70,11 @@ class LumiData
 		int          run;
 		int          ls;
 		unsigned int time; // Unix time - seconds starting from 1970 Jan 01 00:00
-		unsigned int beamint[2];
-		float        intlumi;
-		float        instlumi;
-		float        instlumi_ext;
 		float        pileup;
-		int          l1_size;
-		int          l1_prescale[1000]; // prescale for the L1 trigger with idx
 
 
 		const std::string list = 
-			"fill/I:run:ls:time/i:beamint[2]:intlumi/F:instlumi:instlumi_ext:"
-			"pileup:l1_size/I:l1_prescale[l1_size]";
+			"fill/I:run:ls:time/i:pileup/F";
 
 		LumiData()
 		{
@@ -94,14 +87,7 @@ class LumiData
 			run          = NOVAL_I;
 			ls           = NOVAL_I;
 			time         = abs(NOVAL_I);
-			beamint[0]   = abs(NOVAL_I);
-			beamint[1]   = abs(NOVAL_I);
-			intlumi      = NOVAL_F;
-			instlumi     = NOVAL_F;
-			instlumi_ext = NOVAL_F;
 			pileup       = NOVAL_F;
-			l1_size      = 0;
-			std::fill(l1_prescale, l1_prescale + 1000, NOVAL_I);
 		}
 };
 
@@ -118,14 +104,8 @@ class EventData
 		int          trig;
 		int          nclu[7]; // [0-3]: layer 1-4, [4-6]: disk 1-3]
 		int          npix[7]; // [0-3]: layer 1-4, [4-6]: disk 1-3]
-		unsigned int beamint[2];
 		unsigned int time;
-		float        l1_rate;
-		float        intlumi;
-		float        instlumi;
-		float        instlumi_ext;
 		float        pileup;
-		float        weight;
 		float        vtxndof;
 		float        vtxchi2;
 		float        vtxD0;
@@ -153,8 +133,7 @@ class EventData
 		int          federrs[16][2]; // [error index] [0:Nerror, 1:errorType]
 
 		const std::string list =
-			"fill/I:run:ls:orb:bx:evt:nvtx:trig:nclu[7]:npix[7]:beamint[2]/i:time"
-			"l1_rate/F:intlumi:instlumi:instlumi_ext:pileup:weight:vtxndof:vtxchi2:"
+			"fill/I:run:ls:orb:bx:evt:nvtx:trig:nclu[7]:npix[7]:time/i:pileup/F:weight:vtxndof:vtxchi2:"
 			"vtxD0:vtxX:vtxY:vtxZ:vtxntrk/I:good:tmuon/F:tmuon_err:tecal:tecal_raw:"
 			"tecal_err:field:wbc/I:delay:ntracks:ntrackFPix[3]:ntrackBPix[4]:"
 			"ntrackFPixvalid[3]:ntrackBPixvalid[4]:trackSep/F:federrs_size/I:"
@@ -174,14 +153,8 @@ class EventData
 			trig = NOVAL_I;
 			std::fill(nclu, nclu + 7, NOVAL_I);
 			std::fill(npix, npix + 7, NOVAL_I);
-			beamint[0]   = abs(NOVAL_I);
-			beamint[1]   = abs(NOVAL_I);
-			l1_rate      = NOVAL_F;
-			intlumi      = NOVAL_F;
-			instlumi     = NOVAL_F;
-			instlumi_ext = NOVAL_F;
+			time         = abs(NOVAL_I);
 			pileup       = NOVAL_F;
-			weight       = NOVAL_F;
 			vtxndof      = NOVAL_F;
 			vtxD0        = NOVAL_F;
 			vtxZ         = NOVAL_F;
