@@ -1,7 +1,7 @@
 #ifndef PHASEIPIXELNTUPLIZER_H
 #define PHASEIPIXELNTUPLIZER_H
 
-#define ADD_CHECK_PLOTS_TO_NTUPLE
+// #define ADD_CHECK_PLOTS_TO_NTUPLE
 
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 #pragma message("ADD_CHECK_PLOTS_TO_NTUPLE defined. Ignore this message if this is the intended behaviour.")
@@ -98,14 +98,17 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 	private:
-		std::string ntupleOutputFilename_;
 		edm::ParameterSet iConfig_;
+		std::string ntupleOutputFilename_;
 		// States
 		int isEventFromMc_;
-		int isCocsmicTracking_;
 		// Options
-		int                           clusterSaveDownscaling_;
-		int                           minVertexSize_;
+		int isCocsmicTracking_;
+		int clusterSaveDownscaling_;
+		int saveDigiTree_;
+		int saveTrackTree_;
+		int saveNonPropagatedExtraTrajTree_;
+		int minVertexSize_;
 		// Misc. data
 		TFile*                                 ntupleOutputFile_;
 		edm::Handle<edm::ConditionsInRunBlock> conditionsInRunBlock_;
@@ -137,8 +140,8 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken_;
 		edm::EDGetTokenT<MeasurementTrackerEvent>                measurementTrackerEventToken_;
 		edm::EDGetTokenT<std::vector<PileupSummaryInfo>>         pileupSummaryToken_;
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 		edm::EDGetTokenT<edm::DetSetVector<PixelDigi>>           pixelDigiCollectionToken_;
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 		std::vector<edm::EDGetTokenT<std::vector<PSimHit>>>      simhitCollectionTokens_;
 #endif
 		edm::EDGetTokenT<edm::ConditionsInRunBlock>              conditionsInRunBlockToken_;
@@ -196,9 +199,9 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		void                                getEvtData(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
 		int                                 getTriggerInfo(const edm::Event& iEvent, const edm::Handle<edm::TriggerResults>& triggerResultsHandle);
 		float                               getPileupInfo(const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle);
+		void                                getDigiData(const edm::Handle<edm::DetSetVector<PixelDigi>>& digiCollectionHandle);
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 		void                                getSimhitData(const std::vector<edm::Handle<edm::PSimHitContainer>>& simhitCollectionHandles);
-		void                                getDigiData(const edm::Handle<edm::DetSetVector<PixelDigi>>& digiCollectionHandle);
 #endif
 		void                                getClustData(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle);
 		std::map<reco::TrackRef, TrackData> getTrackData(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
@@ -224,6 +227,8 @@ class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 		LocalPoint            clusterPointDistanceVector (const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
 		float                 clusterPointDistance       (const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
 		void                  printTrackCompositionInfo(const edm::Ref<std::vector<Trajectory>>& trajectory, const reco::TrackRef& track, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>> clusterCollectionHandle, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle);
+		template <typename T>
+		void                  checkGetTrackedParameter(T& optionToSet, const std::string& optionKeyword, T&& defaultValue);
 };
 
 namespace NtuplizerHelpers 

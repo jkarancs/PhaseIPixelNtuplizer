@@ -1,13 +1,32 @@
 #include "PhaseIPixelNtuplizer.h"
 
+template void PhaseIPixelNtuplizer::checkGetTrackedParameter<int>         (int&        optionToSet, const std::string& optionKeyword, int&&         defaultValue);
+template void PhaseIPixelNtuplizer::checkGetTrackedParameter<bool>        (bool&       optionToSet, const std::string& optionKeyword, bool&&        defaultValue);
+template void PhaseIPixelNtuplizer::checkGetTrackedParameter<std::string>(std::string& optionToSet, const std::string& optionKeyword, std::string&& defaultValue);
+
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) : 
 	iConfig_(iConfig),
+	ntupleOutputFilename_("Ntuple.root"),
 	isEventFromMc_(-1),
 	isCocsmicTracking_(0),
 	clusterSaveDownscaling_(1),
+	saveDigiTree_(0),
+	saveTrackTree_(0),
+	saveNonPropagatedExtraTrajTree_(0),
 	minVertexSize_(15)
-
 {
+	// Set cluster saving downscale factor
+	if(iConfig_.exists("clusterSaveDownscaleFactor")) clusterSaveDownscaling_ = iConfig_.getParameter<int>("clusterSaveDownscaleFactor");
+	// Set output file name by either the fileName or outputFileName configuration field
+	checkGetTrackedParameter(ntupleOutputFilename_,           "outputFileName",                 std::string("Ntuple.root"));
+	checkGetTrackedParameter(isCocsmicTracking_,              "cosmics",                        0                         );
+	checkGetTrackedParameter(saveDigiTree_,                   "saveDigiTree",                   0                         );
+	checkGetTrackedParameter(saveTrackTree_,                  "saveTrackTree",                  0                         );
+	checkGetTrackedParameter(saveNonPropagatedExtraTrajTree_, "saveNonPropagatedExtraTrajTree", 0                         );
+	if(isCocsmicTracking_)              std::cout << "Running with cosmics setting turned on." << std::endl;
+	if(saveDigiTree_)                   std::cout << "Option recognized: request to save digis." << std::endl;
+	if(saveTrackTree_)                  std::cout << "Option recognized: request to save all tracks as a separate tree." << std::endl;
+	if(saveNonPropagatedExtraTrajTree_) std::cout << "Option recognized: request to save the traj. measurements replaced by track propagation as a separate tree." << std::endl;
 	// Tokens
 	rawDataErrorToken_            = consumes<edm::DetSetVector<SiPixelRawDataError>>(edm::InputTag("siPixelDigis"));
 	primaryVerticesToken_         = consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"));
@@ -17,8 +36,9 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
 	trajTrackCollectionToken_     = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
 	trajTrackCollectionToken_     = consumes<TrajTrackAssociationCollection>(iConfig.getParameter<edm::InputTag>("trajectoryInput"));
 	measurementTrackerEventToken_ = consumes<MeasurementTrackerEvent>(edm::InputTag("MeasurementTrackerEvent"));
+	// Save digi tree only if saveDigiTree_ option is set
+	if(saveDigiTree_) pixelDigiCollectionToken_ = consumes<edm::DetSetVector<PixelDigi>>(edm::InputTag("simSiPixelDigis"));
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-	pixelDigiCollectionToken_ = consumes<edm::DetSetVector<PixelDigi>>(edm::InputTag("simSiPixelDigis"));
 	simhitCollectionTokens_.insert(simhitCollectionTokens_.end(), 
 	{
 		consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelHighTof")),
@@ -35,16 +55,6 @@ PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer() {}
 void PhaseIPixelNtuplizer::beginJob()
 {
 	setTriggerTable();
-	// Set cluster saving downscale factor
-	if(iConfig_.exists("clusterSaveDownscaleFactor")) clusterSaveDownscaling_ = iConfig_.getParameter<int>("clusterSaveDownscaleFactor");
-	// Set output file name by either the fileName or outputFileName configuration field
-	ntupleOutputFilename_ = iConfig_.getUntrackedParameter<std::string>("fileName", "Ntuple.root");
-	if(iConfig_.exists("outputFileName")) ntupleOutputFilename_ = iConfig_.getParameter<std::string>("outputFileName");
-	if(iConfig_.exists("cosmics")) 
-	{
-		isCocsmicTracking_ = iConfig_.getParameter<int>("cosmics");
-		if(isCocsmicTracking_) std::cout << "Running with cosmics setting turned on.\n";
-	}
 	// Create output file
 	ntupleOutputFile_ = new TFile(ntupleOutputFilename_.c_str(), "RECREATE");
 	if(!(ntupleOutputFile_ -> IsOpen()))
@@ -63,10 +73,12 @@ void PhaseIPixelNtuplizer::beginJob()
 	nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree", "The original trajectroy measurements replaced by propagated hits in the Pixel detector.");
 	// Event tree
 	eventTree_ -> Branch("event", &evt_, evt_.list.c_str());
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-	digiTree_ -> Branch("event", &evt_,  evt_.list.c_str());
-	digiTree_ -> Branch("digi",  &digi_, digi_.list.c_str());
-#endif
+	// Digi tree
+	if(saveDigiTree_)
+	{
+		digiTree_ -> Branch("event", &evt_,  evt_.list.c_str());
+		digiTree_ -> Branch("digi",  &digi_, digi_.list.c_str());
+	}
 	// Cluster tree
 	clustTree_ -> Branch("event",     &evt_,         evt_        .list.c_str());
 	clustTree_ -> Branch("mod_on",    &clu_.mod_on,  clu_.mod_on .list.c_str());
@@ -74,9 +86,12 @@ void PhaseIPixelNtuplizer::beginJob()
 	clustTree_ -> Branch("clust",     &clu_,         clu_        .list.c_str());
 	clustTree_ -> Branch("clust_adc", &clu_.adc,     "adc[size]/F");
 	clustTree_ -> Branch("clust_pix", &clu_.pix,     "pix[size][2]/F");
-	// Track treex
-	trackTree_ -> Branch("event",     &evt_,         evt_        .list.c_str());
-	trackTree_ -> Branch("track",     &track_,       track_      .list.c_str());
+	// Track tree
+	if(saveTrackTree_)
+	{
+		trackTree_ -> Branch("event",     &evt_,         evt_        .list.c_str());
+		trackTree_ -> Branch("track",     &track_,       track_      .list.c_str());
+	}
 	// Trajectory tree
 	trajTree_  -> Branch("event",     &evt_,          evt_        .list.c_str());
 	trajTree_  -> Branch("mod_on",    &traj_.mod_on,  traj_.mod_on.list.c_str());
@@ -87,15 +102,18 @@ void PhaseIPixelNtuplizer::beginJob()
 	trajTree_  -> Branch("track",     &track_,        track_      .list.c_str());
 	trajTree_  -> Branch("traj",      &traj_,         traj_       .list.c_str());
 	// Additional trajectory tree
-	nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree",   "The original trajectroy measurements replaced by propagated hits in the Pixel detector.");
-	nonPropagatedExtraTrajTree_  -> Branch("event",     &evt_,          evt_        .list.c_str());
-	nonPropagatedExtraTrajTree_  -> Branch("mod_on",    &traj_.mod_on,  traj_.mod_on.list.c_str());
-	nonPropagatedExtraTrajTree_  -> Branch("mod",       &traj_.mod,     traj_.mod   .list.c_str());
-	nonPropagatedExtraTrajTree_  -> Branch("clust",     &traj_.clu,     traj_.clu   .list.c_str());
-	nonPropagatedExtraTrajTree_  -> Branch("clust_adc", &traj_.clu.adc, "adc[size]/F");
-	nonPropagatedExtraTrajTree_  -> Branch("clust_pix", &traj_.clu.pix, "pix[size][2]/F");
-	nonPropagatedExtraTrajTree_  -> Branch("track",     &track_,        track_      .list.c_str());
-	nonPropagatedExtraTrajTree_  -> Branch("traj",      &traj_,         traj_       .list.c_str());
+	if(saveNonPropagatedExtraTrajTree_)
+	{
+		nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree",   "The original trajectroy measurements replaced by propagated hits in the Pixel detector.");
+		nonPropagatedExtraTrajTree_  -> Branch("event",     &evt_,          evt_        .list.c_str());
+		nonPropagatedExtraTrajTree_  -> Branch("mod_on",    &traj_.mod_on,  traj_.mod_on.list.c_str());
+		nonPropagatedExtraTrajTree_  -> Branch("mod",       &traj_.mod,     traj_.mod   .list.c_str());
+		nonPropagatedExtraTrajTree_  -> Branch("clust",     &traj_.clu,     traj_.clu   .list.c_str());
+		nonPropagatedExtraTrajTree_  -> Branch("clust_adc", &traj_.clu.adc, "adc[size]/F");
+		nonPropagatedExtraTrajTree_  -> Branch("clust_pix", &traj_.clu.pix, "pix[size][2]/F");
+		nonPropagatedExtraTrajTree_  -> Branch("track",     &track_,        track_      .list.c_str());
+		nonPropagatedExtraTrajTree_  -> Branch("traj",      &traj_,         traj_       .list.c_str());
+	}
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	simhitOccupancy_fwd        = new TH2D("simhitOccupancy_fwd",        "simhit occupancy - forward",          150, -52.15, 52.15,  300,  -3.14159,  3.14159);
 	simhitOccupancy_l1         = new TH2D("simhitOccupancy_l1",         "simhit occupancy - layer 1",          150, -26.7,  26.7,   300,  -3.14159,  3.14159);
@@ -232,10 +250,13 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	{
 		iEvent.getByToken(simhitCollectionTokens_[numToken], simhitCollectionHandles[numToken]);
 	}
+#endif
 	// Digis
 	edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
-	iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
-#endif
+	if(saveDigiTree_)
+	{
+		iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
+	}
 	// Get vertices
 	edm::Handle<reco::VertexCollection>      vertexCollectionHandle;
 	iEvent.getByToken(primaryVerticesToken_, vertexCollectionHandle);
@@ -285,18 +306,22 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 	coord_.init(iSetup);
 	std::cout << "Event summary informations: " << std::endl;
 	std::cout << "Vertices: " << (vertexCollectionHandle.isValid() ? std::to_string(vertexCollectionHandle -> size()) : "invalid") << " ";
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-	std::cout << "Digis: " << (digiCollectionHandle.isValid()) << (digiCollectionHandle.isValid() ? std::to_string(digiCollectionHandle -> size()) : "invalid") << " ";
-#endif
+	if(saveDigiTree_)
+	{
+		std::cout << "Digis: " << (digiCollectionHandle.isValid()) << (digiCollectionHandle.isValid() ? std::to_string(digiCollectionHandle -> size()) : "invalid") << " ";
+	}
 	std::cout << "Clusters: " << (clusterCollectionHandle.isValid() ? std::to_string(clusterCollectionHandle -> size()) : "invalid") << " ";
 	std::cout << "Tracks: " << (trajTrackCollectionHandle.isValid() ? std::to_string(trajTrackCollectionHandle -> size()) : "invalid") << " ";
 	getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle, puInfoCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-	if(digiCollectionHandle.isValid())
+	if(saveDigiTree_)
 	{
-		std::cout << "Saving digis and creating digi plots..." << std::endl;
-		getDigiData(digiCollectionHandle);
+		if(digiCollectionHandle.isValid())
+		{
+			std::cout << "Saving digis and creating digi plots..." << std::endl;
+			getDigiData(digiCollectionHandle);
+		}
 	}
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 	int areAllSimhitHandlesValid = std::all_of(simhitCollectionHandles.begin(), simhitCollectionHandles.end(), [] (const edm::Handle<std::vector<PSimHit>>& handle) { return handle.isValid(); } );
 	if(areAllSimhitHandlesValid)
 	{
@@ -354,7 +379,7 @@ void PhaseIPixelNtuplizer::getEvtData(const edm::Event& iEvent, const edm::Handl
 	// Set data holder object
 	evt_.init();
 	evt_.run          = iEvent.id().run();
-	//evt_.fill         = conditionsInRunBlock_ -> lhcFillNumber;
+	// if(conditionsInRunBlock_ -> isValid()) evt_.fill = conditionsInRunBlock_ -> lhcFillNumber;
 	evt_.ls           = iEvent.luminosityBlock();
 	evt_.orb          = iEvent.orbitNumber();
 	evt_.bx           = iEvent.bunchCrossing();
@@ -536,15 +561,16 @@ void PhaseIPixelNtuplizer::getSimhitData(const std::vector<edm::Handle<edm::PSim
 }
 #endif
 
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 void PhaseIPixelNtuplizer::getDigiData(const edm::Handle<edm::DetSetVector<PixelDigi>>& digiCollectionHandle)
 {
 	int digiIndexInEvent = 0;
 	for(const auto& digiDetSet: *digiCollectionHandle)
 	{
 		DetId detId(digiDetSet.detId());
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 		unsigned int subdetId = detId.subdetId();
 		const GeomDetUnit* geomDetUnit      = trackerGeometry_ -> idToDetUnit(detId);
+#endif
 		for(const auto& digi: digiDetSet)
 		{
 			digi_.init();
@@ -552,6 +578,7 @@ void PhaseIPixelNtuplizer::getDigiData(const edm::Handle<edm::DetSetVector<Pixel
 			digi_.row = digi.row();
 			digi_.col = digi.column();
 			digi_.adc = digi.adc();
+#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 			LocalPoint digiLocalCoordinates(digi_.row, digi_.col, 0);
 			GlobalPoint digiGlobalCoordinates = geomDetUnit -> toGlobal(digiLocalCoordinates);
 			if(subdetId == PixelSubdetector::PixelBarrel)
@@ -566,11 +593,11 @@ void PhaseIPixelNtuplizer::getDigiData(const edm::Handle<edm::DetSetVector<Pixel
 			{
 				digiOccupancy_fwd -> Fill(digiGlobalCoordinates.z(), atan2(digiGlobalCoordinates.y(), digiGlobalCoordinates.x()));
 			}
+#endif
 			digiTree_ -> Fill();
 		}
 	}
 }
-#endif
 
 void PhaseIPixelNtuplizer::getClustData(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle)
 {
@@ -780,10 +807,13 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackData(const edm
 			}
 		}
 	}
-	for(const auto& pair: trackDataCollection)
+	if(saveTrackTree_)
 	{
-		track_ = pair.second;
-		trackTree_ -> Fill();
+		for(const auto& pair: trackDataCollection)
+		{
+			track_ = pair.second;
+			trackTree_ -> Fill();
+		}
 	}
 	return trackDataCollection;
 }
@@ -800,14 +830,14 @@ void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollec
 		if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
 		track_ = trackDataCollection.at(track);
 		const auto& trajectoryMeasurements = traj -> measurements();
-		std::cout << "Searching for the first layer 1 trajectory measurements... ";
+		// std::cout << "Searching for the first layer 1 trajectory measurements... ";
 		auto firstLayer1TrajMeasurementIt = std::find_if(trajectoryMeasurements.begin(), trajectoryMeasurements.end(), [&] (const TrajectoryMeasurement& measurement)
 		{
 			ModuleData mod;
 			getModuleData(mod, 1, measurement.recHit() -> geographicalId());
 			return mod.det == 0 && mod.layer == 1;
 		});
-		std::cout << "Done." << std::endl;
+		// std::cout << "Done." << std::endl;
 		// std::cout << "***" << std::endl;
 		// std::cout << "Number of traj. measurements in track: " << std::distance(trajectoryMeasurements.begin(), trajectoryMeasurements.begin()) << std::endl;
 		// std::cout << "First layer 1 hit index:               " << std::distance(trajectoryMeasurements.begin(), firstLayer1TrajMeasurementIt)   << std::endl;
@@ -819,9 +849,12 @@ void PhaseIPixelNtuplizer::getTrajTrackData(const edm::Handle<reco::VertexCollec
 			checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle, trajTrackCollectionHandle, trajTree_);
 		}
 		// Save non-propagated hits as an additional tree
-		for(auto measurementIt = firstLayer1TrajMeasurementIt; measurementIt != trajectoryMeasurements.end(); measurementIt++)
+		if(saveNonPropagatedExtraTrajTree_)
 		{
-			checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle, trajTrackCollectionHandle, nonPropagatedExtraTrajTree_);
+			for(auto measurementIt = firstLayer1TrajMeasurementIt; measurementIt != trajectoryMeasurements.end(); measurementIt++)
+			{
+				checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle, trajTrackCollectionHandle, nonPropagatedExtraTrajTree_);
+			}
 		}
 		// Check there are hits before the first layer 1 traj. measurement
 		if(firstLayer1TrajMeasurementIt == trajectoryMeasurements.begin()) continue;
@@ -1418,6 +1451,13 @@ void PhaseIPixelNtuplizer::printTrackCompositionInfo(const edm::Ref<std::vector<
 		}
 	}
 	std::cout << " --- End track informations --- " << std::endl;
+}
+
+template <typename T>
+void PhaseIPixelNtuplizer::checkGetTrackedParameter(T& optionToSet, const std::string& optionKeyword, T&& defaultValue)
+{
+	if(iConfig_.exists(optionKeyword)) optionToSet = iConfig_.getParameter<T>(optionKeyword);
+	else                               optionToSet = std::forward<T>(defaultValue);
 }
 
 namespace NtuplizerHelpers
