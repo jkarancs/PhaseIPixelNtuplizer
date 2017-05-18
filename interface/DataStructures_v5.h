@@ -133,7 +133,7 @@ class EventData
 		int          federrs[16][2]; // [error index] [0:Nerror, 1:errorType]
 
 		const std::string list =
-			"fill/I:run:ls:orb:bx:evt:nvtx:trig:nclu[7]:npix[7]:time/i:pileup/F:weight:vtxndof:vtxchi2:"
+			"fill/I:run:ls:orb:bx:evt:nvtx:trig:nclu[7]:npix[7]:time/i:pileup/F:vtxndof:vtxchi2:"
 			"vtxD0:vtxX:vtxY:vtxZ:vtxntrk/I:good:tmuon/F:tmuon_err:tecal:tecal_raw:"
 			"tecal_err:field:wbc/I:delay:ntracks:ntrackFPix[3]:ntrackBPix[4]:"
 			"ntrackFPixvalid[3]:ntrackBPixvalid[4]:trackSep/F:federrs_size/I:"
