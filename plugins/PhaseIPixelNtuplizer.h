@@ -4,9 +4,11 @@
 // #define ADD_CHECK_PLOTS_TO_NTUPLE
 
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-#pragma message("ADD_CHECK_PLOTS_TO_NTUPLE defined. Ignore this message if this is the intended behaviour.")
+#pragma message("ADD_CHECK_PLOTS_TO_NTUPLE defined." \
+		" Ignore this message if this is the intended behaviour.")
 #else
-#pragma message("ADD_CHECK_PLOTS_TO_NTUPLE is NOT defined. No cluster occupancy plots will be generated in the ntuple file.")
+#pragma message("ADD_CHECK_PLOTS_TO_NTUPLE is NOT defined." \
+		" No cluster occupancy plots will be generated in the ntuple file.")
 #endif
 
 // CMSSW code
@@ -59,7 +61,7 @@
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
-#include "../interface/DataStructures_v5.h" // 2017 Mar 9, CMSSW_9_0_0_pre6
+#include "../interface/DataStructures_v5.h" // 2017 May 16, CMSSW_9_1_0
 
 // New class for plotting Phase 0/1 Geometry (Will be added to DQM later)
 #include "../interface/SiPixelCoordinates.h"
@@ -87,164 +89,239 @@
 
 class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 {
-	public:
-		PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);
-		virtual ~PhaseIPixelNtuplizer();
-		virtual void beginJob();
-		virtual void endJob();
-		virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-		virtual void beginRun(edm::Run const&, edm::EventSetup const&);
-		virtual void endRun(edm::Run const&, edm::EventSetup const&);
-		virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-		virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-	private:
-		edm::ParameterSet iConfig_;
-		std::string ntupleOutputFilename_;
-		// States
-		int isEventFromMc_;
-		// Options
-		int isCocsmicTracking_;
-		int clusterSaveDownscaling_;
-		int saveDigiTree_;
-		int saveTrackTree_;
-		int saveNonPropagatedExtraTrajTree_;
-		int minVertexSize_;
-		// Misc. data
-		TFile*                                 ntupleOutputFile_;
-		edm::Handle<edm::ConditionsInRunBlock> conditionsInRunBlock_;
-		std::vector<std::string>               triggerNames_;
-		edm::InputTag                          triggerTag_;
-		std::map<uint32_t, int>                federrors_;
-		// Trees
-		TTree* eventTree_;
-		TTree* lumiTree_;
-		TTree* runTree_;
-		TTree* digiTree_;
-		TTree* clustTree_;
-		TTree* trackTree_;
-		TTree* trajTree_;
-		TTree* nonPropagatedExtraTrajTree_;
-		// Tree field definitions are in the interface directory
-		EventData       evt_;
-		LumiData        lumi_;
-		RunData         run_;
-		Digi            digi_;
-		Cluster         clu_;
-		TrackData       track_;
-		TrajMeasurement traj_;
-		// Tokens
-		edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>> rawDataErrorToken_;
-		edm::EDGetTokenT<reco::VertexCollection>                 primaryVerticesToken_;
-		edm::EDGetTokenT<edm::TriggerResults>                    triggerResultsToken_;
-		edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken_;
-		edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken_;
-		edm::EDGetTokenT<MeasurementTrackerEvent>                measurementTrackerEventToken_;
-		edm::EDGetTokenT<std::vector<PileupSummaryInfo>>         pileupSummaryToken_;
-		edm::EDGetTokenT<edm::DetSetVector<PixelDigi>>           pixelDigiCollectionToken_;
+public:
+  PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);
+  virtual ~PhaseIPixelNtuplizer();
+  virtual void beginJob();
+  virtual void endJob();
+  virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+  virtual void beginRun(edm::Run const&, edm::EventSetup const&);
+  virtual void endRun(edm::Run const&, edm::EventSetup const&);
+  virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
+
+private:
+  edm::ParameterSet iConfig_;
+  std::string ntupleOutputFilename_;
+
+  // States
+  int isEventFromMc_;
+
+  // Options
+  int isCocsmicTracking_;
+  int clusterSaveDownscaling_;
+  int saveDigiTree_;
+  int saveTrackTree_;
+  int saveNonPropagatedExtraTrajTree_;
+  int minVertexSize_;
+
+  // Misc. data
+  TFile*                                 ntupleOutputFile_;
+  edm::Handle<edm::ConditionsInRunBlock> conditionsInRunBlock_;
+  std::vector<std::string>               triggerNames_;
+  edm::InputTag                          triggerTag_;
+  std::map<uint32_t, int>                federrors_;
+  // Trees
+  TTree* eventTree_;
+  TTree* lumiTree_;
+  TTree* runTree_;
+  TTree* digiTree_;
+  TTree* clustTree_;
+  TTree* trackTree_;
+  TTree* trajTree_;
+  TTree* nonPropagatedExtraTrajTree_;
+
+  // Tree field definitions are in the interface directory
+  EventData       evt_;
+  LumiData        lumi_;
+  RunData         run_;
+  Digi            digi_;
+  Cluster         clu_;
+  TrackData       track_;
+  TrajMeasurement traj_;
+
+  // Tokens
+  edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>> rawDataErrorToken_;
+  edm::EDGetTokenT<reco::VertexCollection>                 primaryVerticesToken_;
+  edm::EDGetTokenT<edm::TriggerResults>                    triggerResultsToken_;
+  edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken_;
+  edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken_;
+  edm::EDGetTokenT<MeasurementTrackerEvent>                measurementTrackerEventToken_;
+  edm::EDGetTokenT<std::vector<PileupSummaryInfo>>         pileupSummaryToken_;
+  edm::EDGetTokenT<edm::DetSetVector<PixelDigi>>           pixelDigiCollectionToken_;
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-		std::vector<edm::EDGetTokenT<std::vector<PSimHit>>>      simhitCollectionTokens_;
+  std::vector<edm::EDGetTokenT<std::vector<PSimHit>>>      simhitCollectionTokens_;
 #endif
-		edm::EDGetTokenT<edm::ConditionsInRunBlock>              conditionsInRunBlockToken_;
-		// Tools
-		SiPixelCoordinates coord_;
-		const PixelClusterParameterEstimator* pixelClusterParameterEstimator_;
-		const TrackerTopology*                trackerTopology_;
-		const TrackerGeometry*                trackerGeometry_;
-		const Propagator*                     trackerPropagator_;
-		const MeasurementTracker*             measurementTracker_;
-		const MeasurementTrackerEvent*        measurementTrackerEvent_;
-		const MeasurementEstimator*           chi2MeasurementEstimator_;
+  edm::EDGetTokenT<edm::ConditionsInRunBlock>              conditionsInRunBlockToken_;
+
+  // Tools
+  SiPixelCoordinates coord_;
+  const PixelClusterParameterEstimator* pixelClusterParameterEstimator_;
+  const TrackerTopology*                trackerTopology_;
+  const TrackerGeometry*                trackerGeometry_;
+  const Propagator*                     trackerPropagator_;
+  const MeasurementTracker*             measurementTracker_;
+  const MeasurementTrackerEvent*        measurementTrackerEvent_;
+  const MeasurementEstimator*           chi2MeasurementEstimator_;
+
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-		// Check plots
-		TH2D* simhitOccupancy_fwd;
-		TH2D* simhitOccupancy_l1;
-		TH2D* simhitOccupancy_l2;
-		TH2D* simhitOccupancy_l3;
-		TH2D* simhitOccupancy_l4;
+  // Check plots
+  TH2D* simhitOccupancy_fwd;
+  TH2D* simhitOccupancy_l1;
+  TH2D* simhitOccupancy_l2;
+  TH2D* simhitOccupancy_l3;
+  TH2D* simhitOccupancy_l4;
 		
-		TH2D* digiOccupancy_fwd;
-		TH2D* digiOccupancy_l1;
-		TH2D* digiOccupancy_l2;
-		TH2D* digiOccupancy_l3;
-		TH2D* digiOccupancy_l4;
+  TH2D* digiOccupancy_fwd;
+  TH2D* digiOccupancy_l1;
+  TH2D* digiOccupancy_l2;
+  TH2D* digiOccupancy_l3;
+  TH2D* digiOccupancy_l4;
 
-		TH2D* clustOccupancy_fwd;
-		TH2D* clustOccupancy_l1;
-		TH2D* clustOccupancy_l2;
-		TH2D* clustOccupancy_l3;
-		TH2D* clustOccupancy_l4;
+  TH2D* clustOccupancy_fwd;
+  TH2D* clustOccupancy_l1;
+  TH2D* clustOccupancy_l2;
+  TH2D* clustOccupancy_l3;
+  TH2D* clustOccupancy_l4;
 
-		TH2D* rechitOccupancy_fwd;
-		TH2D* rechitOccupancy_l1;
-		TH2D* rechitOccupancy_l2;
-		TH2D* rechitOccupancy_l3;
-		TH2D* rechitOccupancy_l4;
+  TH2D* rechitOccupancy_fwd;
+  TH2D* rechitOccupancy_l1;
+  TH2D* rechitOccupancy_l2;
+  TH2D* rechitOccupancy_l3;
+  TH2D* rechitOccupancy_l4;
 
-		TH2D* clustOccupancyROCBins_fwd;
-		TH2D* clustOccupancyROCBins_l1;
-		TH2D* clustOccupancyROCBins_l2;
-		TH2D* clustOccupancyROCBins_l3;
-		TH2D* clustOccupancyROCBins_l4;
+  TH2D* clustOccupancyROCBins_fwd;
+  TH2D* clustOccupancyROCBins_l1;
+  TH2D* clustOccupancyROCBins_l2;
+  TH2D* clustOccupancyROCBins_l3;
+  TH2D* clustOccupancyROCBins_l4;
 		
-		TH2D* rechitOccupancyROCBins_fwd;
-		TH2D* rechitOccupancyROCBins_l1;
-		TH2D* rechitOccupancyROCBins_l2;
-		TH2D* rechitOccupancyROCBins_l3;
-		TH2D* rechitOccupancyROCBins_l4;
+  TH2D* rechitOccupancyROCBins_fwd;
+  TH2D* rechitOccupancyROCBins_l1;
+  TH2D* rechitOccupancyROCBins_l2;
+  TH2D* rechitOccupancyROCBins_l3;
+  TH2D* rechitOccupancyROCBins_l4;
 #endif
-		TH1D* disk1PropagationEtaNumhits;
-		TH1D* disk1PropagationEtaEfficiency;
-		// Private methods
-		void                                setTriggerTable();
-		void                                getEvtData(const edm::Event& iEvent, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edm::TriggerResults>& triggerResultsHandle, const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
-		int                                 getTriggerInfo(const edm::Event& iEvent, const edm::Handle<edm::TriggerResults>& triggerResultsHandle);
-		float                               getPileupInfo(const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle);
-		void                                getDigiData(const edm::Handle<edm::DetSetVector<PixelDigi>>& digiCollectionHandle);
+  TH1D* disk1PropagationEtaNumhits;
+  TH1D* disk1PropagationEtaEfficiency;
+
+  // Private methods
+  void setTriggerTable();
+
+  void getEvtData(const edm::Event&, const edm::Handle<reco::VertexCollection>&,
+		  const edm::Handle<edm::TriggerResults>&,
+		  const edm::Handle<std::vector<PileupSummaryInfo>>&,
+		  const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&,
+		  const edm::Handle<TrajTrackAssociationCollection>&);
+
+  int getTriggerInfo(const edm::Event&, const edm::Handle<edm::TriggerResults>&);
+
+  float getPileupInfo(const edm::Handle<std::vector<PileupSummaryInfo>>&);
+
+  void getDigiData(const edm::Handle<edm::DetSetVector<PixelDigi>>&);
+
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-		void                                getSimhitData(const std::vector<edm::Handle<edm::PSimHitContainer>>& simhitCollectionHandles);
+  void getSimhitData(const std::vector<edm::Handle<edm::PSimHitContainer>>&);
 #endif
-		void                                getClustData(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle);
-		std::map<reco::TrackRef, TrackData> getTrackData(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
-		void                                getTrajTrackData       (const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
-		void                                getTrajTrackDataCosmics(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
-		void                                checkAndSaveTrajMeasurementData(const TrajectoryMeasurement& measurement, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, TTree* targetTree);
-		std::vector<TrajectoryMeasurement>  getLayer1ExtrapolatedHitsFromMeas(const TrajectoryMeasurement& trajMeasurement);
-		void                                getDisk1PropagationData(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle);
-		void                                handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::string msg);
-		void                                handleDefaultError(const std::string& exceptionType, const std::string& streamType, std::vector<std::string> msg);
-		void                                printEvtInfo(const std::string& streamType);
-		void                                getModuleData(ModuleData &mod, bool online, const DetId &detId);
-		void                                getRocData(ModuleData &mod, bool online, const DetId &detId, const PixelDigi *digi);
-		void                                getRocData(ModuleData &mod, bool online, const DetId &detId, const SiPixelCluster *cluster);
-		void                                getRocData(ModuleData &mod, bool online, const SiPixelRecHit *rechit);
-	private:
-		void                  propagateTrackToLayer1(const edm::Ref<std::vector<Trajectory>>& trajectory, const reco::TrackRef track);
-		std::tuple<std::vector<TrajectoryMeasurement>::const_iterator, float> 
-			                  findMatchingTrajMeasurement(const GlobalPoint& referencePoint, const ModuleData& referenceModInfo, const std::vector<TrajectoryMeasurement>& possibleMatches);
-		const SiPixelCluster* getClosestClusterOnDetSetToPoint(const edmNew::DetSet<SiPixelCluster>& clustersOnDet, const LocalPoint& referencePoint);
-		float                 trajMeasGlobalPointDistanceSquared(const TrajectoryMeasurement& trajMeasurement, const GlobalPoint& referencePoint);
-		float                 clusterPointDistanceSquared(const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
-		LocalPoint            clusterPointDistanceVector (const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
-		float                 clusterPointDistance       (const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint);
-		void                  printTrackCompositionInfo(const edm::Ref<std::vector<Trajectory>>& trajectory, const reco::TrackRef& track, const edm::Handle<edmNew::DetSetVector<SiPixelCluster>> clusterCollectionHandle, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle);
-		template <typename T>
-		void                  checkGetTrackedParameter(T& optionToSet, const std::string& optionKeyword, T&& defaultValue);
+
+  void getClustData(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&);
+
+  std::map<reco::TrackRef, TrackData> getTrackData(const edm::Handle<reco::VertexCollection>&,
+						   const edm::Handle<TrajTrackAssociationCollection>&);
+
+  void getTrajTrackData(const edm::Handle<reco::VertexCollection>&,
+			const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&,
+			const edm::Handle<TrajTrackAssociationCollection>&);
+
+  void getTrajTrackDataCosmics(const edm::Handle<reco::VertexCollection>&,
+			       const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&,
+			       const edm::Handle<TrajTrackAssociationCollection>&);
+
+  void checkAndSaveTrajMeasurementData(const TrajectoryMeasurement&,
+				       const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&,
+				       const edm::Handle<TrajTrackAssociationCollection>&,
+				       TTree*);
+
+  std::vector<TrajectoryMeasurement> getLayer1ExtrapolatedHitsFromMeas
+  (const TrajectoryMeasurement&);
+
+  void getDisk1PropagationData(const edm::Handle<TrajTrackAssociationCollection>&);
+
+  void handleDefaultError(const std::string&, const std::string&, std::string);
+
+  void handleDefaultError(const std::string&, const std::string&, std::vector<std::string>);
+
+  void printEvtInfo(const std::string&);
+
+  void getModuleData(ModuleData&, bool, const DetId&);
+
+  void getRocData(ModuleData&, bool, const DetId&, const PixelDigi*);
+
+  void getRocData(ModuleData&, bool, const DetId&, const SiPixelCluster*);
+
+  void getRocData(ModuleData&, bool, const SiPixelRecHit*);
+
+  void propagateTrackToLayer1(const edm::Ref<std::vector<Trajectory>>&, const reco::TrackRef);
+
+  std::tuple<std::vector<TrajectoryMeasurement>::const_iterator, float>
+  findMatchingTrajMeasurement(const GlobalPoint&, const ModuleData&,
+			      const std::vector<TrajectoryMeasurement>&);
+
+  const SiPixelCluster* getClosestClusterOnDetSetToPoint(const edmNew::DetSet<SiPixelCluster>&,
+							 const LocalPoint&);
+
+  float trajMeasGlobalPointDistanceSquared(const TrajectoryMeasurement&, const GlobalPoint&);
+
+  float clusterPointDistanceSquared(const DetId&, const SiPixelCluster&, const LocalPoint&);
+
+  LocalPoint clusterPointDistanceVector(const DetId&, const SiPixelCluster&, const LocalPoint&);
+
+  float clusterPointDistance(const DetId&, const SiPixelCluster&, const LocalPoint&);
+
+  void printTrackCompositionInfo(const edm::Ref<std::vector<Trajectory>>&,
+				 const reco::TrackRef&,
+				 const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>,
+				 const edm::Handle<reco::VertexCollection>&);
+
+  template <typename T>
+  void checkGetTrackedParameter(T&, const std::string&, T&&);
 };
 
 namespace NtuplizerHelpers 
 {
-	std::map<uint32_t, int> getFedErrors(const edm::Event& iEvent, const edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>>& rawDataErrorToken);
-	bool detidIsOnPixel(const DetId& detid);
-	bool areIdenticalModules(const ModuleData& lhs, const ModuleData& rhs);
-	int trajectoryHasPixelHit(const edm::Ref<std::vector<Trajectory>>& trajectory);
-	reco::VertexCollection::const_iterator findClosestVertexToTrack(const reco::TrackRef& track, const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const unsigned int& minTracks = 0);
-	TrajectoryStateOnSurface getTrajectoryStateOnSurface(const TrajectoryMeasurement& measurement);
-	std::pair<float, float> getLocalXY(const TrajectoryMeasurement& measurement);
-	float trajMeasurementDistanceSquared(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs);
-	void trajMeasurementDistanceSquared(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs, float& distanceSquared, float& dxSquared, float& dySquared);
-	void trajMeasurementDistance(const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs, float& distance, float& dx, float& dy);
-	void getClosestOtherTrajMeasurementDistanceByLooping(const TrajectoryMeasurement& measurement, const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle, float& distance, float& dx, float& dy);
-	// int getTrackParentVtxNumTracks(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle, const reco::TrackRef trackToFind);
+  std::map<uint32_t, int>
+  getFedErrors(const edm::Event&,
+	       const edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>>&);
+
+  bool detidIsOnPixel(const DetId&);
+
+  bool areIdenticalModules(const ModuleData&, const ModuleData&);
+
+  int trajectoryHasPixelHit(const edm::Ref<std::vector<Trajectory>>&);
+
+  reco::VertexCollection::const_iterator
+  findClosestVertexToTrack(const reco::TrackRef&,
+			   const edm::Handle<reco::VertexCollection>&, const unsigned int&);
+
+  TrajectoryStateOnSurface getTrajectoryStateOnSurface(const TrajectoryMeasurement&);
+
+  std::pair<float, float> getLocalXY(const TrajectoryMeasurement&);
+
+  float trajMeasurementDistanceSquared(const TrajectoryMeasurement&, const TrajectoryMeasurement&);
+
+  void trajMeasurementDistanceSquared(const TrajectoryMeasurement&, const TrajectoryMeasurement&,
+				      float&, float&, float&);
+
+  void trajMeasurementDistance(const TrajectoryMeasurement&, const TrajectoryMeasurement&,
+			       float&, float&, float&);
+
+  void getClosestOtherTrajMeasurementDistanceByLooping
+  (const TrajectoryMeasurement&,
+   const edm::Handle<TrajTrackAssociationCollection>&,
+   float&, float&, float&);
+
+  // int getTrackParentVtxNumTracks(const edm::Handle<reco::VertexCollection>&, const reco::TrackRef);
+
 } // NtuplizerHelpers
 
 #endif
