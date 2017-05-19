@@ -98,7 +98,7 @@ opt.register('globalTag',          '',
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
 	     'Global Tag, Default="" which uses auto:phase1_2017_cosmics')
 
-opt.register('useTemplates',       False,
+opt.register('useTemplates',       True,
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
 	     'Only for On-track clusters! True: use Template reco, False: use Generic reco')
 
@@ -201,9 +201,10 @@ process.Refitter.NavigationSchool = ""
 #  PhaseIPixelNtuplizer
 #---------------------------
 process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
-	outputFileName = cms.string(opt.outputFileName),
-	cosmics = cms.int32(1),
 	trajectoryInput = cms.InputTag('Refitter'),
+	outputFileName = cms.untracked.string(opt.outputFileName),
+	cosmics = cms.untracked.bool(True),
+ 	clusterSaveDownscaleFactor = cms.untracked.int32(1),
 	)
 process.PhaseIPixelNtuplizer_step = cms.Path(process.PhaseINtuplizerPlugin)
 

@@ -1,37 +1,20 @@
 #include "PhaseIPixelNtuplizer.h"
 
-template void PhaseIPixelNtuplizer::checkGetTrackedParameter<int>
-(int& optionToSet, const std::string& optionKeyword, int&& defaultValue);
-
-template void PhaseIPixelNtuplizer::checkGetTrackedParameter<bool>
-(bool& optionToSet, const std::string& optionKeyword, bool&& defaultValue);
-
-template void PhaseIPixelNtuplizer::checkGetTrackedParameter<std::string>
-(std::string& optionToSet, const std::string& optionKeyword, std::string&& defaultValue);
-
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) : 
   iConfig_(iConfig),
-  ntupleOutputFilename_("Ntuple.root"),
+  ntupleOutputFilename_(iConfig.getUntrackedParameter<std::string>
+			("outputFileName", "Ntuple.root")),
   isEventFromMc_(-1),
-  isCocsmicTracking_(0),
-  clusterSaveDownscaling_(1),
-  saveDigiTree_(0),
-  saveTrackTree_(0),
-  saveNonPropagatedExtraTrajTree_(0),
+  isCosmicTracking_(iConfig.getUntrackedParameter<bool>("cosmics", false)),
+  clusterSaveDownscaling_(iConfig.getUntrackedParameter<int>("clusterSaveDownscaleFactor",100)),
+  saveDigiTree_(iConfig.getUntrackedParameter<bool>("saveDigiTree", false)),
+  saveTrackTree_(iConfig.getUntrackedParameter<bool>("saveTrackTree", false)),
+  saveNonPropagatedExtraTrajTree_(iConfig.getUntrackedParameter<bool>
+				  ("saveNonPropagatedExtraTrajTree", false)),
   minVertexSize_(15)
 {
 
-  // Set cluster saving downscale factor
-  if(iConfig_.exists("clusterSaveDownscaleFactor"))
-    clusterSaveDownscaling_ = iConfig_.getParameter<int>("clusterSaveDownscaleFactor");
-
-  // Set output file name by either the fileName or outputFileName configuration field
-  checkGetTrackedParameter(ntupleOutputFilename_, "outputFileName", std::string("Ntuple.root"));
-  checkGetTrackedParameter(isCocsmicTracking_, "cosmics",       0);
-  checkGetTrackedParameter(saveDigiTree_,      "saveDigiTree",  0);
-  checkGetTrackedParameter(saveTrackTree_,     "saveTrackTree", 0);
-  checkGetTrackedParameter(saveNonPropagatedExtraTrajTree_, "saveNonPropagatedExtraTrajTree", 0);
-  if(isCocsmicTracking_) 
+  if(isCosmicTracking_) 
     std::cout << "Running with cosmics setting turned on." << std::endl;
   if(saveDigiTree_)
     std::cout << "Option recognized: request to save digis." << std::endl;
@@ -87,13 +70,15 @@ void PhaseIPixelNtuplizer::beginJob()
 
   // Tree definitions
   eventTree_ = new TTree("eventTree", "The event.");
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-  digiTree_ = new TTree("digiTree",   "Digis in the Pixel detector.");
-#endif
+  if(saveDigiTree_)
+    digiTree_ = new TTree("digiTree",   "Digis in the Pixel detector.");
   clustTree_ = new TTree("clustTree", "Pixel clusters.");
   trackTree_ = new TTree("trackTree", "The track in the event.");
   trajTree_  = new TTree("trajTree",   "Trajectory measurements in the Pixel detector.");
-  nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree", "The original trajectroy measurements replaced by propagated hits in the Pixel detector.");
+  nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree",
+					   "The original trajectroy measurements replaced by"
+					   " propagated hits in the Pixel detector.");
+
   // Event tree
   eventTree_ -> Branch("event", &evt_, evt_.list.c_str());
   // Digi tree
@@ -436,7 +421,7 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   getClustData(clusterCollectionHandle);
 
   std::cout << "Saving trajecectory measurements and track data..." << std::endl;
-  if(isCocsmicTracking_)
+  if(isCosmicTracking_)
     getTrajTrackDataCosmics(vertexCollectionHandle, clusterCollectionHandle,
 			    trajTrackCollectionHandle);
   else
@@ -1102,7 +1087,6 @@ void PhaseIPixelNtuplizer::getTrajTrackDataCosmics
 				      trajTrackCollectionHandle, trajTree_);
 
   }
-
 }
 
 void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
@@ -1801,18 +1785,6 @@ void PhaseIPixelNtuplizer::printTrackCompositionInfo
   }
 
   std::cout << " --- End track informations --- " << std::endl;
-
-}
-
-template <typename T>
-void PhaseIPixelNtuplizer::checkGetTrackedParameter
-(T& optionToSet, const std::string& optionKeyword, T&& defaultValue)
-{
-
-  if(iConfig_.exists(optionKeyword))
-    optionToSet = iConfig_.getParameter<T>(optionKeyword);
-  else
-    optionToSet = std::forward<T>(defaultValue);
 
 }
 

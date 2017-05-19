@@ -1,7 +1,8 @@
 #ifndef PHASEIPIXELNTUPLIZER_H
 #define PHASEIPIXELNTUPLIZER_H
 
-// #define ADD_CHECK_PLOTS_TO_NTUPLE
+/*
+#define ADD_CHECK_PLOTS_TO_NTUPLE
 
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 #pragma message("ADD_CHECK_PLOTS_TO_NTUPLE defined." \
@@ -10,6 +11,7 @@
 #pragma message("ADD_CHECK_PLOTS_TO_NTUPLE is NOT defined." \
 		" No cluster occupancy plots will be generated in the ntuple file.")
 #endif
+*/
 
 // CMSSW code
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -108,7 +110,7 @@ private:
   int isEventFromMc_;
 
   // Options
-  int isCocsmicTracking_;
+  int isCosmicTracking_;
   int clusterSaveDownscaling_;
   int saveDigiTree_;
   int saveTrackTree_;
@@ -282,9 +284,6 @@ private:
 				 const reco::TrackRef&,
 				 const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>,
 				 const edm::Handle<reco::VertexCollection>&);
-
-  template <typename T>
-  void checkGetTrackedParameter(T&, const std::string&, T&&);
 };
 
 namespace NtuplizerHelpers 
