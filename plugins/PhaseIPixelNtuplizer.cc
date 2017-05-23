@@ -471,7 +471,7 @@ void PhaseIPixelNtuplizer::getEvtData
   evt_.pileup       = getPileupInfo(puInfoCollectionHandle);
   evt_.time         = lumi_.time;
 
-  std::cout << "Processing event of run: " << evt_.run << ", event: " << evt_.evt << ", orb: " << evt_.orb << ", bx: " << evt_.bx << "." << std::endl;
+  //std::cout << "Processing event of run: " << evt_.run << ", event: " << evt_.evt << ", orb: " << evt_.orb << ", bx: " << evt_.bx << "." << std::endl;
 
   // Loop on vertices
   evt_.nvtx    = 0;
@@ -588,6 +588,8 @@ int PhaseIPixelNtuplizer::getTriggerInfo
 
 float PhaseIPixelNtuplizer::getPileupInfo
 (const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle) {
+
+  if (!isEventFromMc_) return NOVAL_F;
 
   // Abandon hope all ye who enter here
 
@@ -1472,9 +1474,11 @@ void PhaseIPixelNtuplizer::getRocData(ModuleData &mod, bool online, const DetId 
   } else if(detId.subdetId() == PixelSubdetector::PixelEndcap) {
 
     if(online) {
+      mod.disk_coord        = coord_.signed_disk_coord(detId, digi);
       mod.disk_ring_coord   = coord_.signed_disk_ring_coord(detId, digi);
       mod.blade_panel_coord = coord_.signed_shifted_blade_panel_coord(detId, digi);
     } else {
+      mod.disk_coord        = coord_.disk_coord(detId, digi);
       mod.disk_ring_coord   = coord_.disk_ring_coord(detId, digi);
       mod.blade_panel_coord = coord_.blade_panel_coord(detId, digi);
     }
@@ -1502,9 +1506,11 @@ void PhaseIPixelNtuplizer::getRocData(ModuleData &mod, bool online, const DetId 
   } else if(detId.subdetId() == PixelSubdetector::PixelEndcap) {
 
     if(online) {
+      mod.disk_coord        = coord_.signed_disk_coord(detId, cluster);
       mod.disk_ring_coord   = coord_.signed_disk_ring_coord(detId, cluster);
       mod.blade_panel_coord = coord_.signed_shifted_blade_panel_coord(detId, cluster);
     } else {
+      mod.disk_coord        = coord_.disk_coord(detId, cluster);
       mod.disk_ring_coord   = coord_.disk_ring_coord(detId, cluster);
       mod.blade_panel_coord = coord_.blade_panel_coord(detId, cluster);
     }
@@ -1532,9 +1538,11 @@ void PhaseIPixelNtuplizer::getRocData(ModuleData &mod, bool online, const SiPixe
   } else if(rechit->geographicalId().subdetId() == PixelSubdetector::PixelEndcap) {
 
     if(online) {
+      mod.disk_coord        = coord_.signed_disk_coord(rechit);
       mod.disk_ring_coord   = coord_.signed_disk_ring_coord(rechit);
       mod.blade_panel_coord = coord_.signed_shifted_blade_panel_coord(rechit);
     } else {
+      mod.disk_coord        = coord_.disk_coord(rechit);
       mod.disk_ring_coord   = coord_.disk_ring_coord(rechit);
       mod.blade_panel_coord = coord_.blade_panel_coord(rechit);
     }

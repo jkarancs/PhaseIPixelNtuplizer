@@ -213,12 +213,13 @@ public:
 
   float        module_coord;
   float        ladder_coord;
+  float        disk_coord;
   float        disk_ring_coord;
   float        blade_panel_coord;
 
   const std::string list = "det/I:shl:side:module:layer:sec:ladder:flipped:half:"
     "disk:blade:panel:ring:federr:rawid/i:fedid:channel:roc:"
-    "module_coord/F:ladder_coord:disk_ring_coord:blade_panel_coord";
+    "module_coord/F:ladder_coord:disk_coord:disk_ring_coord:blade_panel_coord";
 
   const std::map<int, std::string> federrortypes = {
     std::make_pair<int, std::string>(25, "invalidROC"),

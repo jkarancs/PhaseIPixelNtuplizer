@@ -13,7 +13,7 @@ PPNdir = os.environ['CMSSW_BASE']+'/src/DPGAnalysis/PhaseIPixelNtuplizer/'
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.requestName = 'Run294927' #can be anything
+config.General.requestName = 'TimingScan2017_Coarse_Run294927' #can be anything
 
 config.section_('JobType')
 config.JobType.allowUndistributedCMSSW = True
@@ -29,7 +29,7 @@ config.section_('Data')
 config.Data.inputDataset = '/ExpressPhysics/Run2017A-Express-v1/FEVT'
 if DataTier == 'AOD': config.Data.useParent = True
 config.Data.outLFNDirBase = '/store/user/jkarancs/PhaseIPixelNtuplizer/2017/'
-config.Data.outputDatasetTag = 'v0405_default_920p2_92X_dataRun2_Express_v2_Run294927'
+config.Data.outputDatasetTag = 'v0405_default_920p2_92X_dataRun2_Express_v2_TimingScan2017_Coarse_Run294927'
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 1
 
