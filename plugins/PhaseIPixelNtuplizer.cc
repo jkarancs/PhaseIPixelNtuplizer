@@ -376,23 +376,23 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 
   // Initialize the object used to calculate module geometric informations
   coord_.init(iSetup);
-  std::cout << "Event summary informations: " << std::endl;
-  std::cout << "Vertices: " << (vertexCollectionHandle.isValid() ? std::to_string(vertexCollectionHandle -> size()) : "invalid") << " ";
-  if(saveDigiTree_) std::cout << "Digis: " << (digiCollectionHandle.isValid()) 
-			      << (digiCollectionHandle.isValid() ? 
-				  std::to_string(digiCollectionHandle -> size()) : "invalid")
-			      << " ";
-
-  std::cout << "Clusters: " << (clusterCollectionHandle.isValid() ?
-				std::to_string(clusterCollectionHandle -> size()) : "invalid")
-	    << " ";
-  std::cout << "Tracks: " << (trajTrackCollectionHandle.isValid() ?
-			      std::to_string(trajTrackCollectionHandle -> size()) : "invalid")
-	    << " ";
+  //std::cout << "Event summary informations: " << std::endl;
+  //std::cout << "Vertices: " << (vertexCollectionHandle.isValid() ? std::to_string(vertexCollectionHandle -> size()) : "invalid") << " ";
+  //if(saveDigiTree_) std::cout << "Digis: " << (digiCollectionHandle.isValid()) 
+  //      		      << (digiCollectionHandle.isValid() ? 
+  //      			  std::to_string(digiCollectionHandle -> size()) : "invalid")
+  //      		      << " ";
+  //
+  //std::cout << "Clusters: " << (clusterCollectionHandle.isValid() ?
+  //      			std::to_string(clusterCollectionHandle -> size()) : "invalid")
+  //          << " ";
+  //std::cout << "Tracks: " << (trajTrackCollectionHandle.isValid() ?
+  //      		      std::to_string(trajTrackCollectionHandle -> size()) : "invalid")
+  //          << " ";
   getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle,
 	     puInfoCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
   if(saveDigiTree_ && digiCollectionHandle.isValid()) {
-    std::cout << "Saving digis and creating digi plots..." << std::endl;
+    //std::cout << "Saving digis and creating digi plots..." << std::endl;
     getDigiData(digiCollectionHandle);
   }
 
@@ -402,7 +402,7 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 		simhitCollectionHandles.end(),
 		[] (const edm::Handle<std::vector<PSimHit>>& handle) { return handle.isValid(); });
   if(areAllSimhitHandlesValid) {
-    std::cout << "Saving simhit plots..." << std::endl;
+    //std::cout << "Saving simhit plots..." << std::endl;
     getSimhitData(simhitCollectionHandles);
   } else {
     static int timesReported = 0;
@@ -417,17 +417,17 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   }
 #endif
 
-  std::cout << "Saving clusters..." << std::endl;
+  //std::cout << "Saving clusters..." << std::endl;
   getClustData(clusterCollectionHandle);
 
-  std::cout << "Saving trajecectory measurements and track data..." << std::endl;
+  //std::cout << "Saving trajecectory measurements and track data..." << std::endl;
   if(isCosmicTracking_)
     getTrajTrackDataCosmics(vertexCollectionHandle, clusterCollectionHandle,
 			    trajTrackCollectionHandle);
   else
     getTrajTrackData(vertexCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
 
-  std::cout << "The Phase1Ntuplizer data processing has been finished." << std::endl;
+  //std::cout << "The Phase1Ntuplizer data processing has been finished." << std::endl;
 }
 
 void PhaseIPixelNtuplizer::setTriggerTable() {

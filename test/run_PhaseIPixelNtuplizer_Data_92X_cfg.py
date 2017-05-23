@@ -156,7 +156,7 @@ opt.setDefault('maxEvents', 100)
 opt.parseArguments()
 
 process.maxEvents.input = opt.maxEvents
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 # Switch off magnetic field if needed
 if opt.noMagField:

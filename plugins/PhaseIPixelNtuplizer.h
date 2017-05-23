@@ -65,8 +65,8 @@
 // It cannot go into separate files included from everywhere
 #include "../interface/DataStructures_v5.h" // 2017 May 16, CMSSW_9_1_0
 
-// New class for plotting Phase 0/1 Geometry (Will be added to DQM later)
-#include "../interface/SiPixelCoordinates.h"
+// SiPixelCoordinates: new class for plotting Phase 0/1 Geometry
+#include "DQM/SiPixelPhase1Common/interface/SiPixelCoordinates.h"
 
 // Helpers to save canvases
 #include "../interface/common_functions.h"

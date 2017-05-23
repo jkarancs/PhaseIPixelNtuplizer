@@ -40,6 +40,7 @@
   <use   name="TrackingTools/MeasurementDet"/>
   <use   name="FWCore/Utilities"/>
   <use   name="DataFormats/Luminosity"/>
+  <use   name="DQM/SiPixelPhase1Common"/>
   <library   file="PhaseIPixelNtuplizer.cc ../src/*.cc" name="DPGAnalysisPhaseIPixelNtuplizerPlugin">
     <flags CXXFLAGS="-g -D=EDM_ML_DEBUG"/>
     <flags EDM_PLUGIN="1"/>
