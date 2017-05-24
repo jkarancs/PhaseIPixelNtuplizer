@@ -180,8 +180,7 @@ if opt.inputFileName == '':
     else:
         process.source = cms.Source("PoolSource",
                                     fileNames = cms.untracked.vstring(
-                                        'file:/data/store/data/Run2016B/ZeroBias/RECO/PromptReco-v2/000/273/158/00000/0C460BA1-EB19-E611-A6ED-02163E0120AE.root' #273158 RECO (same LS)
-                                        #'/store/express/Run2016B/ExpressPhysics/FEVT/Express-v2/000/275/309/00000/008E9B65-B334-E611-BBA8-02163E013641.root' #275309 Express
+                                        '/store/express/Run2017A/ExpressPhysics/FEVT/Express-v1/000/294/928/00000/6ADE5F77-D03F-E711-BFED-02163E01A6C2.root' #first run
                                         )
                                     )
 else:
@@ -412,19 +411,18 @@ if opt.useLocalTemplates :
 #---------------------------
 #  Schedule
 #---------------------------
-process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.endjob_step,process.RECOoutput_step)
 
 # Modify Schedule
 if opt.dataTier == 'RECO' or opt.dataTier == 'FEVT':
-	process.schedule = cms.Schedule(process.myAnalyzer_step)
+    process.schedule = cms.Schedule(process.myAnalyzer_step)
 else:
-	if not opt.saveRECO:
-		process.schedule.remove(process.RECOoutput_step)
-	else:
-		process.RECOoutput.fileName = opt.RECOFileName
-	# Remove unnecessary steps and add Analyzer in the end of the chain
-	process.schedule.remove(process.endjob_step)
-	process.schedule.append(process.myAnalyzer_step)
+    if not opt.saveRECO:
+        process.schedule.remove(process.RECOoutput_step)
+    else:
+        process.RECOoutput.fileName = opt.RECOFileName
+    # Remove unnecessary steps and add Analyzer in the end of the chain
+    process.schedule.remove(process.endjob_step)
+    process.schedule.append(process.myAnalyzer_step)
 # End of inserted code
 
 
