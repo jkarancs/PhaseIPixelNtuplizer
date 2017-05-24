@@ -196,7 +196,7 @@ opt.setDefault('maxEvents', 100)
 opt.parseArguments()
 
 process.maxEvents.input = opt.maxEvents
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
 
 # Add Input file in case using it
@@ -285,12 +285,12 @@ Danek = 'sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/phase1/'
 
 # Test Local DB conditions
 # Quality
-Qua_db          = 'frontier://FrontierPrep/CMS_CONDITIONS'
-#Qua_db          = 'frontier://FrontierProd/CMS_CONDITIONS'
+#Qua_db          = 'frontier://FrontierPrep/CMS_CONDITIONS'
+Qua_db          = 'frontier://FrontierProd/CMS_CONDITIONS'
 #Qua_db          = 'sqlite_file:../../../../../DB/phase1/SiPixelQuality_phase1_ideal.db'
 #Qua_tag         = 'SiPixelQuality_phase1_ideal'
 #Qua_tag         = 'SiPixelQuality_phase1_2017_v1'
-Qua_tag         = 'SiPixelQuality_phase1_2017_v2' # 2017 May 18 version from Tamas
+Qua_tag         = 'SiPixelQuality_phase1_2017_v3' # 2017 May 23
 
 # Gains
 #Gain_db         = 'frontier://FrontierPrep/CMS_CONDITIONS'
