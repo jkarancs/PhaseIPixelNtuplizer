@@ -185,7 +185,7 @@ if opt.inputFileName == '':
                                     )
 else:
     if opt.secondaryInputFileName == '':
-        process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring())
+        process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring(opt.inputFileName))
     else:
         process.source = cms.Source("PoolSource",
                                     fileNames = cms.untracked.vstring(opt.inputFileName),
