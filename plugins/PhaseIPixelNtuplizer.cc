@@ -7,6 +7,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
   isEventFromMc_(-1),
   isCosmicTracking_(iConfig.getUntrackedParameter<bool>("cosmics", false)),
   clusterSaveDownscaling_(iConfig.getUntrackedParameter<int>("clusterSaveDownscaleFactor",100)),
+  eventSaveDownscaling_(iConfig.getUntrackedParameter<int>("eventSaveDownscaleFactor",1)),
   saveDigiTree_(iConfig.getUntrackedParameter<bool>("saveDigiTree", false)),
   saveTrackTree_(iConfig.getUntrackedParameter<bool>("saveTrackTree", false)),
   saveNonPropagatedExtraTrajTree_(iConfig.getUntrackedParameter<bool>
@@ -292,6 +293,8 @@ void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const& iLumi,
 
 void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+  if (++nEvent_ % eventSaveDownscaling_ != 0) return;
+
   // std::cout << "Analysis: " << std::endl;
   // A message is printed every time a change in the data type occurs
   if(isEventFromMc_ != (iEvent.id().run() == 1)) {
@@ -757,7 +760,7 @@ void PhaseIPixelNtuplizer::getClustData
 	currentClusterIt != currentClusterSet.end(); ++currentClusterIt) {
 
       // The number of saved clusters can be downscaled to save space
-      if(clusterCounter++ % clusterSaveDownscaling_ != 0) continue;
+      if(++clusterCounter % clusterSaveDownscaling_ != 0) continue;
       const auto& currentCluster = *currentClusterIt;
 
       // Serial num of cluster in the given module

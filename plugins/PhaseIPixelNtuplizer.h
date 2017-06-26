@@ -108,10 +108,12 @@ private:
 
   // States
   int isEventFromMc_;
+  int nEvent_=0;
 
   // Options
   int isCosmicTracking_;
   int clusterSaveDownscaling_;
+  int eventSaveDownscaling_;
   int saveDigiTree_;
   int saveTrackTree_;
   int saveNonPropagatedExtraTrajTree_;

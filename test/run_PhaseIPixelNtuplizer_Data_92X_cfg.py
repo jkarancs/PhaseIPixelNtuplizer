@@ -149,6 +149,10 @@ opt.register('useLocalTemplates',  False,
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
 	     'Test Template conditions locally (prep/prod database or sqlite file')
 
+opt.register('prescale',           1,
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.int,
+	     'Save only 1/nth of the events (to conserve disk space for long runs)')
+
 ### Events to process: 'maxEvents' is already registered by the framework
 opt.setDefault('maxEvents', 100)
 
@@ -215,6 +219,7 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
 	outputFileName = cms.untracked.string(opt.outputFileName),
 	# Do not save everything and downscale clusters
  	clusterSaveDownscaleFactor     = cms.untracked.int32(100),
+ 	eventSaveDownscaleFactor       = cms.untracked.int32(opt.prescale),
 	saveDigiTree                   = cms.untracked.bool(False),
 	saveTrackTree                  = cms.untracked.bool(False),
 	saveNonPropagatedExtraTrajTree = cms.untracked.bool(False),
@@ -252,6 +257,7 @@ print "  useLocalLA                             = "+str(opt.useLocalLA)
 print "  useLocalGain                           = "+str(opt.useLocalGain)
 print "  useLocalGenErr                         = "+str(opt.useLocalGenErr)
 print "  useLocalTemplates                      = "+str(opt.useLocalTemplates)
+print "  prescale                               = "+str(opt.prescale)
 
 dir   = 'sqlite_file:/afs/cern.ch/user/j/jkarancs/public/DB/Phase1/'
 Danek = 'sqlite_file:/afs/cern.ch/user/d/dkotlins/public/CMSSW/DB/phase1/'
