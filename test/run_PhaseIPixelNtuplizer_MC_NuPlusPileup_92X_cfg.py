@@ -351,30 +351,32 @@ if opt.noMagField:
 	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_00T_2017_v1'
 else:
 	# 3.8T GenErrors
-	#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+	GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
 	#GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
 	# MC
 	#GenErr_db       = dir+'2017_02_13/SiPixelGenErrorDBObject_phase1_38T_mc_v2.db'
 	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v2'
 	# Data
-	GenErr_db       = dir+'2017_04_05/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db'
-	GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v1'
+	#GenErr_db       = dir+'2017_04_05/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db'
+	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v1'
+	GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v6'
 	
 	# 3.8T Templates
-	#Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+	Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
 	#Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
 	# MC
 	#Templates_db       = dir+'2017_02_13/SiPixelTemplateDBObject_phase1_38T_mc_v2.db'
 	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_mc_v2'
 	# Data
-	Templates_db       = dir+'2017_04_05/SiPixelTemplateDBObject_phase1_38T_2017_v1.db'
-	Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v1'
+	#Templates_db       = dir+'2017_04_05/SiPixelTemplateDBObject_phase1_38T_2017_v1.db'
+	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v1'
+	Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v6'
 
 # Dynamic Inefficiency
 #DynIneff_db     = 'frontier://FrontierPrep/CMS_CONDITIONS'
 #DynIneff_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
-DynIneff_db     = 'sqlite_file:test/Recipes_CMSSW_9_0_0_pre6/phase1_efficiencies_85.db'
-DynIneff_tag    = 'SiPixelDynamicInefficiency_v1'
+DynIneff_db     = 'sqlite_file:SiPixelDynamicInefficiency_dcol0p8.db'
+DynIneff_tag    = 'SiPixelDynamicInefficiency_dcol0p8'
 
 #LA
 if opt.useLocalLASim :

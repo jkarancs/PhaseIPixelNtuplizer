@@ -270,10 +270,11 @@ Qua_db          = 'frontier://FrontierPrep/CMS_CONDITIONS'
 Qua_tag         = 'SiPixelQuality_phase1_2017_v2' # 2017 May 18 version from Tamas
 
 # Gains
-Gain_db         = 'frontier://FrontierProd/CMS_CONDITIONS'
-#Gain_db         = 'frontier://FrontierPrep/CMS_CONDITIONS'
+#Gain_db         = 'frontier://FrontierProd/CMS_CONDITIONS'
+Gain_db         = 'frontier://FrontierPrep/CMS_CONDITIONS'
 #Gain_db         = dir + '2017_05_17/SiPixelGainCalibration_2017_v1_offline.db'
-Gain_tag        = 'SiPixelGainCalibration_2017_v1_hltvalidation'
+#Gain_tag        = 'SiPixelGainCalibration_2017_v1_hltvalidation'
+Gain_tag        = 'SiPixelGainCalibration_2017_v4'
 
 # LA (RECO)
 #LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
@@ -320,8 +321,10 @@ else:
 	#GenErr_db       = dir+'2017_02_13/SiPixelGenErrorDBObject_phase1_38T_mc_v2.db'
 	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v2'
 	# Data
-	GenErr_db       = dir+'2017_04_05/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db'
-	GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v1'
+	#GenErr_db       = dir+'2017_04_05/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db'
+	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v1'
+	GenErr_db       = dir+'2017_07_06/SiPixelGenErrorDBObject_phase1_38T_2017_v4_bugfix.db'
+	GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v4_bugfix'
 	
 	# 3.8T Templates
 	#Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
@@ -330,8 +333,10 @@ else:
 	#Templates_db       = dir+'2017_02_13/SiPixelTemplateDBObject_phase1_38T_mc_v2.db'
 	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_mc_v2'
 	# Data
-	Templates_db       = dir+'2017_04_05/SiPixelTemplateDBObject_phase1_38T_2017_v1.db'
-	Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v1'
+	#Templates_db       = dir+'2017_04_05/SiPixelTemplateDBObject_phase1_38T_2017_v1.db'
+	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v1'
+	Templates_db       = dir+'2017_07_06/SiPixelTemplateDBObject_phase1_38T_2017_v4_bugfix.db'
+	Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v4_bugfix'
 
 # Quality
 if opt.useLocalQuality :
@@ -412,7 +417,6 @@ if opt.useLocalTemplates :
 				)
 			)
 	process.templateprefer = cms.ESPrefer("PoolDBESSource","TemplatesReader")
-
 
 #---------------------------
 #  Schedule
