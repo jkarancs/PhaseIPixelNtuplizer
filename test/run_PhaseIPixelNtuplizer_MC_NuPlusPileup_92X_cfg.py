@@ -198,6 +198,9 @@ opt.parseArguments()
 process.maxEvents.input = opt.maxEvents
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
 
+# Input GEN-SIM files
+from DPGAnalysis.PhaseIPixelNtuplizer.PoolSource_13TeV_92X_upgrade2017_realistic_v2_GS import *
+process.mix.input.fileNames = pileupFileNames
 
 # Add Input file in case using it
 if opt.useRECO:
@@ -375,8 +378,8 @@ else:
 # Dynamic Inefficiency
 #DynIneff_db     = 'frontier://FrontierPrep/CMS_CONDITIONS'
 #DynIneff_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
-DynIneff_db     = 'sqlite_file:SiPixelDynamicInefficiency_dcol0p8.db'
-DynIneff_tag    = 'SiPixelDynamicInefficiency_dcol0p8'
+DynIneff_db     = 'sqlite_file:/data/jkarancs/CMSSW/PhaseI/CMSSW_9_2_2/src/DPGAnalysis-SiPixelTools/PixelDBTools/SiPixelDynamicInefficiency_L1_dcol0p8.db'
+DynIneff_tag    = 'SiPixelDynamicInefficiency_L1_dcol0p8'
 
 #LA
 if opt.useLocalLASim :
