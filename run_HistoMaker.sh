@@ -94,7 +94,7 @@ for arg in "$@"; do
 	    echo "  Input files:   $DL_DIR/*/*.root ($NCOMP/$NJOB)"
 	    echo "  Output file: PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME".root"
 	    echo "  Log file:    PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME".log"
-	    nohup python run_phm.py --outdir="PHM_PHASE1_out/TestHitEffMonitoring_"$AUTONAME --nfile=$(($NCOMP/20)) --nproc=4 "$DL_DIR/*/*.root" --run > "PHM_PHASE1_out/TestHitEffMonitoring_"$AUTONAME".log" 2>&1 &
+	    nohup python run_phm.py --outdir="PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME --nfile=$(($NCOMP/20)) --nproc=4 "$DL_DIR/*/*.root" --run > "PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME".log" 2>&1 &
 	fi
 	echo
 	echo " ---------------  "$AUTONAME" Done.  -----------------"
