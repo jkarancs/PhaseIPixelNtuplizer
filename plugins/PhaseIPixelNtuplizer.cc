@@ -1,5 +1,21 @@
 #include "PhaseIPixelNtuplizer.h"
 
+constexpr int                  PhaseIPixelNtuplizer::ZEROBIAS_TRIGGER_BIT;
+constexpr int                  PhaseIPixelNtuplizer::ZEROBIAS_BITMASK;
+constexpr int                  PhaseIPixelNtuplizer::VERTEX_NUMTRACK_CUT_VAL;
+constexpr int                  PhaseIPixelNtuplizer::TRACK_QUALITY_HIGH_PURITY_BIT;
+constexpr int                  PhaseIPixelNtuplizer::TRACK_QUALITY_HIGH_PURITY_MASK;
+constexpr float                PhaseIPixelNtuplizer::TRACK_PT_CUT_VAL;
+constexpr int                  PhaseIPixelNtuplizer::TRACK_NSTRIP_CUT_VAL;
+constexpr std::array<float, 4> PhaseIPixelNtuplizer::TRACK_D0_CUT_BARREL_VAL;
+constexpr float                PhaseIPixelNtuplizer::TRACK_D0_CUT_FORWARD_VAL;
+constexpr float                PhaseIPixelNtuplizer::TRACK_DZ_CUT_BARREL_VAL;
+constexpr float                PhaseIPixelNtuplizer::TRACK_DZ_CUT_FORWARD_VAL;
+constexpr float                PhaseIPixelNtuplizer::MEAS_HITSEP_CUT_VAL;
+constexpr float                PhaseIPixelNtuplizer::HIT_CLUST_NEAR_CUT_VAL;
+constexpr float                PhaseIPixelNtuplizer::BARREL_MODULE_EDGE_X_CUT;
+constexpr float                PhaseIPixelNtuplizer::BARREL_MODULE_EDGE_Y_CUT;
+
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) : 
   iConfig_(iConfig),
   ntupleOutputFilename_(iConfig.getUntrackedParameter<std::string>
@@ -9,10 +25,12 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
   clusterSaveDownscaling_(iConfig.getUntrackedParameter<int>("clusterSaveDownscaleFactor",100)),
   eventSaveDownscaling_(iConfig.getUntrackedParameter<int>("eventSaveDownscaleFactor",1)),
   saveDigiTree_(iConfig.getUntrackedParameter<bool>("saveDigiTree", false)),
+  npixFromDigiCollection_(iConfig.getUntrackedParameter<bool>("npixFromDigiCollection", false)),
   saveTrackTree_(iConfig.getUntrackedParameter<bool>("saveTrackTree", false)),
   saveNonPropagatedExtraTrajTree_(iConfig.getUntrackedParameter<bool>
-				  ("saveNonPropagatedExtraTrajTree", false)),
-  minVertexSize_(15)
+          ("saveNonPropagatedExtraTrajTree", false)),
+  minVertexSize_(15),
+  efficiencyCalculationFrequency_(iConfig.getUntrackedParameter<int>("efficiencyCalculationFrequency_", 1))
 {
 
   if(isCosmicTracking_) 
@@ -41,7 +59,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
     (edm::InputTag("MeasurementTrackerEvent"));
 
   // Save digi tree only if saveDigiTree_ option is set
-  if(saveDigiTree_) pixelDigiCollectionToken_ = consumes<edm::DetSetVector<PixelDigi>>
+  if(saveDigiTree_ || npixFromDigiCollection_) pixelDigiCollectionToken_ = consumes<edm::DetSetVector<PixelDigi>>
     (edm::InputTag("simSiPixelDigis"));
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
   simhitCollectionTokens_.insert
@@ -79,7 +97,7 @@ void PhaseIPixelNtuplizer::beginJob()
   nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree",
 					   "The original trajectroy measurements replaced by"
 					   " propagated hits in the Pixel detector.");
-
+  trajROCEfficiencyTree_ = new TTree("trajROCEfficiencyTree", "ROC and module efficiencies.");
   // Event tree
   eventTree_ -> Branch("event", &evt_, evt_.list.c_str());
   // Digi tree
@@ -122,6 +140,8 @@ void PhaseIPixelNtuplizer::beginJob()
     nonPropagatedExtraTrajTree_  -> Branch("track",     &track_,        track_      .list.c_str());
     nonPropagatedExtraTrajTree_  -> Branch("traj",      &traj_,         traj_       .list.c_str());
   }
+// Efficiency of the detector parts the trajectory measurements are located on
+trajROCEfficiencyTree_ -> Branch("trajROCEfficiency", &trajROCEff_, trajROCEff_.list.c_str());
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
   simhitOccupancy_fwd        = new TH2D("simhitOccupancy_fwd", "simhit occupancy - forward", 
 					150, -52.15, 52.15,  300,  -3.14159,  3.14159);
@@ -205,8 +225,11 @@ void PhaseIPixelNtuplizer::beginJob()
 
 void PhaseIPixelNtuplizer::endJob() 
 {
-  std::cout << "Ntuplizer endjob step with outputFileName: \"" 
-	    << ntupleOutputFilename_ << "\"." << std::endl;
+  std::cout << "Ntuplizer endjob step started." << std::endl;
+  std::cout << "Generating ROC efficiency tree for the missing events..." << std::endl;
+  generateROCEfficiencyTree();
+  std::cout << "Done generating ROC efficiency tree." << std::endl;
+  std::cout << "OutputFileName in the Ntuplizer endjob: " << ntupleOutputFilename_ << "\"." << std::endl;
   ntupleOutputFile_ -> cd();
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
   constexpr int PHASE_SCENARIO = 1;
@@ -289,6 +312,11 @@ void PhaseIPixelNtuplizer::beginLuminosityBlock(edm::LuminosityBlock const& iLum
 void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const& iLumi,
 					      edm::EventSetup const& iSetup) {
   lumi_.time = iLumi.beginTime().unixTime();
+  ++nLumisection_;
+  if(nLumisection_ % efficiencyCalculationFrequency_ == 0)
+  {
+    generateROCEfficiencyTree();
+  }
 }
 
 void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
@@ -318,7 +346,7 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 
   // Digis
   edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
-  if(saveDigiTree_) iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
+  if(saveDigiTree_ || npixFromDigiCollection_) iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
 
   // Get vertices
   edm::Handle<reco::VertexCollection>      vertexCollectionHandle;
@@ -393,7 +421,7 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   //      		      std::to_string(trajTrackCollectionHandle -> size()) : "invalid")
   //          << " ";
   getEvtData(iEvent, vertexCollectionHandle, triggerResultsHandle,
-	     puInfoCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
+	     puInfoCollectionHandle, digiCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
   if(saveDigiTree_ && digiCollectionHandle.isValid()) {
     //std::cout << "Saving digis and creating digi plots..." << std::endl;
     getDigiData(digiCollectionHandle);
@@ -458,6 +486,7 @@ void PhaseIPixelNtuplizer::getEvtData
  const edm::Handle<reco::VertexCollection>& vertexCollectionHandle,
  const edm::Handle<edm::TriggerResults>& triggerResultsHandle,
  const edm::Handle<std::vector<PileupSummaryInfo>>& puInfoCollectionHandle,
+ const edm::Handle<edm::DetSetVector<PixelDigi>>& digiCollectionHandle,
  const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle,
  const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle) {
 
@@ -517,12 +546,31 @@ void PhaseIPixelNtuplizer::getEvtData
       layDiskIndex = trackerTopology_ -> pxbLayer(detId.rawId()) - 1;
     else {
       if(detId.subdetId() == PixelSubdetector::PixelEndcap)
-	layDiskIndex = trackerTopology_ -> pxfDisk(detId.rawId()) + 3;
+  layDiskIndex = trackerTopology_ -> pxfDisk(detId.rawId()) + 3;
       else continue;
     }
 
     evt_.nclu[layDiskIndex] += clu_set.size();
-    for(const auto &clu: clu_set) evt_.npix[layDiskIndex] += clu.size();
+    if(!npixFromDigiCollection_)
+    {
+      for(const auto &clu: clu_set) evt_.npix[layDiskIndex] += clu.size();
+    }
+  }
+  if(npixFromDigiCollection_)
+  {
+    for(const auto& digiDetSet: *digiCollectionHandle)
+    {
+      int layDiskIndex = -1;
+      DetId detId(digiDetSet.detId());
+      if(detId.subdetId() == PixelSubdetector::PixelBarrel)
+        layDiskIndex = trackerTopology_ -> pxbLayer(detId.rawId()) - 1;
+      else {
+        if(detId.subdetId() == PixelSubdetector::PixelEndcap)
+          layDiskIndex = trackerTopology_ -> pxfDisk(detId.rawId()) + 3;
+      else continue;
+      }
+      evt_.npix[layDiskIndex] += digiDetSet.size();
+    }
   }
 
   // Quick loop to get track numbers
@@ -560,9 +608,7 @@ void PhaseIPixelNtuplizer::getEvtData
 
 }
 
-int PhaseIPixelNtuplizer::getTriggerInfo
-(const edm::Event& iEvent,
- const edm::Handle<edm::TriggerResults>& triggerResultsHandle) {
+int PhaseIPixelNtuplizer::getTriggerInfo(const edm::Event& iEvent, const edm::Handle<edm::TriggerResults>& triggerResultsHandle) {
   
   if(!triggerResultsHandle.isValid()) {
     if(isEventFromMc_) return 1; // Assuming that ZeroBias is the first trigger bit
@@ -1223,11 +1269,9 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
   } else traj_.clu.init();
 
   // Get closest other traj measurement
-  NtuplizerHelpers::getClosestOtherTrajMeasurementDistanceByLooping
-    (measurement, trajTrackCollectionHandle, traj_.d_tr, traj_.dx_tr, traj_.dy_tr);
-
+  NtuplizerHelpers::getClosestOtherTrajMeasurementDistanceByLooping(measurement, trajTrackCollectionHandle, traj_.d_tr, traj_.dx_tr, traj_.dy_tr);
   traj_.hit_near = (traj_.d_tr < 0.5); // 5 mm
-  traj_.clust_near = (traj_.d_cl != NOVAL_F && traj_.d_cl < 0.05); // 500 um
+  traj_.clust_near = (traj_.d_cl != NOVAL_F && traj_.d_cl < HIT_CLUST_NEAR_CUT_VAL);
 
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
   if(traj_.mod_on.det == 0) {
@@ -1255,13 +1299,15 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
   }
 #endif
 
+  traj_.pass_effcuts = getTrajMeasurementEfficiencyQualification(measurement) != EXCLUDED;
+
   // Filling the tree
   targetTree -> Fill();
 
 }
 
-std::vector<TrajectoryMeasurement> PhaseIPixelNtuplizer::getLayer1ExtrapolatedHitsFromMeas
-(const TrajectoryMeasurement& trajMeasurement) {
+std::vector<TrajectoryMeasurement> PhaseIPixelNtuplizer::getLayer1ExtrapolatedHitsFromMeas(const TrajectoryMeasurement& trajMeasurement)
+{
 
   // Last layer 2 or disk 1 mesurement is to be propagated to layer 1 if possible
   // Only propagating valid measurements
@@ -1276,16 +1322,80 @@ std::vector<TrajectoryMeasurement> PhaseIPixelNtuplizer::getLayer1ExtrapolatedHi
 
 }
 
+PhaseIPixelNtuplizer::TrajectoryMeasurementEfficiencyQualification PhaseIPixelNtuplizer::getTrajMeasurementEfficiencyQualification(const TrajectoryMeasurement& t_measurement)
+{
+  // Nvtx Cut
+  if(!(VERTEX_NUMTRACK_CUT_VAL < track_.fromVtxNtrk)) return EXCLUDED;
+  // Zerobias cut
+  if(!(evt_.trig & ZEROBIAS_BITMASK >> ZEROBIAS_TRIGGER_BIT)) return EXCLUDED;
+  // Federr cut
+  if(!(evt_.federrs_size == 0)) return EXCLUDED;
+  // Hp cut
+  if(!((track_.quality & TRACK_QUALITY_HIGH_PURITY_MASK) >> TRACK_QUALITY_HIGH_PURITY_BIT)) return EXCLUDED;
+  // Pt cut
+  if(!(TRACK_PT_CUT_VAL < track_.pt)) return EXCLUDED;
+  // Nstrip cut
+  if(!(TRACK_NSTRIP_CUT_VAL < track_.strip)) return EXCLUDED;
+  // D0 cut
+  if(traj_.mod_on.det == 0) if(!(std::abs(track_.d0) < TRACK_D0_CUT_BARREL_VAL[traj_.mod_on.layer - 1])) return EXCLUDED;
+  if(traj_.mod_on.det == 1) if(!(std::abs(track_.d0) < TRACK_D0_CUT_FORWARD_VAL)) return EXCLUDED;
+  // Dz cut
+  if(traj_.mod_on.det == 0) if(!(std::abs(track_.dz) < TRACK_DZ_CUT_BARREL_VAL)) return EXCLUDED;
+  if(traj_.mod_on.det == 1) if(!(std::abs(track_.dz) < TRACK_DZ_CUT_FORWARD_VAL)) return EXCLUDED;
+  // Pixhit cut
+  if(traj_.mod_on.det == 0)
+  {
+    if(traj_.mod_on.layer == 1) if(!(
+      (track_.validbpix[1] > 0 && track_.validbpix[2] > 0 && track_.validbpix[3] > 0) ||
+      (track_.validbpix[1] > 0 && track_.validbpix[2] > 0 && track_.validfpix[0] > 0) ||
+      (track_.validbpix[1] > 0 && track_.validfpix[0] > 0 && track_.validfpix[1] > 0) ||
+      (track_.validfpix[0] > 0 && track_.validfpix[2] > 0 && track_.validfpix[2] > 0))) return EXCLUDED;
+    if(traj_.mod_on.layer == 2) if(!(
+      (track_.validbpix[0] > 0 && track_.validbpix[2] > 0 && track_.validbpix[3] > 0) ||
+      (track_.validbpix[0] > 0 && track_.validbpix[2] > 0 && track_.validfpix[0] > 0) ||
+      (track_.validbpix[0] > 0 && track_.validfpix[0] > 0 && track_.validfpix[1] > 0))) return EXCLUDED;
+    if(traj_.mod_on.layer == 3) if(!(
+      (track_.validbpix[0] > 0 && track_.validbpix[1] > 0 && track_.validbpix[3] > 0) ||
+      (track_.validbpix[0] > 0 && track_.validbpix[1] > 0 && track_.validfpix[0] > 0))) return EXCLUDED;
+    if(traj_.mod_on.layer == 4) if(!(
+      (track_.validbpix[0] > 0 && track_.validbpix[1] > 0 && track_.validbpix[2] > 0))) return EXCLUDED;
+  }
+  if(traj_.mod_on.det == 1)
+  {
+    if(std::abs(traj_.mod_on.disk) == 1) if(!(
+      (track_.validbpix[0] > 0 && track_.validbpix[1] > 0 && track_.validbpix[2] > 0) ||
+      (track_.validbpix[0] > 0 && track_.validbpix[1] > 0 && track_.validfpix[1] > 0) ||
+      (track_.validbpix[0] > 0 && track_.validfpix[1] > 0 && track_.validfpix[2] > 0))) return EXCLUDED;
+    if(std::abs(traj_.mod_on.disk) == 2) if(!(
+      (track_.validbpix[0] > 0 && track_.validbpix[1] > 0 && track_.validfpix[0] > 0) ||
+      (track_.validbpix[0] > 0 && track_.validfpix[0] > 0 && track_.validfpix[2] > 0))) return EXCLUDED;
+    if(std::abs(traj_.mod_on.disk) == 3) if(!(
+      (track_.validbpix[0] > 0 && track_.validfpix[0] > 0 && track_.validfpix[1] > 0))) return EXCLUDED;
+  }
+  // Fidicual cuts
+  if(traj_.mod_on.det == 0)
+  {
+    if(!(std::abs(traj_.lx) < BARREL_MODULE_EDGE_X_CUT)) return EXCLUDED;
+    if(!(std::abs(traj_.lx) < BARREL_MODULE_EDGE_Y_CUT)) return EXCLUDED;
+  }
+  // Hitsep cut
+  if(traj_.d_tr < MEAS_HITSEP_CUT_VAL) return EXCLUDED;
+  // Valmis cut
+  if(traj_.missing)
+  {
+    if((0 < traj_.d_cl) && (traj_.d_cl < HIT_CLUST_NEAR_CUT_VAL)) return VALIDHIT;
+    return MISSING;
+  }
+  else if(traj_.validhit)
+  {
+    return VALIDHIT;
+  }
+  return EXCLUDED;
+}
+
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
 
-
-// kiplotolom az összes olyan track etáját, amelyhez a layer 2-rol 
-// vagy a disk 1-rol sikeresen progagáltam a layer 1-re
-// van-e olyan track ami nagy étájú (nyalábhoz simul) és disk 2-n és disk 3-n van csak valid hitje
-// ha minden tracknek van layer 1-en hitje, akkor nem lehet trükközni
-// ha nincs, akkor vannak doublet seedelt hitek 
-void PhaseIPixelNtuplizer::getDisk1PropagationData
-(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle) {
+void PhaseIPixelNtuplizer::getDisk1PropagationData(const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle) {
 
   int hitsDisk1WhenLayer1PropagationUsed      = 0;
   int validhitsDisk1WhenLayer1PropagationUsed = 0;
@@ -1370,6 +1480,115 @@ void PhaseIPixelNtuplizer::getDisk1PropagationData
 
 }
 #endif
+
+std::vector<TEfficiency> PhaseIPixelNtuplizer::getDetectorPartEfficienciesInTrajTreeEntryRange(const TrajMeasurement& t_trajField, const Long64_t& t_minEntry, const Long64_t& t_maxEntry)
+{
+  std::vector<TEfficiency> detectorPartEfficiencies;
+  detectorPartEfficiencies.emplace_back("ROC eff. - forward", "ROC eff. - forward",  112, -3.5, 3.5, 140, -17.5, 17.5);
+  detectorPartEfficiencies.emplace_back("ROC eff. - layer 1", "ROC eff. - layer 1",   72, -4.5, 4.5,  26,  -6.5,  6.5);
+  detectorPartEfficiencies.emplace_back("ROC eff. - layer 2", "ROC eff. - layer 2",   72, -4.5, 4.5,  58, -14.5, 14.5);
+  detectorPartEfficiencies.emplace_back("ROC eff. - layer 3", "ROC eff. - layer 3",   72, -4.5, 4.5,  90, -22.5, 22.5);
+  detectorPartEfficiencies.emplace_back("ROC eff. - layer 4", "ROC eff. - layer 4",   72, -4.5, 4.5, 130, -32.5, 32.5);
+  std::vector<std::ofstream> fillPrintouts;
+  // static int i = 0;
+  // fillPrintouts.emplace_back("entries_fwd" + std::to_string(i) + ".txt", std::ios::out | std::ios::app);
+  // fillPrintouts.emplace_back("entries_l1" + std::to_string(i) + ".txt", std::ios::out | std::ios::app);
+  // fillPrintouts.emplace_back("entries_l2" + std::to_string(i) + ".txt", std::ios::out | std::ios::app);
+  // fillPrintouts.emplace_back("entries_l3" + std::to_string(i) + ".txt", std::ios::out | std::ios::app);
+  // fillPrintouts.emplace_back("entries_l4" + std::to_string(i) + ".txt", std::ios::out | std::ios::app);
+  // i++;
+  for(Long64_t entryIndex = t_minEntry; entryIndex < t_maxEntry; ++entryIndex)
+  {
+    trajTree_ -> GetEntry(entryIndex);
+    if(t_trajField.pass_effcuts == EXCLUDED) continue;
+    int efficiencyHistogramIndex = t_trajField.mod_on.det == 1 ? 0 : t_trajField.mod_on.layer;
+    int validMissing = 0;
+    if(t_trajField.validhit || (t_trajField.missing && 0 < t_trajField.d_cl && (t_trajField.d_cl < HIT_CLUST_NEAR_CUT_VAL))) validMissing = 1;
+    if(efficiencyHistogramIndex == 0) detectorPartEfficiencies[efficiencyHistogramIndex].Fill(validMissing, t_trajField.mod_on.module_coord, t_trajField.mod_on.ladder_coord);
+    else                              detectorPartEfficiencies[efficiencyHistogramIndex].Fill(validMissing, t_trajField.mod_on.disk_ring_coord, t_trajField.mod_on.blade_panel_coord);
+    // (fillPrintouts[efficiencyHistogramIndex]) << 
+    //   "t_trajField.mod_on.module_coord: " << std::setw(4) << std::setprecision(3) << t_trajField.mod_on.module_coord << " " <<
+    //   "t_trajField.mod_on.ladder_coord: " << std::setw(4) << std::setprecision(3) << t_trajField.mod_on.ladder_coord << " " <<
+    //   "validMissing: " << std::setw(4) << std::setprecision(3) << validMissing  << std::endl;
+  }
+  // std::for_each(fillPrintouts.begin(), fillPrintouts.end(), [] (auto& e) { e.close(); });
+  return detectorPartEfficiencies;
+}
+
+void PhaseIPixelNtuplizer::generateROCEfficiencyTree()
+{
+  Long64_t numEntriesWithAssociatedEfficiency = trajROCEfficiencyTree_ -> GetEntries();
+  Long64_t trajTreeNumEntries = trajTree_ -> GetEntries();
+  TrajMeasurement trajField;
+  trajTree_ -> SetBranchAddress("traj",   &trajField);
+  trajTree_ -> SetBranchAddress("mod_on", &trajField.mod_on);
+  std::vector<TEfficiency> detectorPartEfficiencies { getDetectorPartEfficienciesInTrajTreeEntryRange(trajField, numEntriesWithAssociatedEfficiency, trajTreeNumEntries) };
+  // for(const TEfficiency& efficiency: detectorPartEfficiencies)
+  // {
+  //   static int i = 0;
+  //   TCanvas canvas;
+  //   canvas.cd();
+  //   const_cast<TH1*>(efficiency.GetPassedHistogram()) -> Draw("COLZ");
+  //   canvas.SaveAs((std::to_string(i++) + ".eps").c_str());
+  //   const_cast<TH1*>(efficiency.GetTotalHistogram()) -> Draw("COLZ");
+  //   canvas.SaveAs((std::to_string(i++) + ".eps").c_str());
+  // }
+  for(Long64_t entryIndex = numEntriesWithAssociatedEfficiency; entryIndex < trajTreeNumEntries; ++entryIndex)
+  {
+    trajTree_ -> GetEntry(entryIndex);
+    std::size_t efficiencyHistogramIndex = trajField.mod_on.det == 1 ? 0 : trajField.mod_on.layer;
+    
+    const Int_t globalROCBin = [&] () 
+    {
+      if(efficiencyHistogramIndex) return detectorPartEfficiencies[efficiencyHistogramIndex].GetGlobalBin(trajField.mod_on.disk_ring_coord, trajField.mod_on.blade_panel_coord);
+      return detectorPartEfficiencies[efficiencyHistogramIndex].GetGlobalBin(trajField.mod_on.module_coord, trajField.mod_on.ladder_coord);
+    } ();
+    const Int_t& rowLengthBins = efficiencyHistogramIndex ? 112 : 72;
+    const bool isOddHalf = (globalROCBin / rowLengthBins) % 2; // Make sure this is integer division
+    const Int_t rowStartBin = globalROCBin - globalROCBin % 8;
+    const Int_t moduleOtherRowStartBin = isOddHalf ? rowStartBin + rowLengthBins  : rowStartBin - rowLengthBins;
+    Int_t halfmoduleEfficiencyNumerator   = 0;
+    Int_t halfmoduleEfficiencyDenominator = 0;
+    Int_t moduleEfficiencyNumerator       = 0;
+    Int_t moduleEfficiencyDenominator     = 0;
+    for(Int_t i = 0; i < 8; ++i)
+    {
+      halfmoduleEfficiencyNumerator   += detectorPartEfficiencies[efficiencyHistogramIndex].GetPassedHistogram() -> GetBinContent(rowStartBin + i);
+      halfmoduleEfficiencyDenominator += detectorPartEfficiencies[efficiencyHistogramIndex].GetTotalHistogram()  -> GetBinContent(rowStartBin + i);
+      moduleEfficiencyNumerator       += detectorPartEfficiencies[efficiencyHistogramIndex].GetPassedHistogram() -> GetBinContent(rowStartBin + i);
+      moduleEfficiencyDenominator     += detectorPartEfficiencies[efficiencyHistogramIndex].GetTotalHistogram()  -> GetBinContent(rowStartBin + i);
+      moduleEfficiencyNumerator       += detectorPartEfficiencies[efficiencyHistogramIndex].GetPassedHistogram() -> GetBinContent(moduleOtherRowStartBin + i);
+      moduleEfficiencyDenominator     += detectorPartEfficiencies[efficiencyHistogramIndex].GetTotalHistogram()  -> GetBinContent(moduleOtherRowStartBin + i);
+    }
+    trajROCEff_.ROCEfficiency        = detectorPartEfficiencies[efficiencyHistogramIndex].GetEfficiency(globalROCBin);
+    if(0 < halfmoduleEfficiencyDenominator) trajROCEff_.halfModuleEfficiency = static_cast<float>(halfmoduleEfficiencyNumerator) / static_cast<float>(halfmoduleEfficiencyDenominator);
+    else                                    trajROCEff_.halfModuleEfficiency = 0.0f;
+    if(0 < moduleEfficiencyDenominator)     trajROCEff_.moduleEfficiency     = static_cast<float>(moduleEfficiencyNumerator)     / static_cast<float>(moduleEfficiencyDenominator);
+    else                                    trajROCEff_.moduleEfficiency     = 0.0f;
+
+    // std::cout << "***" << std::endl;
+    // std::cout << 
+    //   "trajField.mod_on.det:             " << std::setw(5) << std::setprecision(3) << trajField.mod_on.det             << std::endl << 
+    //   "trajField.mod_on.layer:           " << std::setw(5) << std::setprecision(3) << trajField.mod_on.layer           << std::endl << 
+    //   "trajField.mod_on.module_coord:    " << std::setw(5) << std::setprecision(3) << trajField.mod_on.module_coord    << std::endl << 
+    //   "trajField.mod_on.ladder_coord:    " << std::setw(5) << std::setprecision(3) << trajField.mod_on.ladder_coord    << std::endl << 
+    //   "trajROCEff_.ROCEfficiency:        " << std::setw(5) << std::setprecision(3) << trajROCEff_.ROCEfficiency        << std::endl << 
+    //   "trajROCEff_.halfModuleEfficiency: " << std::setw(5) << std::setprecision(3) << trajROCEff_.halfModuleEfficiency << std::endl << 
+    //   "trajROCEff_.moduleEfficiency:     " << std::setw(5) << std::setprecision(3) << trajROCEff_.moduleEfficiency     << std::endl << 
+    //   "halfmoduleEfficiencyNumerator:    " << std::setw(5) << std::setprecision(3) << halfmoduleEfficiencyNumerator    << std::endl << 
+    //   "halfmoduleEfficiencyDenominator:  " << std::setw(5) << std::setprecision(3) << halfmoduleEfficiencyDenominator  << std::endl << 
+    //   "moduleEfficiencyNumerator:        " << std::setw(5) << std::setprecision(3) << moduleEfficiencyNumerator        << std::endl << 
+    //   "moduleEfficiencyDenominator:      " << std::setw(5) << std::setprecision(3) << moduleEfficiencyDenominator      << std::endl << 
+    //   "moduleEfficiencyNumerator:        " << std::setw(5) << std::setprecision(3) << moduleEfficiencyNumerator        << std::endl << 
+    //   "moduleEfficiencyDenominator:      " << std::setw(5) << std::setprecision(3) << moduleEfficiencyDenominator      << std::endl;
+    trajROCEfficiencyTree_ -> Fill();
+  }
+  std::for_each(detectorPartEfficiencies.begin(), detectorPartEfficiencies.end(), [] (auto& e)
+  {
+    e.Delete();
+  });
+  detectorPartEfficiencies.clear();
+}
 
 //////////////////////////////
 // Private member functions //
@@ -2017,8 +2236,7 @@ namespace NtuplizerHelpers
 
   }
 
-  void getClosestOtherTrajMeasurementDistanceByLooping
-  (const TrajectoryMeasurement& measurement,
+  void getClosestOtherTrajMeasurementDistanceByLooping(const TrajectoryMeasurement& measurement,
    const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle,
    float& distance, float& dx, float& dy) {
 
@@ -2035,10 +2253,9 @@ namespace NtuplizerHelpers
     double closestTrajMeasurementDistanceSquared =
       trajMeasurementDistanceSquared(measurement, *closestMeasurementIt);
 
-    for(const auto& otherTrackKeypair: *trajTrackCollectionHandle) {
-
+    for(const auto& otherTrackKeypair: *trajTrackCollectionHandle) 
+    {
       const edm::Ref<std::vector<Trajectory>> otherTraj = otherTrackKeypair.key;
-
       for(auto otherTrajMeasurementIt = otherTraj -> measurements().begin();
 	  otherTrajMeasurementIt != otherTraj -> measurements().end(); ++otherTrajMeasurementIt) {
 

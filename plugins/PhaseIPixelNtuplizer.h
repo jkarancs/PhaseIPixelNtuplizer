@@ -63,7 +63,7 @@
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
-#include "../interface/DataStructures_v5.h" // 2017 May 16, CMSSW_9_1_0
+#include "../interface/DataStructures_v6.h" // 2017 July 25, CMSSW_9_2_7
 
 // SiPixelCoordinates: new class for plotting Phase 0/1 Geometry
 #include "DQM/SiPixelPhase1Common/interface/SiPixelCoordinates.h"
@@ -78,10 +78,12 @@
 // #include <TH1D.h>
 #include <TH2D.h>
 #include <TRandom3.h>
+#include <TEfficiency.h>
 
 // C++
 #include <iostream>
 #include <string>
+#include <fstream>
 #include <vector>
 #include <map>
 
@@ -91,6 +93,23 @@
 
 class PhaseIPixelNtuplizer : public edm::EDAnalyzer
 {
+  using LumisectionCount = int;
+    static constexpr int                  ZEROBIAS_TRIGGER_BIT           = 0;
+    static constexpr int                  ZEROBIAS_BITMASK               = 1 << ZEROBIAS_TRIGGER_BIT;
+    static constexpr int                  VERTEX_NUMTRACK_CUT_VAL        = 10;
+    static constexpr int                  TRACK_QUALITY_HIGH_PURITY_BIT  = 2;
+    static constexpr int                  TRACK_QUALITY_HIGH_PURITY_MASK = 1 << TRACK_QUALITY_HIGH_PURITY_BIT;
+    static constexpr float                TRACK_PT_CUT_VAL               = 1.0f;
+    static constexpr int                  TRACK_NSTRIP_CUT_VAL           = 10;
+    static constexpr std::array<float, 4> TRACK_D0_CUT_BARREL_VAL        = {{0.01f, 0.02f, 0.02f, 0.02f}};
+    static constexpr float                TRACK_D0_CUT_FORWARD_VAL       = 0.05f;
+    static constexpr float                TRACK_DZ_CUT_BARREL_VAL        = 0.01f;
+    static constexpr float                TRACK_DZ_CUT_FORWARD_VAL       = 0.5f;
+    static constexpr float                MEAS_HITSEP_CUT_VAL            = 0.01f; //  100 um
+    static constexpr float                HIT_CLUST_NEAR_CUT_VAL         = 0.10f; // 1000 um
+    static constexpr float                BARREL_MODULE_EDGE_X_CUT       = 0.6f;
+    static constexpr float                BARREL_MODULE_EDGE_Y_CUT       = 3.0f;
+
 public:
   PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig);
   virtual ~PhaseIPixelNtuplizer();
@@ -108,16 +127,19 @@ private:
 
   // States
   int isEventFromMc_;
-  int nEvent_=0;
+  int nEvent_ = 0;
+  LumisectionCount nLumisection_ = 0;
 
   // Options
   int isCosmicTracking_;
   int clusterSaveDownscaling_;
   int eventSaveDownscaling_;
   int saveDigiTree_;
+  int npixFromDigiCollection_;
   int saveTrackTree_;
   int saveNonPropagatedExtraTrajTree_;
   int minVertexSize_;
+  LumisectionCount efficiencyCalculationFrequency_;
 
   // Misc. data
   TFile*                                 ntupleOutputFile_;
@@ -134,15 +156,17 @@ private:
   TTree* trackTree_;
   TTree* trajTree_;
   TTree* nonPropagatedExtraTrajTree_;
+  TTree* trajROCEfficiencyTree_;
 
   // Tree field definitions are in the interface directory
-  EventData       evt_;
-  LumiData        lumi_;
-  RunData         run_;
-  Digi            digi_;
-  Cluster         clu_;
-  TrackData       track_;
-  TrajMeasurement traj_;
+  EventData         evt_;
+  LumiData          lumi_;
+  RunData           run_;
+  Digi              digi_;
+  Cluster           clu_;
+  TrackData         track_;
+  TrajMeasurement   traj_;
+  TrajROCEfficiency trajROCEff_;
 
   // Tokens
   edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>> rawDataErrorToken_;
@@ -215,6 +239,7 @@ private:
   void getEvtData(const edm::Event&, const edm::Handle<reco::VertexCollection>&,
 		  const edm::Handle<edm::TriggerResults>&,
 		  const edm::Handle<std::vector<PileupSummaryInfo>>&,
+      const edm::Handle<edm::DetSetVector<PixelDigi>>&,
 		  const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&,
 		  const edm::Handle<TrajTrackAssociationCollection>&);
 
@@ -246,10 +271,22 @@ private:
 				       const edm::Handle<TrajTrackAssociationCollection>&,
 				       TTree*);
 
-  std::vector<TrajectoryMeasurement> getLayer1ExtrapolatedHitsFromMeas
-  (const TrajectoryMeasurement&);
+  std::vector<TrajectoryMeasurement> getLayer1ExtrapolatedHitsFromMeas(const TrajectoryMeasurement&);
+
+  enum TrajectoryMeasurementEfficiencyQualification
+  {
+    EXCLUDED,
+    VALIDHIT,
+    MISSING
+  };
+
+  TrajectoryMeasurementEfficiencyQualification getTrajMeasurementEfficiencyQualification(const TrajectoryMeasurement& t_measurement);
 
   void getDisk1PropagationData(const edm::Handle<TrajTrackAssociationCollection>&);
+
+  std::vector<TEfficiency> getDetectorPartEfficienciesInTrajTreeEntryRange(const TrajMeasurement& t_trajField, const Long64_t& t_minEntry, const Long64_t& t_maxEntry);
+  void generateROCEfficiencyTree();
+
 
   void handleDefaultError(const std::string&, const std::string&, std::string);
 
