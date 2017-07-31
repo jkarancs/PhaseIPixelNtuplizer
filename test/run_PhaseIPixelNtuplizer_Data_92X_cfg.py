@@ -278,13 +278,13 @@ Gain_tag        = 'SiPixelGainCalibration_2017_v4'
 
 # LA (RECO)
 #LA_db           = 'frontier://FrontierProd/CMS_CONDITIONS'
-#LA_db           = 'frontier://FrontierPrep/CMS_CONDITIONS'
+LA_db           = 'frontier://FrontierPrep/CMS_CONDITIONS'
 # MC
 #LA_db           = dir+'2017_02_13/SiPixelLorentzAngle_phase1_mc_v2.db'
 #LA_tag          = 'SiPixelLorentzAngle_phase1_mc_v2'
 # Data
-LA_db           = dir+'2017_04_05/SiPixelLorentzAngle_phase1_2017_v1.db'
-LA_tag          = 'SiPixelLorentzAngle_phase1_2017_v1'
+#LA_db           = dir+'2017_04_05/SiPixelLorentzAngle_phase1_2017_v1.db'
+LA_tag          = 'SiPixelLorentzAngle_phase1_2017_v4'
 
 # LA (Width)
 #LA_Width_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
@@ -316,27 +316,29 @@ if opt.noMagField:
 else:
 	# 3.8T GenErrors
 	#GenErr_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
-	#GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+	GenErr_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
 	# MC
 	#GenErr_db       = dir+'2017_02_13/SiPixelGenErrorDBObject_phase1_38T_mc_v2.db'
 	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_mc_v2'
 	# Data
 	#GenErr_db       = dir+'2017_04_05/SiPixelGenErrorDBObject_phase1_38T_2017_v1.db'
 	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v1'
-	GenErr_db       = dir+'2017_07_06/SiPixelGenErrorDBObject_phase1_38T_2017_v4_bugfix.db'
-	GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v4_bugfix'
+	#GenErr_db       = dir+'2017_07_06/SiPixelGenErrorDBObject_phase1_38T_2017_v4_bugfix.db'
+	#GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v4_bugfix'
+	GenErr_tag      = 'SiPixelGenErrorDBObject_phase1_38T_2017_v8'
 	
 	# 3.8T Templates
 	#Templates_db       = 'frontier://FrontierProd/CMS_CONDITIONS'
-	#Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
+	Templates_db       = 'frontier://FrontierPrep/CMS_CONDITIONS'
 	# MC
 	#Templates_db       = dir+'2017_02_13/SiPixelTemplateDBObject_phase1_38T_mc_v2.db'
 	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_mc_v2'
 	# Data
 	#Templates_db       = dir+'2017_04_05/SiPixelTemplateDBObject_phase1_38T_2017_v1.db'
 	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v1'
-	Templates_db       = dir+'2017_07_06/SiPixelTemplateDBObject_phase1_38T_2017_v4_bugfix.db'
-	Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v4_bugfix'
+	#Templates_db       = dir+'2017_07_06/SiPixelTemplateDBObject_phase1_38T_2017_v4_bugfix.db'
+	#Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v4_bugfix'
+	Templates_tag      = 'SiPixelTemplateDBObject_phase1_38T_2017_v8'
 
 # Quality
 if opt.useLocalQuality :

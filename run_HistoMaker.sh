@@ -1,6 +1,6 @@
 #!/bin/bash
-LOWSTAT=1
-PHM=1
+LOWSTAT=0
+PHM=0
 RAND=`uuid | sed "s;-;_;g"`
 CWD=`pwd -P`
 
@@ -45,14 +45,14 @@ for arg in "$@"; do
 	    if (( $BADROC )); then
 		echo "- Start creating BADROC list first"
 		echo "  Input files:   $DL_DIR/*/*5.root ($NCOMP/$NJOB)"
-		echo "  Output file: PHM_PHASE1_out/BADROC_"$AUTONAME".root"
-		echo "  Log file:    PHM_PHASE1_out/BADROC_"$AUTONAME".log"
+		echo "  Output file: PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.root"
+		echo "  Log file:    PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.log"
 		if (( $PHM )); then
 		    # Wait for BADROC list to finish, before running plotting
-		    ./Phase1PixelHistoMaker -b -o PHM_PHASE1_out/BADROC_"$AUTONAME".root $DL_DIR/*/*5.root > PHM_PHASE1_out/BADROC_"$AUTONAME".log 2>&1
+		    ./Phase1PixelHistoMaker -b -o PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.root $DL_DIR/*/*5.root > PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.log 2>&1
 		else
 		    # Otherwise run in background
-		    nohup ./Phase1PixelHistoMaker -b -o PHM_PHASE1_out/BADROC_"$AUTONAME".root $DL_DIR/*/*5.root > PHM_PHASE1_out/BADROC_"$AUTONAME".log 2>&1 &
+		    nohup ./Phase1PixelHistoMaker -b -o PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.root $DL_DIR/*/*5.root > PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.log 2>&1 &
 		fi
 	    fi
 	    if (( $PHM )); then
