@@ -1,6 +1,6 @@
 #!/bin/bash
-LOWSTAT=0
-PHM=0
+LOWSTAT=1
+PHM=1
 RAND=`uuid | sed "s;-;_;g"`
 CWD=`pwd -P`
 
