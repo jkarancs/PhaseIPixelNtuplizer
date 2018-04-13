@@ -20,7 +20,7 @@ for arg in "$@"; do
 	AUTONAME=`echo $CRAB_CFG | sed "s;crab3_;;;s;.py;;"`
 	# Read info from the crab status
 	crab status -d crab_$AUTONAME > crab_status_$RAND.txt
-	NJOB=`cat crab_status_$RAND.txt | grep -E "%.*\(.*\)" | tail -1 | sed "s;(; ;;s;); ;;s;/; ;" | awk '{ print $NF }'`
+	NJOB=`cat crab_status_$RAND.txt | grep -v Warning | grep -E "%.*\(.*\)" | tail -1 | sed "s;(; ;;s;); ;;s;/; ;" | awk '{ print $NF }'`
 	# Set input directory
 	TIME=`/data/jkarancs/scripts/se_util.csh ls T2_HU_Budapest:$LFN/$PRIMARY/$TASKNAME | tail -1`
         DL_DIR=`echo $LFN/$PRIMARY/$TASKNAME/$TIME | sed "s;/store/user;/data/gridout;"`
