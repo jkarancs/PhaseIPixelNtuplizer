@@ -92,11 +92,15 @@ void PhaseIPixelNtuplizer::beginJob()
   if(saveDigiTree_)
     digiTree_ = new TTree("digiTree",   "Digis in the Pixel detector.");
   clustTree_ = new TTree("clustTree", "Pixel clusters.");
-  trackTree_ = new TTree("trackTree", "The track in the event.");
+  if(saveTrackTree_) {
+    trackTree_ = new TTree("trackTree", "The track in the event.");
+  }
   trajTree_  = new TTree("trajTree",   "Trajectory measurements in the Pixel detector.");
-  nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree",
-					   "The original trajectroy measurements replaced by"
-					   " propagated hits in the Pixel detector.");
+  if(saveNonPropagatedExtraTrajTree_) {
+    nonPropagatedExtraTrajTree_  = new TTree("nonPropagatedExtraTrajTree",
+					     "The original trajectroy measurements replaced by"
+					     " propagated hits in the Pixel detector.");
+  }
   trajROCEfficiencyTree_ = new TTree("trajROCEfficiencyTree", "ROC and module efficiencies.");
   // Event tree
   eventTree_ -> Branch("event", &evt_, evt_.list.c_str());
@@ -140,8 +144,8 @@ void PhaseIPixelNtuplizer::beginJob()
     nonPropagatedExtraTrajTree_  -> Branch("track",     &track_,        track_      .list.c_str());
     nonPropagatedExtraTrajTree_  -> Branch("traj",      &traj_,         traj_       .list.c_str());
   }
-// Efficiency of the detector parts the trajectory measurements are located on
-trajROCEfficiencyTree_ -> Branch("trajROCEfficiency", &trajROCEff_, trajROCEff_.list.c_str());
+  // Efficiency of the detector parts the trajectory measurements are located on
+  trajROCEfficiencyTree_ -> Branch("trajROCEfficiency", &trajROCEff_, trajROCEff_.list.c_str());
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
   simhitOccupancy_fwd        = new TH2D("simhitOccupancy_fwd", "simhit occupancy - forward", 
 					150, -52.15, 52.15,  300,  -3.14159,  3.14159);
@@ -227,7 +231,7 @@ void PhaseIPixelNtuplizer::endJob()
 {
   std::cout << "Ntuplizer endjob step started." << std::endl;
   std::cout << "Generating ROC efficiency tree for the missing events..." << std::endl;
-  generateROCEfficiencyTree();
+  //generateROCEfficiencyTree();
   std::cout << "Done generating ROC efficiency tree." << std::endl;
   std::cout << "OutputFileName in the Ntuplizer endjob: " << ntupleOutputFilename_ << "\"." << std::endl;
   ntupleOutputFile_ -> cd();
@@ -313,14 +317,15 @@ void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const& iLumi,
 					      edm::EventSetup const& iSetup) {
   lumi_.time = iLumi.beginTime().unixTime();
   ++nLumisection_;
-  if(nLumisection_ % efficiencyCalculationFrequency_ == 0)
-  {
-    generateROCEfficiencyTree();
-  }
+  //if(nLumisection_ % efficiencyCalculationFrequency_ == 0)
+  //{
+  //  generateROCEfficiencyTree();
+  //}
 }
 
 void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+  
   if (++nEvent_ % eventSaveDownscaling_ != 0) return;
 
   // std::cout << "Analysis: " << std::endl;
@@ -1109,7 +1114,6 @@ void PhaseIPixelNtuplizer::getTrajTrackData
 				      trajTrackCollectionHandle, trajTree_);
 
   } // end loop on trajectories
-
 }
 
 void PhaseIPixelNtuplizer::getTrajTrackDataCosmics
@@ -1168,8 +1172,6 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
   getModuleData(traj_.mod_on, 1, detId);
 
   // Position measurements
-  const GeomDetUnit* geomDetUnit = recHit -> detUnit();
-
   // Looking for valid and missing hits
   GlobalPoint globalPosition     = trajStateOnSurface.globalPosition();
   LocalPoint  localPosition      = trajStateOnSurface.localPosition();
@@ -1236,6 +1238,7 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
 
   if(clust != nullptr) {
 
+    const GeomDetUnit* geomDetUnit = recHit -> detUnit();
     LocalPoint clustLocalCoordinates;
     std::tie(clustLocalCoordinates, std::ignore, std::ignore) = 
       pixelClusterParameterEstimator_ -> getParameters(*clust, *geomDetUnit);
