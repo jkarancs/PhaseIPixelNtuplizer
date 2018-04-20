@@ -19,8 +19,11 @@ for arg in "$@"; do
 	PRIMARY=`grep "config.Data.inputDataset" $CRAB_CFG | sed "s;';;g;s;/; ;g" | awk '{ print $3 }'`
 	AUTONAME=`echo $CRAB_CFG | sed "s;crab3_;;;s;.py;;"`
 	# Read info from the crab status
-	crab status -d crab_$AUTONAME > crab_status_$RAND.txt
-	NJOB=`cat crab_status_$RAND.txt | grep -v Warning | grep -E "%.*\(.*\)" | tail -1 | sed "s;(; ;;s;); ;;s;/; ;" | awk '{ print $NF }'`
+	#crab status -d crab_$AUTONAME > crab_status_$RAND.txt
+	#NJOB=`cat crab_status_$RAND.txt | grep -v Warning | grep -E "%.*\(.*\)" | tail -1 | sed "s;(; ;;s;); ;;s;/; ;" | awk '{ print $NF }'`
+	#rm crab_status_$RAND.txt
+	# Read njobs from crab.log which is faster and more reliable
+	NJOB=`grep "Jobs status" crab_$AUTONAME/crab.log | head -1 | sed "s;(; ;;s;); ;;s;/; ;" | awk '{ print $NF }'`
 	# Set input directory
 	TIME=`/data/jkarancs/scripts/se_util.csh ls T2_HU_Budapest:$LFN/$PRIMARY/$TASKNAME | tail -1`
         DL_DIR=`echo $LFN/$PRIMARY/$TASKNAME/$TIME | sed "s;/store/user;/data/gridout;"`
@@ -43,25 +46,25 @@ for arg in "$@"; do
 	    echo "75% of jobs finished, running first a low statistics analysis (on 10% statistics)"
 	    echo
 	    if (( $BADROC )); then
-		echo "- Start creating BADROC list first"
-		echo "  Input files:   $DL_DIR/*/*5.root ($NCOMP/$NJOB)"
-		echo "  Output file: PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.root"
-		echo "  Log file:    PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.log"
-		if (( $PHM )); then
-		    # Wait for BADROC list to finish, before running plotting
-		    ./Phase1PixelHistoMaker -b -o PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.root $DL_DIR/*/*5.root > PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.log 2>&1
-		else
-		    # Otherwise run in background
-		    nohup ./Phase1PixelHistoMaker -b -o PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.root $DL_DIR/*/*5.root > PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.log 2>&1 &
-		fi
+	        echo "- Start creating BADROC list first"
+	        echo "  Input files:   $DL_DIR/*/*5.root ($NCOMP/$NJOB)"
+	        echo "  Output file: PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.root"
+	        echo "  Log file:    PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.log"
+	        if (( $PHM )); then
+	            # Wait for BADROC list to finish, before running plotting
+	            ./Phase1PixelHistoMaker -b -o PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.root $DL_DIR/*/*5.root > PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.log 2>&1
+	        else
+	            # Otherwise run in background
+	            nohup ./Phase1PixelHistoMaker -b -o PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.root $DL_DIR/*/*5.root > PHM_PHASE1_out/BADROC_"$AUTONAME"_lowstat.log 2>&1 &
+	        fi
 	    fi
 	    if (( $PHM )); then
-		echo
-		echo "- Start running PixelHistoMaker (in background)"
-		echo "  Input files:   $DL_DIR/*/*5.root ($NCOMP/$NJOB)"
-		echo "  Output file: PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME"_lowstat.root"
-		echo "  Log file:    PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME"_lowstat.log"
-		nohup python run_phm.py --outdir="PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME"_lowstat" --nfile=$(($NCOMP/10/7)) --nproc=4 "$DL_DIR/*/*5.root" --run > "PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME"_lowstat.log" 2>&1 &
+	        echo
+	        echo "- Start running PixelHistoMaker (in background)"
+	        echo "  Input files:   $DL_DIR/*/*5.root ($NCOMP/$NJOB)"
+	        echo "  Output file: PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME"_lowstat.root"
+	        echo "  Log file:    PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME"_lowstat.log"
+	        nohup python run_phm.py --outdir="PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME"_lowstat" --nfile=$(($NCOMP/10/7)) --nproc=4 "$DL_DIR/*/*5.root" --run > "PHM_PHASE1_out/HitEffMonitoring_"$AUTONAME"_lowstat.log" 2>&1 &
 	    fi
 	    echo
 	fi
