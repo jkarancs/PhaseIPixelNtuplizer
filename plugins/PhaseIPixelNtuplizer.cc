@@ -480,8 +480,8 @@ void PhaseIPixelNtuplizer::setTriggerTable() {
     for(size_t i = 0; i < triggerNames_.size(); i++) std::cout << triggerNames_[i] << " ";
     std::cout << std::endl;
   } else {
-    triggerNames_.push_back("HLT_ZeroBias");
-    triggerNames_.push_back("HLT_Random");
+    triggerNames_.push_back("HLT_ZeroBias_v");
+    triggerNames_.push_back("HLT_Random_v");
   }
 
 }
