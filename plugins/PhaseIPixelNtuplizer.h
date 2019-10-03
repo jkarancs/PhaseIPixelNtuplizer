@@ -63,7 +63,7 @@
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
-#include "../interface/DataStructures_v6.h" // 2017 July 25, CMSSW_9_2_7
+#include "../interface/DataStructures_v7.h" // 2018 December 30, CMSSW_10_4_0
 
 // SiPixelCoordinates: new class for plotting Phase 0/1 Geometry
 #include "DQM/SiPixelPhase1Common/interface/SiPixelCoordinates.h"

@@ -1189,6 +1189,8 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
   // traj_.onedge = std::abs(traj_.lx) < 0.55 && std::abs(traj_.ly) < 3.0;
   traj_.validhit = recHit -> getType() == TrackingRecHit::valid;
   traj_.missing  = recHit -> getType() == TrackingRecHit::missing;
+  traj_.inactive  = recHit -> getType() == TrackingRecHit::inactive;
+  
 
   // Track local angles
   LocalTrajectoryParameters trajectoryParameters = trajStateOnSurface.localParameters();
