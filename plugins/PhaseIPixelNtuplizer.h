@@ -1,7 +1,10 @@
 #ifndef PHASEIPIXELNTUPLIZER_H
 #define PHASEIPIXELNTUPLIZER_H
 
+#define WORK_ON_MC 1
+
 /*
+#define WORK_ON_MC 1
 #define ADD_CHECK_PLOTS_TO_NTUPLE
 
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
@@ -58,12 +61,27 @@
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/PixelClusterParameterEstimator.h"
 #include "RecoTracker/Record/interface/CkfComponentsRecord.h"
 #include "RecoLocalTracker/Records/interface/TkPixelCPERecord.h"
+#include "SimTracker/TrackerHitAssociation/interface/TrackerHitAssociator.h"
+#include "../interface/PixelHitAssociator.h"
 
+// muons
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
+#include "RecoParticleFlow/PFProducer/interface/PFMuonAlgo.h"
+#define ADD_NEW_MUON_SELECTORS 0
+// 2D/3D impact parameters - The IPTools stuff simply won't compile :(
+//#include "TrackingTools/IPTools/interface/IPTools.h"
+#include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
-#include "../interface/DataStructures_v7.h" // 2018 December 30, CMSSW_10_4_0
+#include "../interface/DataStructures_v8.h" // 2019 October 07, CMSSW_10_6_X
 
 // SiPixelCoordinates: new class for plotting Phase 0/1 Geometry
 #include "DQM/SiPixelPhase1Common/interface/SiPixelCoordinates.h"
@@ -123,16 +141,16 @@ public:
 
 private:
   edm::ParameterSet iConfig_;
+  TrackerHitAssociator::Config trackerHitAssociatorConfig_;
   std::string ntupleOutputFilename_;
 
   // States
   int isEventFromMc_;
-  int nEvent_ = 0;
-  LumisectionCount nLumisection_ = 0;
 
   // Options
   int isCosmicTracking_;
   int clusterSaveDownscaling_;
+  int trackSaveDownscaling_;
   int eventSaveDownscaling_;
   int saveDigiTree_;
   int npixFromDigiCollection_;
@@ -140,6 +158,12 @@ private:
   int saveNonPropagatedExtraTrajTree_;
   int minVertexSize_;
   LumisectionCount efficiencyCalculationFrequency_;
+
+  int nEvent_ = 0;
+  LumisectionCount nLumisection_ = 0;
+  unsigned long long int nCluster_ = 0;
+  unsigned long long int nTrack_ = 0;
+  bool discardTrack_ = 0;
 
   // Misc. data
   TFile*                                 ntupleOutputFile_;
@@ -169,18 +193,20 @@ private:
   TrajROCEfficiency trajROCEff_;
 
   // Tokens
-  edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>> rawDataErrorToken_;
-  edm::EDGetTokenT<reco::VertexCollection>                 primaryVerticesToken_;
-  edm::EDGetTokenT<edm::TriggerResults>                    triggerResultsToken_;
-  edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>   clustersToken_;
-  edm::EDGetTokenT<TrajTrackAssociationCollection>         trajTrackCollectionToken_;
-  edm::EDGetTokenT<MeasurementTrackerEvent>                measurementTrackerEventToken_;
-  edm::EDGetTokenT<std::vector<PileupSummaryInfo>>         pileupSummaryToken_;
-  edm::EDGetTokenT<edm::DetSetVector<PixelDigi>>           pixelDigiCollectionToken_;
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-  std::vector<edm::EDGetTokenT<std::vector<PSimHit>>>      simhitCollectionTokens_;
+  edm::EDGetTokenT<edm::DetSetVector<SiPixelRawDataError>>  rawDataErrorToken_;
+  edm::EDGetTokenT<reco::VertexCollection>                  primaryVerticesToken_;
+  edm::EDGetTokenT<edm::TriggerResults>                     triggerResultsToken_;
+  edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>>    clustersToken_;
+  edm::EDGetTokenT<TrajTrackAssociationCollection>          trajTrackCollectionToken_;
+  edm::EDGetTokenT<MeasurementTrackerEvent>                 measurementTrackerEventToken_;
+  edm::EDGetTokenT<std::vector<PileupSummaryInfo>>          pileupSummaryToken_;
+  edm::EDGetTokenT<edm::DetSetVector<PixelDigi>>            pixelDigiCollectionToken_;
+#if WORK_ON_MC > 0
+  std::vector<edm::EDGetTokenT<std::vector<PSimHit>>>       simhitCollectionTokens_;
+  edm::EDGetTokenT<edm::SimTrackContainer>                  simTrackToken_;
 #endif
-  edm::EDGetTokenT<edm::ConditionsInRunBlock>              conditionsInRunBlockToken_;
+  edm::EDGetTokenT<reco::MuonCollection>                    muonCollectionToken_;
+  edm::EDGetTokenT<edm::ConditionsInRunBlock>               conditionsInRunBlockToken_;
 
   // Tools
   SiPixelCoordinates coord_;
@@ -191,6 +217,10 @@ private:
   const MeasurementTracker*             measurementTracker_;
   const MeasurementTrackerEvent*        measurementTrackerEvent_;
   const MeasurementEstimator*           chi2MeasurementEstimator_;
+#if WORK_ON_MC > 0
+  //const TrackerHitAssociator*           trackerHitAssociator_;
+  PixelHitAssociator*                   pixelHitAssociator_;
+#endif
 
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
   // Check plots
@@ -249,26 +279,38 @@ private:
 
   void getDigiData(const edm::Handle<edm::DetSetVector<PixelDigi>>&);
 
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+#if WORK_ON_MC > 0
   void getSimhitData(const std::vector<edm::Handle<edm::PSimHitContainer>>&);
 #endif
 
   void getClustData(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&);
 
+  bool sameTrack(const reco::TrackRef&, const reco::TrackRef&);
+
   std::map<reco::TrackRef, TrackData> getTrackData(const edm::Handle<reco::VertexCollection>&,
-						   const edm::Handle<TrajTrackAssociationCollection>&);
+						   const edm::Handle<TrajTrackAssociationCollection>&,
+                                                   const edm::Handle<reco::MuonCollection>&,
+                                                   const edm::ESHandle<TransientTrackBuilder>&);
 
   void getTrajTrackData(const edm::Handle<reco::VertexCollection>&,
 			const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&,
-			const edm::Handle<TrajTrackAssociationCollection>&);
+			const edm::Handle<TrajTrackAssociationCollection>&,
+                        const edm::Handle<reco::MuonCollection>&,
+                        const edm::ESHandle<TransientTrackBuilder>&,
+                        const edm::Handle<edm::SimTrackContainer>&);
 
   void getTrajTrackDataCosmics(const edm::Handle<reco::VertexCollection>&,
 			       const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&,
-			       const edm::Handle<TrajTrackAssociationCollection>&);
+			       const edm::Handle<TrajTrackAssociationCollection>&,
+                               const edm::Handle<reco::MuonCollection>&,
+                               const edm::ESHandle<TransientTrackBuilder>&,
+                               const edm::Handle<edm::SimTrackContainer>&);
 
   void checkAndSaveTrajMeasurementData(const TrajectoryMeasurement&,
 				       const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&,
 				       const edm::Handle<TrajTrackAssociationCollection>&,
+                                       const reco::TrackRef&,
+                                       const edm::Handle<edm::SimTrackContainer>&,
 				       TTree*);
 
   std::vector<TrajectoryMeasurement> getLayer1ExtrapolatedHitsFromMeas(const TrajectoryMeasurement&);
@@ -359,6 +401,13 @@ namespace NtuplizerHelpers
    float&, float&, float&);
 
   // int getTrackParentVtxNumTracks(const edm::Handle<reco::VertexCollection>&, const reco::TrackRef);
+
+  std::pair<bool,Measurement1D> absoluteImpactParameter(const TrajectoryStateOnSurface&,
+                                                        const  reco::Vertex&,
+                                                        VertexDistance&);
+  std::pair<bool,Measurement1D> signedTransverseImpactParameter(const reco::TransientTrack&,
+                                                                const GlobalVector&,
+                                                                const reco::Vertex&);
 
 } // NtuplizerHelpers
 

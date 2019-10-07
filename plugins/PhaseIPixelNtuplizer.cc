@@ -1,4 +1,5 @@
 #include "PhaseIPixelNtuplizer.h"
+#include "TVector.h"
 
 constexpr int                  PhaseIPixelNtuplizer::ZEROBIAS_TRIGGER_BIT;
 constexpr int                  PhaseIPixelNtuplizer::ZEROBIAS_BITMASK;
@@ -18,11 +19,13 @@ constexpr float                PhaseIPixelNtuplizer::BARREL_MODULE_EDGE_Y_CUT;
 
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) : 
   iConfig_(iConfig),
+  trackerHitAssociatorConfig_(iConfig, consumesCollector()),
   ntupleOutputFilename_(iConfig.getUntrackedParameter<std::string>
 			("outputFileName", "Ntuple.root")),
   isEventFromMc_(-1),
   isCosmicTracking_(iConfig.getUntrackedParameter<bool>("cosmics", false)),
   clusterSaveDownscaling_(iConfig.getUntrackedParameter<int>("clusterSaveDownscaleFactor",100)),
+  trackSaveDownscaling_(iConfig.getUntrackedParameter<int>("trackSaveDownscaleFactor",1)),
   eventSaveDownscaling_(iConfig.getUntrackedParameter<int>("eventSaveDownscaleFactor",1)),
   saveDigiTree_(iConfig.getUntrackedParameter<bool>("saveDigiTree", false)),
   npixFromDigiCollection_(iConfig.getUntrackedParameter<bool>("npixFromDigiCollection", false)),
@@ -61,15 +64,19 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
   // Save digi tree only if saveDigiTree_ option is set
   if(saveDigiTree_ || npixFromDigiCollection_) pixelDigiCollectionToken_ = consumes<edm::DetSetVector<PixelDigi>>
     (edm::InputTag("simSiPixelDigis"));
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
+#if WORK_ON_MC >0
   simhitCollectionTokens_.insert
     (simhitCollectionTokens_.end(), {
-      consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelHighTof")),
-	consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelLowTof")),
-	consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapHighTof")),
-	consumes<std::vector<PSimHit>>(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapLowTof")) });
-#endif
+      consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelHighTof")),
+	consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelLowTof")),
+	consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapHighTof")),
+	consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapLowTof")) });
   //	conditionsInRunBlockToken_ = mayConsume<edm::ConditionsInRunBlock, edm::InRun>(edm::InputTag("conditionsInEdm"));
+
+  simTrackToken_ = consumes<edm::SimTrackContainer>(edm::InputTag("g4SimHits"));
+#endif
+
+  muonCollectionToken_ = consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonCollection"));
 }
 
 PhaseIPixelNtuplizer::~PhaseIPixelNtuplizer() {}
@@ -340,19 +347,26 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   // FED errors
   federrors_ = NtuplizerHelpers::getFedErrors(iEvent, rawDataErrorToken_);
 
-#ifdef ADD_CHECK_PLOTS_TO_NTUPLE
-  // Simhits
+#if WORK_ON_MC > 0
+  // Simhits and hit associator
   std::vector<edm::Handle<edm::PSimHitContainer>>
     simhitCollectionHandles(simhitCollectionTokens_.size());
   for(unsigned int numToken = 0; numToken < simhitCollectionTokens_.size(); ++numToken) {
     iEvent.getByToken(simhitCollectionTokens_[numToken], simhitCollectionHandles[numToken]);
   }
+  //trackerHitAssociator_ = new TrackerHitAssociator(iEvent, trackerHitAssociatorConfig_);
+  pixelHitAssociator_   = new PixelHitAssociator(iEvent);
 #endif
+  
 
   // Digis
   edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
   if(saveDigiTree_ || npixFromDigiCollection_) iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
 
+  // SimTracks
+  edm::Handle<edm::SimTrackContainer> simTracksHandle;
+  iEvent.getByToken(simTrackToken_, simTracksHandle);
+  
   // Get vertices
   edm::Handle<reco::VertexCollection>      vertexCollectionHandle;
   iEvent.getByToken(primaryVerticesToken_, vertexCollectionHandle);
@@ -372,6 +386,14 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   // Get Traj-Track Collection
   edm::Handle<TrajTrackAssociationCollection>  trajTrackCollectionHandle;
   iEvent.getByToken(trajTrackCollectionToken_, trajTrackCollectionHandle);
+
+  // muons
+  edm::Handle<reco::MuonCollection> muonCollectionHandle;
+  iEvent.getByToken(muonCollectionToken_, muonCollectionHandle);
+
+  // track builder for IPTools methods
+  edm::ESHandle<TransientTrackBuilder> trackBuilderHandle;
+  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", trackBuilderHandle);
 
   // TrackerTopology for module informations
   edm::ESHandle<TrackerTopology> trackerTopologyHandle;
@@ -458,12 +480,18 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 
   //std::cout << "Saving trajecectory measurements and track data..." << std::endl;
   if(isCosmicTracking_)
-    getTrajTrackDataCosmics(vertexCollectionHandle, clusterCollectionHandle,
-			    trajTrackCollectionHandle);
+    getTrajTrackDataCosmics(vertexCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle,
+                            muonCollectionHandle, trackBuilderHandle, simTracksHandle);
   else
-    getTrajTrackData(vertexCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle);
+    getTrajTrackData(vertexCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle, 
+                     muonCollectionHandle, trackBuilderHandle, simTracksHandle);
 
   //std::cout << "The Phase1Ntuplizer data processing has been finished." << std::endl;
+
+#if WORK_ON_MC > 0
+  //delete trackerHitAssociator_;
+  delete pixelHitAssociator_;
+#endif
 }
 
 void PhaseIPixelNtuplizer::setTriggerTable() {
@@ -790,7 +818,6 @@ void PhaseIPixelNtuplizer::getClustData
   if(!clusterCollectionHandle.isValid())
     handleDefaultError("data_access", "data_access", "Failed to fetch the clusters.");
 
-  int clusterCounter = 0;
   const edmNew::DetSetVector<SiPixelCluster>& currentClusterCollection = *clusterCollectionHandle;
 
   // Looping on clusters with the same location
@@ -811,7 +838,7 @@ void PhaseIPixelNtuplizer::getClustData
 	currentClusterIt != currentClusterSet.end(); ++currentClusterIt) {
 
       // The number of saved clusters can be downscaled to save space
-      if(++clusterCounter % clusterSaveDownscaling_ != 0) continue;
+      if(++nCluster_ % clusterSaveDownscaling_ != 0) continue;
       const auto& currentCluster = *currentClusterIt;
 
       // Serial num of cluster in the given module
@@ -887,10 +914,22 @@ void PhaseIPixelNtuplizer::getClustData
   }
 }
 
-std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackData
-( const edm::Handle<reco::VertexCollection>& vertexCollectionHandle,
-  const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle) {
+bool 
+PhaseIPixelNtuplizer::sameTrack(const reco::TrackRef& one, const reco::TrackRef& two) {
+  return (std::abs(one->px() - two->px()) < 1e-2 &&
+          std::abs(one->py() - two->py()) < 1e-2 &&
+          std::abs(one->pz() - two->pz()) < 1e-2 &&
+          std::abs(one->vx() - two->vx()) < 1e-2 &&
+          std::abs(one->vy() - two->vy()) < 1e-2 &&
+          std::abs(one->vz() - two->vz()) < 1e-2);
+}
 
+std::map<reco::TrackRef, TrackData> 
+PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& vertexCollectionHandle,
+                                    const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle,
+                                    const edm::Handle<reco::MuonCollection>& muonCollectionHandle,
+                                    const edm::ESHandle<TransientTrackBuilder>& trackBuilderHandle) {
+  
   std::map<reco::TrackRef, TrackData> trackDataCollection;
   int trackIndex = 0;
 
@@ -898,6 +937,18 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackData
 
     const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
     const reco::TrackRef                    track = currentTrackKeypair.val;
+
+    // Match global and tracker muon inner tracks
+    bool muonMatch = false;
+    reco::Muon muon;
+    for (const reco::Muon& mu : *muonCollectionHandle) if (mu.isTrackerMuon() || mu.isGlobalMuon()) {
+      if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) {
+        muonMatch = true;
+        muon = mu;
+      }
+    }
+    
+    if ((discardTrack_ = (++nTrack_ % trackSaveDownscaling_ != 0 && !muonMatch))) continue;
 
     TrackData* trackField;
 
@@ -939,6 +990,81 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackData
       newTrackData.phi     = track -> phi();
       trackFieldIt = trackDataCollection.insert({track, std::move(newTrackData)}).first;
 
+      // muon info
+      // https://cmssdt.cern.ch/lxr/source/DataFormats/MuonReco/interface/Muon.h
+      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2#Muon_Identification
+      if (muonMatch) {
+        // ID/ISO
+        newTrackData.muon_global        = muon.isGlobalMuon();
+        newTrackData.muon_intime        = muon.passed(reco::Muon::InTimeMuon);
+        newTrackData.muon_id_soft       = muon.passed(reco::Muon::SoftCutBasedId);
+        newTrackData.muon_id_loose      = muon.passed(reco::Muon::CutBasedIdLoose);
+        newTrackData.muon_id_medium     = muon.passed(reco::Muon::CutBasedIdMedium);
+        newTrackData.muon_id_tight      = muon.passed(reco::Muon::CutBasedIdTight);
+        newTrackData.muon_id_mva_soft   = muon.passed(reco::Muon::SoftMvaId);
+        newTrackData.muon_id_mva        = muon.passed(reco::Muon::MvaLoose);
+        newTrackData.muon_id_mva       += muon.passed(reco::Muon::MvaMedium);
+        newTrackData.muon_id_mva       += muon.passed(reco::Muon::MvaTight); 
+        newTrackData.muon_id_trigger    = muon.passed(reco::Muon::TriggerIdLoose);
+        newTrackData.muon_iso_pf        = muon.passed(reco::Muon::PFIsoVeryLoose);
+        newTrackData.muon_iso_pf       += muon.passed(reco::Muon::PFIsoLoose);
+        newTrackData.muon_iso_pf       += muon.passed(reco::Muon::PFIsoMedium);
+        newTrackData.muon_iso_pf       += muon.passed(reco::Muon::PFIsoTight);
+        newTrackData.muon_iso_pf       += muon.passed(reco::Muon::PFIsoVeryTight);
+        newTrackData.muon_iso_pf       += muon.passed(reco::Muon::PFIsoVeryVeryTight);
+        newTrackData.muon_iso_tk        = muon.passed(reco::Muon::TkIsoLoose);
+        newTrackData.muon_iso_tk       += muon.passed(reco::Muon::TkIsoTight);
+        newTrackData.muon_iso_mini      = muon.passed(reco::Muon::MiniIsoLoose);
+        newTrackData.muon_iso_mini     += muon.passed(reco::Muon::MiniIsoMedium);
+        newTrackData.muon_iso_mini     += muon.passed(reco::Muon::MiniIsoTight);
+        newTrackData.muon_iso_mini     += muon.passed(reco::Muon::MiniIsoVeryTight);
+        newTrackData.muon_iso_multi     = muon.passed(reco::Muon::MultiIsoLoose);
+        newTrackData.muon_iso_multi    += muon.passed(reco::Muon::MultiIsoMedium);
+        // stuff only added in latest releases
+#if ADD_NEW_MUON_SELECTORS > 0
+        newTrackData.muon_id_mva       += muon.passed(reco::Muon::MvaVTight);
+        newTrackData.muon_id_mva       += muon.passed(reco::Muon::MvaVVTight);
+        newTrackData.muon_id_mva_lowpt  = muon.passed(reco::Muon::LowPtMvaLoose);
+        newTrackData.muon_id_mva_lowpt += muon.passed(reco::Muon::LowPtMvaMedium);
+        newTrackData.muon_iso_puppi     = muon.passed(reco::Muon::PuppiIsoLoose);
+        newTrackData.muon_iso_puppi    += muon.passed(reco::Muon::PuppiIsoMedium);
+        newTrackData.muon_iso_puppi    += muon.passed(reco::Muon::PuppiIsoTight);
+#endif
+        // IP - Taken from PAT and apply it to the closest vertex
+        // PV2D
+        double dz  = std::abs(muon.muonBestTrack()->dz(closestVtx->position()));
+        double dxy  = std::abs(muon.muonBestTrack()->dxy(closestVtx->position()));
+        newTrackData.muon_ip_2d         = ((dz<0.5) && (dxy<0.2)) + ((dz<0.1) && (dxy<0.05));
+        // This thing won't compile no matter what I try
+        //reco::TransientTrack tt = trackBuilderHandle->build(track);
+        //std::pair<bool, Measurement1D> ip2d = IPTools::signedTransverseImpactParameter(tt, GlobalVector(track->px(), track->py(), track->pz()), *closestVtx);
+        //double dxy = ip2d.second.value();
+        // PV3D
+        //std::pair<bool, Measurement1D> ip3d = IPTools::signedImpactParameter3D(tt, direction, *closestVtx);
+        //double dB3D  = std::abs(ip3d.second.value());
+        //double edB3D = std::abs(ip3d.second.error());
+        //double sip3D = edB3D > 0 ? dB3D / edB3D : 0.0;
+        //newTrackData.muon_ip_3dsig      = (sip3D<8) + (sip3D<4);
+        // Muon timing
+        // https://cmssdt.cern.ch/lxr/source/DataFormats/MuonReco/interface/MuonTime.h
+        // https://cmssdt.cern.ch/lxr/source/DataFormats/MuonReco/src/MuonSelectors.cc#1047
+        newTrackData.muon_time_comb_dir   = muon.time().direction();
+        newTrackData.muon_time_comb_ndof  = muon.time().nDof;
+        newTrackData.muon_time_rpc_dir    = muon.rpcTime().direction();
+        newTrackData.muon_time_rpc_ndof   = muon.rpcTime().nDof;
+        if (muon.time().direction()==reco::MuonTime::OutsideIn) {
+          newTrackData.muon_time_comb = muon.time().timeAtIpOutIn;
+        } else if (muon.time().direction()==reco::MuonTime::InsideOut) {
+          newTrackData.muon_time_comb = muon.time().timeAtIpInOut;
+        }
+        if (muon.rpcTime().nDof > 1 && std::abs(muon.rpcTime().timeAtIpInOutErr) < 0.001) {
+          if (muon.time().direction()==reco::MuonTime::OutsideIn) {
+            newTrackData.muon_time_rpc = muon.rpcTime().timeAtIpOutIn;
+          } else if (muon.time().direction()==reco::MuonTime::InsideOut) {
+            newTrackData.muon_time_rpc = muon.rpcTime().timeAtIpInOut;
+          }
+        }
+      }
     }
 
     trackField = &(trackFieldIt -> second);
@@ -1031,19 +1157,24 @@ std::map<reco::TrackRef, TrackData> PhaseIPixelNtuplizer::getTrackData
 
 }
 
-void PhaseIPixelNtuplizer::getTrajTrackData
-( const edm::Handle<reco::VertexCollection>& vertexCollectionHandle,
-  const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle,
-  const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle) {
-
+void
+PhaseIPixelNtuplizer::getTrajTrackData( const edm::Handle<reco::VertexCollection>& vertexCollectionHandle,
+                                        const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle,
+                                        const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle,
+                                        const edm::Handle<reco::MuonCollection>& muonCollectionHandle,
+                                        const edm::ESHandle<TransientTrackBuilder>& trackBuilderHandle,
+                                        const edm::Handle<edm::SimTrackContainer>& simTracksHandle) {
+  
   std::map<reco::TrackRef, TrackData> trackDataCollection
-    (getTrackData(vertexCollectionHandle, trajTrackCollectionHandle));
+    (getTrackData(vertexCollectionHandle, trajTrackCollectionHandle, muonCollectionHandle, trackBuilderHandle));
 
   // Trajectory measurement loop
   for(const auto& currentTrackKeypair: *trajTrackCollectionHandle) {
 
     const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
     const reco::TrackRef                    track = currentTrackKeypair.val;
+
+    if (discardTrack_) continue;
 
     // Discarding tracks without pixel measurements
     if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
@@ -1079,7 +1210,8 @@ void PhaseIPixelNtuplizer::getTrajTrackData
 	measurementIt != firstLayer1TrajMeasurementIt; measurementIt++) {
 
       checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle,
-				      trajTrackCollectionHandle, trajTree_);
+				      trajTrackCollectionHandle, track,
+                                      simTracksHandle, trajTree_);
     }
 
     // Save non-propagated hits as an additional tree
@@ -1088,7 +1220,8 @@ void PhaseIPixelNtuplizer::getTrajTrackData
       for(auto measurementIt = firstLayer1TrajMeasurementIt;
 	  measurementIt != trajectoryMeasurements.end(); measurementIt++)
 	checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle,
-					trajTrackCollectionHandle, nonPropagatedExtraTrajTree_);
+					trajTrackCollectionHandle, track,
+                                        simTracksHandle, nonPropagatedExtraTrajTree_);
 
     }
 
@@ -1111,24 +1244,30 @@ void PhaseIPixelNtuplizer::getTrajTrackData
     for(auto measurementIt = extrapolatedHitsOnLayer1.begin();
 	measurementIt != extrapolatedHitsOnLayer1.end(); measurementIt++)
       checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle,
-				      trajTrackCollectionHandle, trajTree_);
+				      trajTrackCollectionHandle, track,
+                                      simTracksHandle, trajTree_);
 
   } // end loop on trajectories
 }
 
-void PhaseIPixelNtuplizer::getTrajTrackDataCosmics
-( const edm::Handle<reco::VertexCollection>& vertexCollectionHandle,
-  const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle,
-  const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle) {
-
+void
+PhaseIPixelNtuplizer::getTrajTrackDataCosmics(const edm::Handle<reco::VertexCollection>& vertexCollectionHandle,
+                                              const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle,
+                                              const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle,
+                                              const edm::Handle<reco::MuonCollection>& muonCollectionHandle,
+                                              const edm::ESHandle<TransientTrackBuilder>& trackBuilderHandle,
+                                              const edm::Handle<edm::SimTrackContainer>& simTracksHandle) {
+  
   std::map<reco::TrackRef, TrackData> trackDataCollection
-    (getTrackData(vertexCollectionHandle, trajTrackCollectionHandle));
+    (getTrackData(vertexCollectionHandle, trajTrackCollectionHandle, muonCollectionHandle, trackBuilderHandle));
 
   // Trajectory measurement loop
   for(const auto& currentTrackKeypair: *trajTrackCollectionHandle) {
 
     const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
     const reco::TrackRef                    track = currentTrackKeypair.val;
+
+    if (discardTrack_) continue;
 
     // Discarding tracks without pixel measurements
     if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
@@ -1139,7 +1278,8 @@ void PhaseIPixelNtuplizer::getTrajTrackDataCosmics
     for(auto measurementIt = trajectoryMeasurements.begin();
 	measurementIt != trajectoryMeasurements.end(); measurementIt++)
       checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle,
-				      trajTrackCollectionHandle, trajTree_);
+				      trajTrackCollectionHandle, track,
+                                      simTracksHandle, trajTree_);
 
   }
 }
@@ -1148,6 +1288,8 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
 ( const TrajectoryMeasurement& measurement,
   const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>& clusterCollectionHandle,
   const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle,
+  const reco::TrackRef& track,
+  const edm::Handle<edm::SimTrackContainer>& simTracksHandle,
   TTree* targetTree) {
 
   traj_.init();
@@ -1191,6 +1333,59 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
   traj_.missing  = recHit -> getType() == TrackingRecHit::missing;
   traj_.inactive  = recHit -> getType() == TrackingRecHit::inactive;
   
+  // Distance of nearest other track
+  traj_.dr_trk = 9999;
+  for(const auto& pair : *trajTrackCollectionHandle) {
+    const reco::TrackRef track2 = pair.val;
+    if (track!=track2) {
+      double deta = track2->eta()-track->eta();
+      double dphi = std::abs(track2->phi()-track->phi());
+      dphi = dphi<3.141592654 ? dphi : 6.283185307 - dphi;
+      double dr = std::sqrt(deta*deta+dphi*dphi);
+      if (dr<traj_.dr_trk) traj_.dr_trk = dr;
+    }
+  }
+
+  // Sim hit matching and residuals
+#if WORK_ON_MC > 0
+  //std::vector<PSimHit> matched = trackerHitAssociator_->associateHit(*recHit);
+  std::vector<PSimHit> matched = pixelHitAssociator_->  associateHit(*recHit, localPosition);
+  if (matched.size()>0) {
+    float mindist = 999999;
+    PSimHit closest;
+    unsigned int matchid = -9999;
+    // Find the vector of SimHits matching this RecHit
+    // Print out the SimHit positions and residuals
+    for (auto const& m : matched) {
+      //std::cout << " simtrack ID = " << m.trackId() << "                            Simhit Pos = " << m.localPosition() << std::endl;
+      // Seek the smallest residual
+      float dist = (localPosition - m.localPosition()).mag();
+      if (dist < mindist) {
+        mindist = dist;
+        closest = m;
+        matchid = m.trackId();
+      }
+    }
+    //std::cout << " Closest Simhit = " << closest.localPosition();
+    if (mindist != 999999) {
+      traj_.dx_simhit = fabs(localPosition.x() - closest.localPosition().x());
+      traj_.dy_simhit = fabs(localPosition.y() - closest.localPosition().y());
+      //std::cout << ", diff(x,y) = (" << traj_.dx_simhit << ", " << traj_.dy_simhit << ")";
+      //std::cout << ", |diff| = " << mindist << std::endl;
+    }
+    
+    // Sim track (TrackingParticles) matching
+    // https://github.com/cms-sw/cmssw/blob/master/Validation/RecoTrack/plugins/TrackingNtuple.cc#L3403-L3417
+    for (const auto& simtrack : *(simTracksHandle.product())) if (simtrack.trackId()==matchid) {
+      //std::cout << "sim track      pt=" << simtrack.momentum().pt() << " eta=" << simtrack.momentum().eta() << " phi=" << simtrack.momentum().phi() << std::endl;
+      //std::cout << "--> reco track pt=" << track->pt() << " eta=" << track->eta() << " phi=" << track->phi() << std::endl<<std::endl<<std::endl;
+      double deta = simtrack.momentum().eta()-track->eta();
+      double dphi = std::abs(simtrack.momentum().phi()-track->phi());
+      dphi = dphi<3.141592654 ? dphi : 6.283185307 - dphi;
+      traj_.dr_simtrk = std::sqrt(deta*deta+dphi*dphi);
+    }
+  }
+#endif
 
   // Track local angles
   LocalTrajectoryParameters trajectoryParameters = trajStateOnSurface.localParameters();
@@ -2283,6 +2478,7 @@ namespace NtuplizerHelpers
     trajMeasurementDistance(measurement, *closestMeasurementIt, distance, dx, dy);
 
   }
+
 } // NtuplizerHelpers
 
 
