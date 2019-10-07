@@ -19,10 +19,9 @@ constexpr float                PhaseIPixelNtuplizer::BARREL_MODULE_EDGE_Y_CUT;
 
 PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) : 
   iConfig_(iConfig),
-  trackerHitAssociatorConfig_(iConfig, consumesCollector()),
   ntupleOutputFilename_(iConfig.getUntrackedParameter<std::string>
 			("outputFileName", "Ntuple.root")),
-  isEventFromMc_(-1),
+  isEventFromMc_(iConfig.getUntrackedParameter<bool>("MC", false)),
   isCosmicTracking_(iConfig.getUntrackedParameter<bool>("cosmics", false)),
   clusterSaveDownscaling_(iConfig.getUntrackedParameter<int>("clusterSaveDownscaleFactor",100)),
   trackSaveDownscaling_(iConfig.getUntrackedParameter<int>("trackSaveDownscaleFactor",1)),
@@ -62,18 +61,21 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
     (edm::InputTag("MeasurementTrackerEvent"));
 
   // Save digi tree only if saveDigiTree_ option is set
-  if(saveDigiTree_ || npixFromDigiCollection_) pixelDigiCollectionToken_ = consumes<edm::DetSetVector<PixelDigi>>
-    (edm::InputTag("simSiPixelDigis"));
-#if WORK_ON_MC >0
-  simhitCollectionTokens_.insert
-    (simhitCollectionTokens_.end(), {
-      consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelHighTof")),
-	consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelLowTof")),
-	consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapHighTof")),
-	consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapLowTof")) });
-  //	conditionsInRunBlockToken_ = mayConsume<edm::ConditionsInRunBlock, edm::InRun>(edm::InputTag("conditionsInEdm"));
-
-  simTrackToken_ = consumes<edm::SimTrackContainer>(edm::InputTag("g4SimHits"));
+#if ADD_SIM_INFO >0
+  if (isEventFromMc_) {
+    if(saveDigiTree_ || npixFromDigiCollection_) pixelDigiCollectionToken_ = consumes<edm::DetSetVector<PixelDigi>>
+						   (edm::InputTag("simSiPixelDigis"));
+    trackerHitAssociatorConfig_ = TrackerHitAssociator::Config(iConfig, consumesCollector());
+    simhitCollectionTokens_.insert
+      (simhitCollectionTokens_.end(), {
+	consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelHighTof")),
+	  consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelBarrelLowTof")),
+	  consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapHighTof")),
+	  consumes<std::vector<PSimHit> >(edm::InputTag("g4SimHits", "TrackerHitsPixelEndcapLowTof")) });
+    //	conditionsInRunBlockToken_ = mayConsume<edm::ConditionsInRunBlock, edm::InRun>(edm::InputTag("conditionsInEdm"));
+    
+    simTrackToken_ = consumes<edm::SimTrackContainer>(edm::InputTag("g4SimHits"));
+  }
 #endif
 
   muonCollectionToken_ = consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonCollection"));
@@ -337,7 +339,7 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 
   // std::cout << "Analysis: " << std::endl;
   // A message is printed every time a change in the data type occurs
-  if(isEventFromMc_ != (iEvent.id().run() == 1)) {
+  if (isEventFromMc_ != (iEvent.id().run() == 1)) {
     isEventFromMc_ = iEvent.id().run() == 1;
     std::cout << "Deduced data type: " 
 	      << (isEventFromMc_ ? "MONTE-CARLO" : "REAL RAW DATA") << "." << std::endl;
@@ -347,25 +349,30 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   // FED errors
   federrors_ = NtuplizerHelpers::getFedErrors(iEvent, rawDataErrorToken_);
 
-#if WORK_ON_MC > 0
+#if ADD_SIM_INFO > 0
   // Simhits and hit associator
   std::vector<edm::Handle<edm::PSimHitContainer>>
     simhitCollectionHandles(simhitCollectionTokens_.size());
-  for(unsigned int numToken = 0; numToken < simhitCollectionTokens_.size(); ++numToken) {
-    iEvent.getByToken(simhitCollectionTokens_[numToken], simhitCollectionHandles[numToken]);
+  if (isEventFromMc_) {
+    for(unsigned int numToken = 0; numToken < simhitCollectionTokens_.size(); ++numToken) {
+      iEvent.getByToken(simhitCollectionTokens_[numToken], simhitCollectionHandles[numToken]);
+    }
+    //trackerHitAssociator_ = new TrackerHitAssociator(iEvent, trackerHitAssociatorConfig_);
+    pixelHitAssociator_   = new PixelHitAssociator(iEvent);
   }
-  //trackerHitAssociator_ = new TrackerHitAssociator(iEvent, trackerHitAssociatorConfig_);
-  pixelHitAssociator_   = new PixelHitAssociator(iEvent);
 #endif
   
-
   // Digis
   edm::Handle<edm::DetSetVector<PixelDigi>> digiCollectionHandle;
-  if(saveDigiTree_ || npixFromDigiCollection_) iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
+  if (isEventFromMc_) {
+    if(saveDigiTree_ || npixFromDigiCollection_) iEvent.getByToken(pixelDigiCollectionToken_, digiCollectionHandle);
+  }
 
   // SimTracks
   edm::Handle<edm::SimTrackContainer> simTracksHandle;
-  iEvent.getByToken(simTrackToken_, simTracksHandle);
+  if (isEventFromMc_) {
+    iEvent.getByToken(simTrackToken_, simTracksHandle);
+  }
   
   // Get vertices
   edm::Handle<reco::VertexCollection>      vertexCollectionHandle;
@@ -479,18 +486,20 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   getClustData(clusterCollectionHandle);
 
   //std::cout << "Saving trajecectory measurements and track data..." << std::endl;
-  if(isCosmicTracking_)
+  if(isCosmicTracking_) {
     getTrajTrackDataCosmics(vertexCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle,
                             muonCollectionHandle, trackBuilderHandle, simTracksHandle);
-  else
+  } else {
     getTrajTrackData(vertexCollectionHandle, clusterCollectionHandle, trajTrackCollectionHandle, 
                      muonCollectionHandle, trackBuilderHandle, simTracksHandle);
-
+  }
   //std::cout << "The Phase1Ntuplizer data processing has been finished." << std::endl;
 
-#if WORK_ON_MC > 0
-  //delete trackerHitAssociator_;
-  delete pixelHitAssociator_;
+#if ADD_SIM_INFO > 0
+  if (isEventFromMc_) {
+    //delete trackerHitAssociator_;
+    delete pixelHitAssociator_;
+  }
 #endif
 }
 
@@ -933,6 +942,7 @@ PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& v
   std::map<reco::TrackRef, TrackData> trackDataCollection;
   int trackIndex = 0;
 
+  nTrackSave_ = nTrack_;
   for(const auto& currentTrackKeypair: *trajTrackCollectionHandle) {
 
     const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
@@ -947,8 +957,7 @@ PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& v
         muon = mu;
       }
     }
-    
-    if ((discardTrack_ = (++nTrack_ % trackSaveDownscaling_ != 0 && !muonMatch))) continue;
+    if (++nTrack_ % trackSaveDownscaling_ != 0 && !muonMatch) continue;
 
     TrackData* trackField;
 
@@ -1169,12 +1178,18 @@ PhaseIPixelNtuplizer::getTrajTrackData( const edm::Handle<reco::VertexCollection
     (getTrackData(vertexCollectionHandle, trajTrackCollectionHandle, muonCollectionHandle, trackBuilderHandle));
 
   // Trajectory measurement loop
+  unsigned long long int nTrack = nTrackSave_;
   for(const auto& currentTrackKeypair: *trajTrackCollectionHandle) {
 
     const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
     const reco::TrackRef                    track = currentTrackKeypair.val;
 
-    if (discardTrack_) continue;
+    // Match global and tracker muon inner tracks
+    bool muonMatch = false;
+    for (const reco::Muon& mu : *muonCollectionHandle) if (mu.isTrackerMuon() || mu.isGlobalMuon()) {
+      if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) muonMatch = true;
+    }
+    if (++nTrack % trackSaveDownscaling_ != 0 && !muonMatch) continue;
 
     // Discarding tracks without pixel measurements
     if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
@@ -1262,12 +1277,18 @@ PhaseIPixelNtuplizer::getTrajTrackDataCosmics(const edm::Handle<reco::VertexColl
     (getTrackData(vertexCollectionHandle, trajTrackCollectionHandle, muonCollectionHandle, trackBuilderHandle));
 
   // Trajectory measurement loop
+  unsigned long long int nTrack = nTrackSave_;
   for(const auto& currentTrackKeypair: *trajTrackCollectionHandle) {
 
     const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
     const reco::TrackRef                    track = currentTrackKeypair.val;
 
-    if (discardTrack_) continue;
+    // Match global and tracker muon inner tracks
+    bool muonMatch = false;
+    for (const reco::Muon& mu : *muonCollectionHandle) if (mu.isTrackerMuon() || mu.isGlobalMuon()) {
+      if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) muonMatch = true;
+    }
+    if (++nTrack % trackSaveDownscaling_ != 0 && !muonMatch) continue;
 
     // Discarding tracks without pixel measurements
     if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
@@ -1347,42 +1368,44 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
   }
 
   // Sim hit matching and residuals
-#if WORK_ON_MC > 0
-  //std::vector<PSimHit> matched = trackerHitAssociator_->associateHit(*recHit);
-  std::vector<PSimHit> matched = pixelHitAssociator_->  associateHit(*recHit, localPosition);
-  if (matched.size()>0) {
-    float mindist = 999999;
-    PSimHit closest;
-    unsigned int matchid = -9999;
-    // Find the vector of SimHits matching this RecHit
-    // Print out the SimHit positions and residuals
-    for (auto const& m : matched) {
-      //std::cout << " simtrack ID = " << m.trackId() << "                            Simhit Pos = " << m.localPosition() << std::endl;
-      // Seek the smallest residual
-      float dist = (localPosition - m.localPosition()).mag();
-      if (dist < mindist) {
-        mindist = dist;
-        closest = m;
-        matchid = m.trackId();
+#if ADD_SIM_INFO > 0
+  if (isEventFromMc_) {
+    //std::vector<PSimHit> matched = trackerHitAssociator_->associateHit(*recHit);
+    std::vector<PSimHit> matched = pixelHitAssociator_->  associateHit(*recHit, localPosition);
+    if (matched.size()>0) {
+      float mindist = 999999;
+      PSimHit closest;
+      unsigned int matchid = -9999;
+      // Find the vector of SimHits matching this RecHit
+      // Print out the SimHit positions and residuals
+      for (auto const& m : matched) {
+        //std::cout << " simtrack ID = " << m.trackId() << "                            Simhit Pos = " << m.localPosition() << std::endl;
+        // Seek the smallest residual
+        float dist = (localPosition - m.localPosition()).mag();
+        if (dist < mindist) {
+          mindist = dist;
+          closest = m;
+          matchid = m.trackId();
+        }
       }
-    }
-    //std::cout << " Closest Simhit = " << closest.localPosition();
-    if (mindist != 999999) {
-      traj_.dx_simhit = fabs(localPosition.x() - closest.localPosition().x());
-      traj_.dy_simhit = fabs(localPosition.y() - closest.localPosition().y());
-      //std::cout << ", diff(x,y) = (" << traj_.dx_simhit << ", " << traj_.dy_simhit << ")";
-      //std::cout << ", |diff| = " << mindist << std::endl;
-    }
-    
-    // Sim track (TrackingParticles) matching
-    // https://github.com/cms-sw/cmssw/blob/master/Validation/RecoTrack/plugins/TrackingNtuple.cc#L3403-L3417
-    for (const auto& simtrack : *(simTracksHandle.product())) if (simtrack.trackId()==matchid) {
-      //std::cout << "sim track      pt=" << simtrack.momentum().pt() << " eta=" << simtrack.momentum().eta() << " phi=" << simtrack.momentum().phi() << std::endl;
-      //std::cout << "--> reco track pt=" << track->pt() << " eta=" << track->eta() << " phi=" << track->phi() << std::endl<<std::endl<<std::endl;
-      double deta = simtrack.momentum().eta()-track->eta();
-      double dphi = std::abs(simtrack.momentum().phi()-track->phi());
-      dphi = dphi<3.141592654 ? dphi : 6.283185307 - dphi;
-      traj_.dr_simtrk = std::sqrt(deta*deta+dphi*dphi);
+      //std::cout << " Closest Simhit = " << closest.localPosition();
+      if (mindist != 999999) {
+        traj_.dx_simhit = fabs(localPosition.x() - closest.localPosition().x());
+        traj_.dy_simhit = fabs(localPosition.y() - closest.localPosition().y());
+        //std::cout << ", diff(x,y) = (" << traj_.dx_simhit << ", " << traj_.dy_simhit << ")";
+        //std::cout << ", |diff| = " << mindist << std::endl;
+      }
+      
+      // Sim track (TrackingParticles) matching
+      // https://github.com/cms-sw/cmssw/blob/master/Validation/RecoTrack/plugins/TrackingNtuple.cc#L3403-L3417
+      for (const auto& simtrack : *(simTracksHandle.product())) if (simtrack.trackId()==matchid) {
+        //std::cout << "sim track      pt=" << simtrack.momentum().pt() << " eta=" << simtrack.momentum().eta() << " phi=" << simtrack.momentum().phi() << std::endl;
+        //std::cout << "--> reco track pt=" << track->pt() << " eta=" << track->eta() << " phi=" << track->phi() << std::endl<<std::endl<<std::endl;
+        double deta = simtrack.momentum().eta()-track->eta();
+        double dphi = std::abs(simtrack.momentum().phi()-track->phi());
+        dphi = dphi<3.141592654 ? dphi : 6.283185307 - dphi;
+        traj_.dr_simtrk = std::sqrt(deta*deta+dphi*dphi);
+      }
     }
   }
 #endif

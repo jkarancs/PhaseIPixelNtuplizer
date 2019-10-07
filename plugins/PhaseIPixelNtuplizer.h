@@ -1,10 +1,11 @@
 #ifndef PHASEIPIXELNTUPLIZER_H
 #define PHASEIPIXELNTUPLIZER_H
 
-#define WORK_ON_MC 1
+#define ADD_SIM_INFO 1
+#define ADD_NEW_MUON_SELECTORS 1 // Works in 9_4_X, 10_6_X or later
 
 /*
-#define WORK_ON_MC 1
+#define ADD_SIM_INFO 1
 #define ADD_CHECK_PLOTS_TO_NTUPLE
 
 #ifdef ADD_CHECK_PLOTS_TO_NTUPLE
@@ -69,7 +70,6 @@
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "RecoParticleFlow/PFProducer/interface/PFMuonAlgo.h"
-#define ADD_NEW_MUON_SELECTORS 0
 // 2D/3D impact parameters - The IPTools stuff simply won't compile :(
 //#include "TrackingTools/IPTools/interface/IPTools.h"
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
@@ -141,7 +141,6 @@ public:
 
 private:
   edm::ParameterSet iConfig_;
-  TrackerHitAssociator::Config trackerHitAssociatorConfig_;
   std::string ntupleOutputFilename_;
 
   // States
@@ -163,7 +162,7 @@ private:
   LumisectionCount nLumisection_ = 0;
   unsigned long long int nCluster_ = 0;
   unsigned long long int nTrack_ = 0;
-  bool discardTrack_ = 0;
+  unsigned long long int nTrackSave_ = 0;
 
   // Misc. data
   TFile*                                 ntupleOutputFile_;
@@ -201,7 +200,8 @@ private:
   edm::EDGetTokenT<MeasurementTrackerEvent>                 measurementTrackerEventToken_;
   edm::EDGetTokenT<std::vector<PileupSummaryInfo>>          pileupSummaryToken_;
   edm::EDGetTokenT<edm::DetSetVector<PixelDigi>>            pixelDigiCollectionToken_;
-#if WORK_ON_MC > 0
+#if ADD_SIM_INFO > 0
+  TrackerHitAssociator::Config trackerHitAssociatorConfig_;
   std::vector<edm::EDGetTokenT<std::vector<PSimHit>>>       simhitCollectionTokens_;
   edm::EDGetTokenT<edm::SimTrackContainer>                  simTrackToken_;
 #endif
@@ -217,7 +217,7 @@ private:
   const MeasurementTracker*             measurementTracker_;
   const MeasurementTrackerEvent*        measurementTrackerEvent_;
   const MeasurementEstimator*           chi2MeasurementEstimator_;
-#if WORK_ON_MC > 0
+#if ADD_SIM_INFO > 0
   //const TrackerHitAssociator*           trackerHitAssociator_;
   PixelHitAssociator*                   pixelHitAssociator_;
 #endif
@@ -279,7 +279,7 @@ private:
 
   void getDigiData(const edm::Handle<edm::DetSetVector<PixelDigi>>&);
 
-#if WORK_ON_MC > 0
+#if ADD_SIM_INFO > 0
   void getSimhitData(const std::vector<edm::Handle<edm::PSimHitContainer>>&);
 #endif
 
