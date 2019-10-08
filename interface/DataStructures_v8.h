@@ -587,6 +587,7 @@ public:
   // Non-split mode from here - keep order of variables
   int   validhit;
   int   missing;
+  int   inactive;
   float lx;
   float ly;
   float lz;
@@ -622,7 +623,6 @@ public:
   // float lymatch;
   // int   i; // serial num of trajectory measurement on the (single) track of the event
   int   onedge;
-  int   inactive;
   // int   badhit;
   // int   telescope;
   // int   telescope_valid;
@@ -638,16 +638,17 @@ public:
 
 
   const std::string list = 
-    "validhit/I:missing:lx/F:ly:lz:glx:gly:glz:clust_near/I"
+    "validhit/I:missing:inactive:lx/F:ly:lz:glx:gly:glz:clust_near/I"
     ":hit_near:pass_effcuts:alpha/F"
     ":beta:norm_charge:d_tr:dx_tr:dy_tr:d_cl:dx_cl:dy_cl:dx_hit:dy_hit"
-    ":dr_trk:dr_simtrk:dx_simhit:dy_simhit:onedge/I:inactive/I:lx_err/F:ly_err/F";
+    ":dr_trk:dr_simtrk:dx_simhit:dy_simhit:onedge/I:lx_err/F:ly_err/F";
 
   TrajMeasData() { init(); }
 
   void init() {
     validhit        = NOVAL_I;
     missing         = NOVAL_I;
+    inactive        = NOVAL_I;
     lx              = NOVAL_F;
     ly              = NOVAL_F;
     lz              = NOVAL_F;
@@ -681,7 +682,6 @@ public:
     // lymatch         = NOVAL_F;
     // i               = NOVAL_I;
     onedge          = NOVAL_I;
-    inactive        = NOVAL_I;
     // badhit          = NOVAL_I;
     // telescope       = NOVAL_I;
     // telescope_valid = NOVAL_I;
