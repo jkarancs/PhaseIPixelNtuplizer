@@ -215,6 +215,10 @@ opt.register('useLocalDynIneff',   False,
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
 	     'Test Dynamic Inefficiency conditions locally (prep/prod database or sqlite file')
 
+opt.register('dynIneffDBTag',      '',
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
+	     'Name of the sqlite file and internal tag')
+
 ### Events to process: 'maxEvents' is already registered by the framework
 opt.setDefault('maxEvents', 100)
 
@@ -246,9 +250,8 @@ process.mix.input.nbPileupEvents.probFunctionVariable = range(pileuphigh+1)
 process.mix.input.nbPileupEvents.probValue = [0] * pileuplow + [1.0/(pileuphigh-pileuplow)] * (pileuphigh-pileuplow)
 
 # set flat ROC efficency for layer 1
-opt.useLocalDynIneff = True
-DynIneff_db     = 'sqlite_file:SiPixelDynamicInefficiency_l1roc0p5.db'
-DynIneff_tag    = 'SiPixelDynamicInefficiency_l1roc0p5'
+DynIneff_db     = 'sqlite_file:'+opt.dynIneffDBTag+'.db'
+DynIneff_tag    = opt.dynIneffDBTag
 
 # Set some default options based on others
 if opt.useTemplates:
@@ -291,7 +294,7 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     clusterSaveDownscaleFactor     = cms.untracked.int32(100),
     trackSaveDownscaleFactor       = cms.untracked.int32(1),
     saveDigiTree                   = cms.untracked.bool(False),
-    saveTrackTree                  = cms.untracked.bool(False),
+    saveTrackTree                  = cms.untracked.bool(True),
     saveNonPropagatedExtraTrajTree = cms.untracked.bool(False),
     ### for using track hit association
     MC = cms.untracked.bool(True),
