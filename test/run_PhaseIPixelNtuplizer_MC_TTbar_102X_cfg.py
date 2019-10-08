@@ -284,6 +284,10 @@ process.trackingParticlesIntime = _trackingParticleRefSelector.clone(
 process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     trajectoryInput = cms.InputTag('TrackRefitter'),
     outputFileName = cms.untracked.string(opt.outputFileName),
+    # Global muon collection
+    muonCollection                 = cms.InputTag("muons"),
+    keepAllGlobalMuons             = cms.untracked.bool(True),
+    keepAllTrackerMuons            = cms.untracked.bool(True),
     # Save everything
     ##  clusterSaveDownscaleFactor     = cms.untracked.int32(1),
     ##  trackSaveDownscaleFactor       = cms.untracked.int32(1),
@@ -297,6 +301,7 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     saveTrackTree                  = cms.untracked.bool(False),
     saveNonPropagatedExtraTrajTree = cms.untracked.bool(False),
     ### for using track hit association
+    MC = cms.untracked.bool(True),
     associateRecoTracks = cms.bool(False),
     associateHitbySimTrack = cms.bool(False),
     associatePixel = cms.bool(True),       
@@ -317,8 +322,6 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
                           'TrackerHitsTOBHighTof',
                           'TrackerHitsTECLowTof',
                           'TrackerHitsTECHighTof'),
-    # Global muon collection
-    muonCollection                 = cms.InputTag("muons")
     )
 process.PhaseIPixelNtuplizer_step = cms.Path(process.PhaseINtuplizerPlugin)
 
