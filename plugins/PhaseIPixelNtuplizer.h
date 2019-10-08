@@ -151,10 +151,12 @@ private:
   int clusterSaveDownscaling_;
   int trackSaveDownscaling_;
   int eventSaveDownscaling_;
-  int saveDigiTree_;
+  bool saveDigiTree_;
+  bool saveTrackTree_;
+  bool saveNonPropagatedExtraTrajTree_;
+  bool keepAllGlobalMuons_;
+  bool keepAllTrackerMuons_;
   int npixFromDigiCollection_;
-  int saveTrackTree_;
-  int saveNonPropagatedExtraTrajTree_;
   int minVertexSize_;
   LumisectionCount efficiencyCalculationFrequency_;
 

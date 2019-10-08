@@ -427,7 +427,7 @@ public:
   float muon_time_rpc;
 
   const std::string list = "pt/F:eta:phi:theta:p:d0:dz:fromVtxNtrk/I:strip:quality:"
-    "i:pix:pixhit[2]:validpixhit[2]:fpix[3]:bpix[4]:validfpix[3]:validbpix[4]"
+    "i:pix:pixhit[2]:validpixhit[2]:fpix[3]:bpix[4]:validfpix[3]:validbpix[4]:"
     "muon_global:muon_intime:muon_id_soft:muon_id_loose:muon_id_medium:muon_id_tight:"
     "muon_id_mva_soft:muon_id_mva:muon_id_mva_lowpt:muon_id_trigger:muon_iso_pf:"
     "muon_iso_tk:muon_iso_mini:muon_iso_multi:muon_iso_puppi:muon_ip_2d:"//muon_ip_3dsig:"
@@ -455,6 +455,29 @@ public:
     std::copy(other.bpix,        other.bpix        + 4, bpix);
     std::copy(other.validfpix,   other.validfpix   + 3, validfpix);
     std::copy(other.validbpix,   other.validbpix   + 4, validbpix);
+    muon_global 	= other.muon_global;
+    muon_intime 	= other.muon_intime;
+    muon_id_soft 	= other.muon_id_soft;
+    muon_id_loose 	= other.muon_id_loose;
+    muon_id_medium 	= other.muon_id_medium;
+    muon_id_tight 	= other.muon_id_tight;
+    muon_id_mva_soft 	= other.muon_id_mva_soft;
+    muon_id_mva 	= other.muon_id_mva;
+    muon_id_mva_lowpt 	= other.muon_id_mva_lowpt;
+    muon_id_trigger 	= other.muon_id_trigger;
+    muon_iso_pf 	= other.muon_iso_pf;
+    muon_iso_tk 	= other.muon_iso_tk;
+    muon_iso_mini 	= other.muon_iso_mini;
+    muon_iso_multi 	= other.muon_iso_multi;
+    muon_iso_puppi 	= other.muon_iso_puppi;
+    muon_ip_2d 		= other.muon_ip_2d;
+    //muon_ip_3dsig 	= other.muon_ip_3dsig;
+    muon_time_comb_dir 	= other.muon_time_comb_dir;
+    muon_time_comb_ndof = other.muon_time_comb_ndof;
+    muon_time_rpc_dir 	= other.muon_time_rpc_dir;
+    muon_time_rpc_ndof 	= other.muon_time_rpc_ndof;
+    muon_time_comb 	= other.muon_time_comb;
+    muon_time_rpc       = other.muon_time_rpc;      
   }
 
   TrackData(TrackData&& other) {
@@ -463,24 +486,47 @@ public:
 
   friend void swap(TrackData& first, TrackData& second) {
     using std::swap;
-    swap(first.pt,          second.pt);
-    swap(first.eta,         second.eta);
-    swap(first.phi,         second.phi);
-    swap(first.theta,       second.theta);
-    swap(first.p,           second.p);
-    swap(first.d0,          second.d0);
-    swap(first.dz,          second.dz);
-    swap(first.fromVtxNtrk, second.fromVtxNtrk);
-    swap(first.strip,       second.strip);
-    swap(first.quality,     second.quality);
-    swap(first.i,           second.i);
-    swap(first.pix,         second.pix);
-    swap(first.pixhit,      second.pixhit);
-    swap(first.validpixhit, second.validpixhit);
-    swap(first.fpix,        second.fpix);
-    swap(first.bpix,        second.bpix);
-    swap(first.validfpix,   second.validfpix);
-    swap(first.validbpix,   second.validbpix);
+    swap(first.pt,                  second.pt);
+    swap(first.eta,                 second.eta);
+    swap(first.phi,                 second.phi);
+    swap(first.theta,               second.theta);
+    swap(first.p,                   second.p);
+    swap(first.d0,                  second.d0);
+    swap(first.dz,                  second.dz);
+    swap(first.fromVtxNtrk,         second.fromVtxNtrk);
+    swap(first.strip,               second.strip);
+    swap(first.quality,             second.quality);
+    swap(first.i,                   second.i);
+    swap(first.pix,                 second.pix);
+    swap(first.pixhit,              second.pixhit);
+    swap(first.validpixhit,         second.validpixhit);
+    swap(first.fpix,                second.fpix);
+    swap(first.bpix,                second.bpix);
+    swap(first.validfpix,           second.validfpix);
+    swap(first.validbpix,           second.validbpix);
+    swap(first.muon_global,         second.muon_global);
+    swap(first.muon_intime,         second.muon_intime);
+    swap(first.muon_id_soft,        second.muon_id_soft);
+    swap(first.muon_id_loose,       second.muon_id_loose);
+    swap(first.muon_id_medium,      second.muon_id_medium);
+    swap(first.muon_id_tight,       second.muon_id_tight);
+    swap(first.muon_id_mva_soft,    second.muon_id_mva_soft);
+    swap(first.muon_id_mva,         second.muon_id_mva);
+    swap(first.muon_id_mva_lowpt,   second.muon_id_mva_lowpt);
+    swap(first.muon_id_trigger,     second.muon_id_trigger);
+    swap(first.muon_iso_pf,         second.muon_iso_pf);
+    swap(first.muon_iso_tk,         second.muon_iso_tk);
+    swap(first.muon_iso_mini,       second.muon_iso_mini);
+    swap(first.muon_iso_multi,      second.muon_iso_multi);
+    swap(first.muon_iso_puppi,      second.muon_iso_puppi);
+    swap(first.muon_ip_2d,          second.muon_ip_2d);
+    //swap(first.muon_ip_3dsig,       second.muon_ip_3dsig);
+    swap(first.muon_time_comb_dir,  second.muon_time_comb_dir);
+    swap(first.muon_time_comb_ndof, second.muon_time_comb_ndof);
+    swap(first.muon_time_rpc_dir,   second.muon_time_rpc_dir);
+    swap(first.muon_time_rpc_ndof,  second.muon_time_rpc_ndof);
+    swap(first.muon_time_comb,      second.muon_time_comb);
+    swap(first.muon_time_rpc,       second.muon_time_rpc);  
   }
 
   TrackData& operator =(TrackData other) noexcept {
@@ -507,6 +553,29 @@ public:
     std::fill(bpix,        bpix        + 4, NOVAL_I);
     std::fill(validfpix,   validfpix   + 3, NOVAL_I);
     std::fill(validbpix,   validbpix   + 4, NOVAL_I);
+    muon_global         = NOVAL_I;
+    muon_intime         = NOVAL_I;
+    muon_id_soft        = NOVAL_I;
+    muon_id_loose       = NOVAL_I;
+    muon_id_medium      = NOVAL_I;
+    muon_id_tight       = NOVAL_I;
+    muon_id_mva_soft    = NOVAL_I;
+    muon_id_mva         = NOVAL_I;
+    muon_id_mva_lowpt   = NOVAL_I;
+    muon_id_trigger     = NOVAL_I;
+    muon_iso_pf         = NOVAL_I;
+    muon_iso_tk         = NOVAL_I;
+    muon_iso_mini       = NOVAL_I;
+    muon_iso_multi      = NOVAL_I;
+    muon_iso_puppi      = NOVAL_I;
+    muon_ip_2d          = NOVAL_I;
+    //muon_ip_3dsig       = NOVAL_I;
+    muon_time_comb_dir  = NOVAL_I;
+    muon_time_comb_ndof = NOVAL_I;
+    muon_time_rpc_dir   = NOVAL_I;
+    muon_time_rpc_ndof  = NOVAL_I;
+    muon_time_comb      = NOVAL_F;
+    muon_time_rpc       = NOVAL_F;
   }
 
 };

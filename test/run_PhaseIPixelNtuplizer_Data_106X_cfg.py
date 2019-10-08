@@ -221,6 +221,8 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     outputFileName = cms.untracked.string(opt.outputFileName),
     # Global muon collection
     muonCollection                 = cms.InputTag("muons"),
+    keepAllGlobalMuons             = cms.untracked.bool(True),
+    keepAllTrackerMuons            = cms.untracked.bool(False),
     # Save everything
     ##  clusterSaveDownscaleFactor     = cms.untracked.int32(1),
     ##  trackSaveDownscaleFactor       = cms.untracked.int32(1),
@@ -228,8 +230,8 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     ##  saveTrackTree                  = cms.untracked.bool(True),
     ##  saveNonPropagatedExtraTrajTree = cms.untracked.bool(True),
     # Do not save everything and downscale clusters
-    clusterSaveDownscaleFactor     = cms.untracked.int32(1000),
-    trackSaveDownscaleFactor       = cms.untracked.int32(100),
+    clusterSaveDownscaleFactor     = cms.untracked.int32(1000000), # don't save clusters
+    trackSaveDownscaleFactor       = cms.untracked.int32(1000000), # Save only muon tracks
     saveDigiTree                   = cms.untracked.bool(False),
     saveTrackTree                  = cms.untracked.bool(True),
     saveNonPropagatedExtraTrajTree = cms.untracked.bool(False),

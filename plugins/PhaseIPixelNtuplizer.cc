@@ -27,10 +27,12 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
   trackSaveDownscaling_(iConfig.getUntrackedParameter<int>("trackSaveDownscaleFactor",1)),
   eventSaveDownscaling_(iConfig.getUntrackedParameter<int>("eventSaveDownscaleFactor",1)),
   saveDigiTree_(iConfig.getUntrackedParameter<bool>("saveDigiTree", false)),
-  npixFromDigiCollection_(iConfig.getUntrackedParameter<bool>("npixFromDigiCollection", false)),
   saveTrackTree_(iConfig.getUntrackedParameter<bool>("saveTrackTree", false)),
   saveNonPropagatedExtraTrajTree_(iConfig.getUntrackedParameter<bool>
           ("saveNonPropagatedExtraTrajTree", false)),
+  keepAllGlobalMuons_(iConfig.getUntrackedParameter<bool>("keepAllGlobalMuons", true)),
+  keepAllTrackerMuons_(iConfig.getUntrackedParameter<bool>("keepAllTrackerMuons", true)),
+  npixFromDigiCollection_(iConfig.getUntrackedParameter<bool>("npixFromDigiCollection", false)),
   minVertexSize_(15),
   efficiencyCalculationFrequency_(iConfig.getUntrackedParameter<int>("efficiencyCalculationFrequency_", 1))
 {
@@ -949,15 +951,17 @@ PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& v
     const reco::TrackRef                    track = currentTrackKeypair.val;
 
     // Match global and tracker muon inner tracks
-    bool muonMatch = false;
+    bool saveMuon = false;
     reco::Muon muon;
-    for (const reco::Muon& mu : *muonCollectionHandle) if (mu.isTrackerMuon() || mu.isGlobalMuon()) {
-      if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) {
-        muonMatch = true;
-        muon = mu;
+    for (const reco::Muon& mu : *muonCollectionHandle) {
+      if ((keepAllTrackerMuons_&&mu.isTrackerMuon()) || (keepAllGlobalMuons_&&mu.isGlobalMuon())) {
+	if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) {
+	  saveMuon = true;
+	  muon = mu;
+	}
       }
     }
-    if (++nTrack_ % trackSaveDownscaling_ != 0 && !muonMatch) continue;
+    if (++nTrack_ % trackSaveDownscaling_ != 0 && !saveMuon) continue;
 
     TrackData* trackField;
 
@@ -997,12 +1001,11 @@ PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& v
       newTrackData.eta     = track -> eta();
       newTrackData.theta   = track -> theta();
       newTrackData.phi     = track -> phi();
-      trackFieldIt = trackDataCollection.insert({track, std::move(newTrackData)}).first;
 
       // muon info
       // https://cmssdt.cern.ch/lxr/source/DataFormats/MuonReco/interface/Muon.h
       // https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2#Muon_Identification
-      if (muonMatch) {
+      if (saveMuon) {
         // ID/ISO
         newTrackData.muon_global        = muon.isGlobalMuon();
         newTrackData.muon_intime        = muon.passed(reco::Muon::InTimeMuon);
@@ -1073,7 +1076,9 @@ PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& v
             newTrackData.muon_time_rpc = muon.rpcTime().timeAtIpInOut;
           }
         }
-      }
+      } // end muons
+
+      trackFieldIt = trackDataCollection.insert({track, std::move(newTrackData)}).first;
     }
 
     trackField = &(trackFieldIt -> second);
@@ -1185,11 +1190,13 @@ PhaseIPixelNtuplizer::getTrajTrackData( const edm::Handle<reco::VertexCollection
     const reco::TrackRef                    track = currentTrackKeypair.val;
 
     // Match global and tracker muon inner tracks
-    bool muonMatch = false;
-    for (const reco::Muon& mu : *muonCollectionHandle) if (mu.isTrackerMuon() || mu.isGlobalMuon()) {
-      if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) muonMatch = true;
+    bool saveMuon = false;
+    for (const reco::Muon& mu : *muonCollectionHandle) {
+      if ((keepAllTrackerMuons_&&mu.isTrackerMuon()) || (keepAllGlobalMuons_&&mu.isGlobalMuon())) {
+	if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) saveMuon = true;
+      }
     }
-    if (++nTrack % trackSaveDownscaling_ != 0 && !muonMatch) continue;
+    if (++nTrack % trackSaveDownscaling_ != 0 && !saveMuon) continue;
 
     // Discarding tracks without pixel measurements
     if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
@@ -1284,11 +1291,13 @@ PhaseIPixelNtuplizer::getTrajTrackDataCosmics(const edm::Handle<reco::VertexColl
     const reco::TrackRef                    track = currentTrackKeypair.val;
 
     // Match global and tracker muon inner tracks
-    bool muonMatch = false;
-    for (const reco::Muon& mu : *muonCollectionHandle) if (mu.isTrackerMuon() || mu.isGlobalMuon()) {
-      if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) muonMatch = true;
+    bool saveMuon = false;
+    for (const reco::Muon& mu : *muonCollectionHandle) {
+      if ((keepAllTrackerMuons_&&mu.isTrackerMuon()) || (keepAllGlobalMuons_&&mu.isGlobalMuon())) {
+	if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) saveMuon = true;
+      }
     }
-    if (++nTrack % trackSaveDownscaling_ != 0 && !muonMatch) continue;
+    if (++nTrack % trackSaveDownscaling_ != 0 && !saveMuon) continue;
 
     // Discarding tracks without pixel measurements
     if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
