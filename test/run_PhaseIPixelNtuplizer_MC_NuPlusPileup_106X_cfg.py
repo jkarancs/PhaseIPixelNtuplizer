@@ -2,12 +2,12 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,L1Reco,RECO --evt_type SingleNuE10_cfi --process PrivateMC --conditions auto:phase1_2021_realistic --era Run3 --beamspot Run3RoundOptics25ns13TeVLowSigmaZ --geometry DB:Extended --pileup Flat_20_50 --pileup_input das:/RelValMinBias_14TeV/CMSSW_10_6_1-106X_mcRun3_2021_realistic_v1-v1/GEN-SIM --runUnscheduled --eventcontent RECOSIM --datatier GEN-SIM-RECO -n 10 --fileout file:TTbarMC_106X.root --python_filename test/run_PhaseIPixelNtuplizer_MC_MinBias_106X_cfg.py
+# with command line options: -s GEN,SIM,DIGI,L1,DIGI2RAW,RAW2DIGI,L1Reco,RECO --evt_type SingleNuE10_cfi --process PrivateMC --conditions auto:phase1_2018_realistic --era Run2_2018 --geometry DB:Extended --pileup Flat_20_50 --pileup_input file:dummy.root --runUnscheduled --eventcontent RECOSIM --datatier GEN-SIM-RECO -n 10 --fileout file:TTbarMC_106X.root --python_filename test/run_PhaseIPixelNtuplizer_MC_NuPlusPileup_106X_cfg.py --no_exec
 import FWCore.ParameterSet.Config as cms
 
-from Configuration.Eras.Era_Run3_cff import Run3
+from Configuration.Eras.Era_Run2_2018_cff import Run2_2018
 
-process = cms.Process('PrivateMC',Run3)
+process = cms.Process('PrivateMC',Run2_2018)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -19,7 +19,7 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.GeometrySimDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
-process.load('IOMC.EventVertexGenerators.VtxSmearedRun3RoundOptics25ns13TeVLowSigmaZ_cfi')
+process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
 process.load('GeneratorInterface.Core.genFilterSummary_cff')
 process.load('Configuration.StandardSequences.SimIdeal_cff')
 process.load('Configuration.StandardSequences.Digi_cff')
@@ -67,11 +67,11 @@ process.RECOSIMoutput = cms.OutputModule("PoolOutputModule",
 # Additional output definition
 
 # Other statements
-process.mix.input.fileNames = cms.untracked.vstring(['/store/relval/CMSSW_10_6_1/RelValMinBias_14TeV/GEN-SIM/106X_mcRun3_2021_realistic_v1-v1/10000/8D30910B-9EEF-094F-8462-DFEFEA09B821.root', '/store/relval/CMSSW_10_6_1/RelValMinBias_14TeV/GEN-SIM/106X_mcRun3_2021_realistic_v1-v1/10000/A963B261-2F75-DF45-9393-49805B62E543.root', '/store/relval/CMSSW_10_6_1/RelValMinBias_14TeV/GEN-SIM/106X_mcRun3_2021_realistic_v1-v1/10000/2B2DB674-9C95-C345-85BF-F407C5542FDF.root', '/store/relval/CMSSW_10_6_1/RelValMinBias_14TeV/GEN-SIM/106X_mcRun3_2021_realistic_v1-v1/10000/8D7362C4-A3EA-914E-AAE7-98C1C91501AB.root', '/store/relval/CMSSW_10_6_1/RelValMinBias_14TeV/GEN-SIM/106X_mcRun3_2021_realistic_v1-v1/10000/337920D9-FF68-404B-BB20-52A898D705F1.root', '/store/relval/CMSSW_10_6_1/RelValMinBias_14TeV/GEN-SIM/106X_mcRun3_2021_realistic_v1-v1/10000/46E42DA0-4E77-4646-9E84-B48E0407A6E7.root'])
+process.mix.input.fileNames = cms.untracked.vstring(['file:dummy.root'])
 process.XMLFromDBSource.label = cms.string("Extended")
 process.genstepfilter.triggerConditions=cms.vstring("generation_step")
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2021_realistic', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase1_2018_realistic', '')
 
 process.generator = cms.EDProducer("FlatRandomEGunProducer",
     AddAntiParticle = cms.bool(False),
@@ -110,6 +110,12 @@ associatePatAlgosToolsTask(process)
 # filter all path with the production filter sequence
 for path in process.paths:
 	getattr(process,path).insert(0, process.generator)
+
+
+
+
+
+
 
 
 
@@ -190,6 +196,10 @@ opt.register('useLocalDynIneff',   False,
 	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.bool,
 	     'Test Dynamic Inefficiency conditions locally (prep/prod database or sqlite file')
 
+opt.register('dynIneffDBTag',      '',
+	     opts.VarParsing.multiplicity.singleton, opts.VarParsing.varType.string,
+	     'Name of the sqlite file and internal tag')
+
 ### Events to process: 'maxEvents' is already registered by the framework
 opt.setDefault('maxEvents', 100)
 
@@ -198,7 +208,6 @@ opt.parseArguments()
 
 process.maxEvents.input = opt.maxEvents
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
-
 
 # Add Input file in case using it
 if opt.useRECO:
@@ -214,10 +223,18 @@ if opt.noMagField:
 	process.g4SimHits.UseMagneticField = cms.bool(False)
 
 # Set 20-65 pileup
+from DPGAnalysis.PhaseIPixelNtuplizer.PoolSource_13TeV_102X_upgrade2018_realistic_v9_GS import *
+process.mix.input.fileNames = pileupFileNames
 pileuplow  = 20
 pileuphigh = 65
 process.mix.input.nbPileupEvents.probFunctionVariable = range(pileuphigh+1)
 process.mix.input.nbPileupEvents.probValue = [0] * pileuplow + [1.0/(pileuphigh-pileuplow)] * (pileuphigh-pileuplow)
+
+
+
+# set flat ROC efficency for layer 1
+DynIneff_db     = 'sqlite_file:'+opt.dynIneffDBTag+'.db'
+DynIneff_tag    = opt.dynIneffDBTag
 
 # Set some default options based on others
 if opt.useTemplates:
@@ -244,19 +261,47 @@ else:
 #  PhaseIPixelNtuplizer
 #---------------------------
 process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
-	trajectoryInput = cms.InputTag('TrackRefitter'),
-	outputFileName = cms.untracked.string(opt.outputFileName),
-	##  # Save everything
- 	##  clusterSaveDownscaleFactor     = cms.untracked.int32(1),
-	##  saveDigiTree                   = cms.untracked.bool(True),
-	##  saveTrackTree                  = cms.untracked.bool(True),
-	##  saveNonPropagatedExtraTrajTree = cms.untracked.bool(True),
-	# Do not save everything and downscale clusters
- 	clusterSaveDownscaleFactor     = cms.untracked.int32(100),
-	saveDigiTree                   = cms.untracked.bool(False),
-	saveTrackTree                  = cms.untracked.bool(False),
-	saveNonPropagatedExtraTrajTree = cms.untracked.bool(False),
-	)
+    trajectoryInput = cms.InputTag('TrackRefitter'),
+    outputFileName = cms.untracked.string(opt.outputFileName),
+    # Global muon collection
+    muonCollection                 = cms.InputTag("muons"),
+    keepAllGlobalMuons             = cms.untracked.bool(True),
+    keepAllTrackerMuons            = cms.untracked.bool(True),
+    # Save everything
+    ##  clusterSaveDownscaleFactor     = cms.untracked.int32(1),
+    ##  trackSaveDownscaleFactor       = cms.untracked.int32(1),
+    ##  saveDigiTree                   = cms.untracked.bool(True),
+    ##  saveTrackTree                  = cms.untracked.bool(True),
+    ##  saveNonPropagatedExtraTrajTree = cms.untracked.bool(True),
+    # Do not save everything and downscale clusters
+    clusterSaveDownscaleFactor     = cms.untracked.int32(100),
+    trackSaveDownscaleFactor       = cms.untracked.int32(1),
+    saveDigiTree                   = cms.untracked.bool(False),
+    saveTrackTree                  = cms.untracked.bool(True),
+    saveNonPropagatedExtraTrajTree = cms.untracked.bool(False),
+    ### for using track hit association
+    MC = cms.untracked.bool(True),
+    associateRecoTracks = cms.bool(False),
+    associateHitbySimTrack = cms.bool(False),
+    associatePixel = cms.bool(True),       
+    associateStrip = cms.bool(False),
+    usePhase2Tracker = cms.bool(False),
+    pixelSimLinkSrc = cms.InputTag("simSiPixelDigis"),
+    stripSimLinkSrc = cms.InputTag("simSiStripDigis"),
+    phase2TrackerSimLinkSrc = cms.InputTag("simSiPixelDigis", "Tracker"),
+    ROUList = cms.vstring('TrackerHitsPixelBarrelLowTof',
+                          'TrackerHitsPixelBarrelHighTof',
+                          'TrackerHitsPixelEndcapLowTof',
+                          'TrackerHitsPixelEndcapHighTof',
+                          'TrackerHitsTIBLowTof',
+                          'TrackerHitsTIBHighTof',
+                          'TrackerHitsTIDLowTof',
+                          'TrackerHitsTIDHighTof',
+                          'TrackerHitsTOBLowTof',
+                          'TrackerHitsTOBHighTof',
+                          'TrackerHitsTECLowTof',
+                          'TrackerHitsTECHighTof'),
+    )
 process.PhaseIPixelNtuplizer_step = cms.Path(process.PhaseINtuplizerPlugin)
 
 # myAnalyzer Path
@@ -384,8 +429,6 @@ else:
 # Dynamic Inefficiency
 #DynIneff_db     = 'frontier://FrontierPrep/CMS_CONDITIONS'
 #DynIneff_db     = 'frontier://FrontierProd/CMS_CONDITIONS'
-DynIneff_db     = 'sqlite_file:test/Recipes_CMSSW_9_0_0_pre6/phase1_efficiencies_85.db'
-DynIneff_tag    = 'SiPixelDynamicInefficiency_v1'
 
 #LA
 if opt.useLocalLASim :
@@ -511,6 +554,18 @@ else:
 	process.schedule.remove(process.genfiltersummary_step)
 	process.schedule.append(process.myAnalyzer_step)
 # End of inserted code
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
