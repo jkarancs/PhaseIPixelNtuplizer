@@ -2,7 +2,7 @@
 #define PHASEIPIXELNTUPLIZER_H
 
 #define ADD_SIM_INFO 1
-#define ADD_NEW_MUON_SELECTORS 1 // Works in 9_4_X, 10_6_X or later
+#define ADD_NEW_MUON_SELECTORS 0 // Works in 9_4_X, 10_6_X or later
 
 /*
 #define ADD_SIM_INFO 1
