@@ -287,8 +287,6 @@ private:
 
   void getClustData(const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>&);
 
-  bool sameTrack(const reco::TrackRef&, const reco::TrackRef&);
-
   std::map<reco::TrackRef, TrackData> getTrackData(const edm::Handle<reco::VertexCollection>&,
 						   const edm::Handle<TrajTrackAssociationCollection>&,
                                                    const edm::Handle<reco::MuonCollection>&,
@@ -346,8 +344,6 @@ private:
 
   void getRocData(ModuleData&, bool, const SiPixelRecHit*);
 
-  void propagateTrackToLayer1(const edm::Ref<std::vector<Trajectory>>&, const reco::TrackRef);
-
   std::tuple<std::vector<TrajectoryMeasurement>::const_iterator, float>
   findMatchingTrajMeasurement(const GlobalPoint&, const ModuleData&,
 			      const std::vector<TrajectoryMeasurement>&);
@@ -355,13 +351,11 @@ private:
   const SiPixelCluster* getClosestClusterOnDetSetToPoint(const edmNew::DetSet<SiPixelCluster>&,
 							 const LocalPoint&);
 
-  float trajMeasGlobalPointDistanceSquared(const TrajectoryMeasurement&, const GlobalPoint&);
-
-  float clusterPointDistanceSquared(const DetId&, const SiPixelCluster&, const LocalPoint&);
-
-  LocalPoint clusterPointDistanceVector(const DetId&, const SiPixelCluster&, const LocalPoint&);
+  float trajMeasGlobalPointDistance(const TrajectoryMeasurement&, const GlobalPoint&);
 
   float clusterPointDistance(const DetId&, const SiPixelCluster&, const LocalPoint&);
+
+  LocalPoint clusterPointDistanceVector(const DetId&, const SiPixelCluster&, const LocalPoint&);
 
   void printTrackCompositionInfo(const edm::Ref<std::vector<Trajectory>>&,
 				 const reco::TrackRef&,
@@ -389,27 +383,18 @@ namespace NtuplizerHelpers
 
   std::pair<float, float> getLocalXY(const TrajectoryMeasurement&);
 
-  float trajMeasurementDistanceSquared(const TrajectoryMeasurement&, const TrajectoryMeasurement&);
-
-  void trajMeasurementDistanceSquared(const TrajectoryMeasurement&, const TrajectoryMeasurement&,
-				      float&, float&, float&);
+  float trajMeasurementDistance(const TrajectoryMeasurement&, const TrajectoryMeasurement&);
 
   void trajMeasurementDistance(const TrajectoryMeasurement&, const TrajectoryMeasurement&,
-			       float&, float&, float&);
+                               float&, float&, float&);
 
-  void getClosestOtherTrajMeasurementDistanceByLooping
-  (const TrajectoryMeasurement&,
+  bool sameTrack(const reco::TrackRef&, const reco::TrackRef&);
+
+  void getClosestTrajMeasDistance
+  (const TrajectoryMeasurement&, const reco::TrackRef&,
    const edm::Handle<TrajTrackAssociationCollection>&,
    float&, float&, float&);
 
-  // int getTrackParentVtxNumTracks(const edm::Handle<reco::VertexCollection>&, const reco::TrackRef);
-
-  std::pair<bool,Measurement1D> absoluteImpactParameter(const TrajectoryStateOnSurface&,
-                                                        const  reco::Vertex&,
-                                                        VertexDistance&);
-  std::pair<bool,Measurement1D> signedTransverseImpactParameter(const reco::TransientTrack&,
-                                                                const GlobalVector&,
-                                                                const reco::Vertex&);
 
 } // NtuplizerHelpers
 

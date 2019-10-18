@@ -622,8 +622,8 @@ void PhaseIPixelNtuplizer::getEvtData
   std::fill(evt_.ntrackFPix, evt_.ntrackFPix + 3, 0);
   std::fill(evt_.ntrackBPix, evt_.ntrackBPix + 4, 0);
   for(const auto &pair: *trajTrackCollectionHandle) {
-    const edm::Ref<std::vector<Trajectory>> traj = pair.key;
-    const reco::TrackRef track                   = pair.val;
+    const edm::Ref<std::vector<Trajectory> > traj = pair.key;
+    const reco::TrackRef track                    = pair.val;
 
     // Discarding tracks without pixel measurements
     if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
@@ -925,15 +925,6 @@ void PhaseIPixelNtuplizer::getClustData
   }
 }
 
-bool 
-PhaseIPixelNtuplizer::sameTrack(const reco::TrackRef& one, const reco::TrackRef& two) {
-  return (std::abs(one->px() - two->px()) < 1e-2 &&
-          std::abs(one->py() - two->py()) < 1e-2 &&
-          std::abs(one->pz() - two->pz()) < 1e-2 &&
-          std::abs(one->vx() - two->vx()) < 1e-2 &&
-          std::abs(one->vy() - two->vy()) < 1e-2 &&
-          std::abs(one->vz() - two->vz()) < 1e-2);
-}
 
 std::map<reco::TrackRef, TrackData> 
 PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& vertexCollectionHandle,
@@ -955,7 +946,7 @@ PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& v
     reco::Muon muon;
     for (const reco::Muon& mu : *muonCollectionHandle) {
       if ((keepAllTrackerMuons_&&mu.isTrackerMuon()) || (keepAllGlobalMuons_&&mu.isGlobalMuon())) {
-	if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) {
+	if (NtuplizerHelpers::sameTrack(track, mu.innerTrack())) {
 	  saveMuon = true;
 	  muon = mu;
 	}
@@ -1193,7 +1184,7 @@ PhaseIPixelNtuplizer::getTrajTrackData( const edm::Handle<reco::VertexCollection
     bool saveMuon = false;
     for (const reco::Muon& mu : *muonCollectionHandle) {
       if ((keepAllTrackerMuons_&&mu.isTrackerMuon()) || (keepAllGlobalMuons_&&mu.isGlobalMuon())) {
-	if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) saveMuon = true;
+	if (NtuplizerHelpers::sameTrack(track, mu.innerTrack())) saveMuon = true;
       }
     }
     if (++nTrack % trackSaveDownscaling_ != 0 && !saveMuon) continue;
@@ -1204,72 +1195,92 @@ PhaseIPixelNtuplizer::getTrajTrackData( const edm::Handle<reco::VertexCollection
     track_ = trackDataCollection.at(track);
     const auto& trajectoryMeasurements = traj -> measurements();
 
-    // std::cout << "Searching for the first layer 1 trajectory measurements... ";
-    // Not for the faint hearted ...
-    auto firstLayer1TrajMeasurementIt = 
-      std::find_if(trajectoryMeasurements.begin(), 
-		   trajectoryMeasurements.end(),
-		   [&] (const TrajectoryMeasurement& measurement) {
-		     ModuleData mod;
-		     getModuleData(mod, 1, measurement.recHit() -> geographicalId());
-		     return mod.det == 0 && mod.layer == 1;
-		   });
-    // std::cout << "Done." << std::endl;
-    // std::cout << "***" << std::endl;
-    // std::cout << "Number of traj. measurements in track: "
-    //           << std::distance(trajectoryMeasurements.begin(), trajectoryMeasurements.begin()) 
-    //           << std::endl;
-    // std::cout << "First layer 1 hit index:               " 
-    //           << std::distance(trajectoryMeasurements.begin(), firstLayer1TrajMeasurementIt)
-    //           << std::endl;
-    // std::cout << "Number of layer 1 hits:                "
-    //           << std::distance(firstLayer1TrajMeasurementIt,   trajectoryMeasurements.end())
-    //           << std::endl;
-    // std::cout << "***" << std::endl;
-
-    // Save trajectory measurement data for non-layer 1 hits
+    // First, save trajectory measurement data from the original track
+    auto firstLayer1TrajMeasurementIt = trajectoryMeasurements.end();
     for(auto measurementIt = trajectoryMeasurements.begin();
-	measurementIt != firstLayer1TrajMeasurementIt; measurementIt++) {
-
-      checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle,
-				      trajTrackCollectionHandle, track,
-                                      simTracksHandle, trajTree_);
+	measurementIt != trajectoryMeasurements.end(); measurementIt++) {
+      ModuleData mod; getModuleData(mod, 1, measurementIt->recHit() -> geographicalId());
+      if (mod.det == 0 && mod.layer == 1) {
+        if(saveNonPropagatedExtraTrajTree_) {
+          // Save non-propagated L1 hits as an additional tree
+          checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle,
+                                          trajTrackCollectionHandle, track,
+                                          simTracksHandle, nonPropagatedExtraTrajTree_);
+        }
+        firstLayer1TrajMeasurementIt = measurementIt;
+      } else {
+        checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle,
+                                        trajTrackCollectionHandle, track,
+                                        simTracksHandle, trajTree_);
+      }
     }
 
-    // Save non-propagated hits as an additional tree
-    if(saveNonPropagatedExtraTrajTree_) {
-
-      for(auto measurementIt = firstLayer1TrajMeasurementIt;
-	  measurementIt != trajectoryMeasurements.end(); measurementIt++)
-	checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle,
-					trajTrackCollectionHandle, track,
-                                        simTracksHandle, nonPropagatedExtraTrajTree_);
-
-    }
+    // Then, propagate hits from the previous Layer 2/Disk 1 valid hit to Layer 1
 
     // Check there are hits before the first layer 1 traj. measurement
+    // Trajmeasurements go from outside in, last hit can only be Layer 1
     if(firstLayer1TrajMeasurementIt == trajectoryMeasurements.begin()) continue;
-
     auto lastNonLayer1TrajMeasurementIt = std::prev(firstLayer1TrajMeasurementIt);
 
-    // Check if the last non-layer1 traj measurement is valid 
+    // Check if the last non-layer1 traj measurement is valid
     auto lastNonLayer1TrajMeasurementRecHit = lastNonLayer1TrajMeasurementIt -> recHit();
-    if(lastNonLayer1TrajMeasurementRecHit == nullptr)
+    if (lastNonLayer1TrajMeasurementRecHit == nullptr)
       std::cout << "Invalid rechit pointer." << std::endl;
-
     if(!(lastNonLayer1TrajMeasurementRecHit -> isValid())) continue;
 
     std::vector<TrajectoryMeasurement> extrapolatedHitsOnLayer1
       (getLayer1ExtrapolatedHitsFromMeas(*lastNonLayer1TrajMeasurementIt));
 
-    // Save propagated hits
-    for(auto measurementIt = extrapolatedHitsOnLayer1.begin();
-	measurementIt != extrapolatedHitsOnLayer1.end(); measurementIt++)
-      checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle,
-				      trajTrackCollectionHandle, track,
+    // Save  all propagated hits
+    //for(auto measurementIt = extrapolatedHitsOnLayer1.begin();
+    //    measurementIt != extrapolatedHitsOnLayer1.end(); measurementIt++)
+    //  checkAndSaveTrajMeasurementData(*measurementIt, clusterCollectionHandle,
+    //    			      trajTrackCollectionHandle, track,
+    //                                  simTracksHandle, trajTree_);
+    
+    // Save first hit along trajectory
+    //std::cout<<"Nmeas="<<extrapolatedHitsOnLayer1.size()<<std::endl;
+    if (!extrapolatedHitsOnLayer1.empty()) 
+      checkAndSaveTrajMeasurementData(extrapolatedHitsOnLayer1.front(), clusterCollectionHandle,
+                                      trajTrackCollectionHandle, track,
                                       simTracksHandle, trajTree_);
-
   } // end loop on trajectories
+}
+
+// currently unused
+std::tuple<std::vector<TrajectoryMeasurement>::const_iterator, float>
+PhaseIPixelNtuplizer::findMatchingTrajMeasurement
+( const GlobalPoint& referencePoint, 
+  const ModuleData& referenceModInfo,
+  const std::vector<TrajectoryMeasurement>& possibleMatches)
+{
+
+  using NtuplizerHelpers::areIdenticalModules;
+  auto isMeasurementOnReferenceModule = [&] (const TrajectoryMeasurement& measurement) {
+    ModuleData mod; 
+    getModuleData(mod, 1, measurement.recHit() -> geographicalId().rawId());
+    return areIdenticalModules(mod, referenceModInfo);
+  };
+
+  auto bestMatch = std::find_if(possibleMatches.begin(), possibleMatches.end(), isMeasurementOnReferenceModule);
+  if(bestMatch == possibleMatches.end()) return std::make_tuple(bestMatch, NOVAL_F);
+
+  float closestDistance = trajMeasGlobalPointDistance(*bestMatch, referencePoint);
+  for(auto measurementsIt = bestMatch + 1; 
+      measurementsIt != possibleMatches.end(); ++measurementsIt) {
+
+    if(!isMeasurementOnReferenceModule(*measurementsIt)) continue;
+
+    float distance = trajMeasGlobalPointDistance(*measurementsIt, referencePoint);
+    if(distance < closestDistance) {
+      closestDistance = distance;
+      bestMatch = measurementsIt;
+    }
+
+  }
+
+  return std::make_tuple(bestMatch, closestDistance);
+
 }
 
 void
@@ -1287,14 +1298,14 @@ PhaseIPixelNtuplizer::getTrajTrackDataCosmics(const edm::Handle<reco::VertexColl
   unsigned long long int nTrack = nTrackSave_;
   for(const auto& currentTrackKeypair: *trajTrackCollectionHandle) {
 
-    const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
-    const reco::TrackRef                    track = currentTrackKeypair.val;
+    const edm::Ref<std::vector<Trajectory> > traj  = currentTrackKeypair.key;
+    const reco::TrackRef                     track = currentTrackKeypair.val;
 
     // Match global and tracker muon inner tracks
     bool saveMuon = false;
     for (const reco::Muon& mu : *muonCollectionHandle) {
       if ((keepAllTrackerMuons_&&mu.isTrackerMuon()) || (keepAllGlobalMuons_&&mu.isGlobalMuon())) {
-	if (PhaseIPixelNtuplizer::sameTrack(track, mu.innerTrack())) saveMuon = true;
+	if (NtuplizerHelpers::sameTrack(track, mu.innerTrack())) saveMuon = true;
       }
     }
     if (++nTrack % trackSaveDownscaling_ != 0 && !saveMuon) continue;
@@ -1303,7 +1314,7 @@ PhaseIPixelNtuplizer::getTrajTrackDataCosmics(const edm::Handle<reco::VertexColl
     if(!NtuplizerHelpers::trajectoryHasPixelHit(traj)) continue;
 
     track_ = trackDataCollection.at(track);
-    const auto& trajectoryMeasurements = traj -> measurements();
+    const std::vector<TrajectoryMeasurement>& trajectoryMeasurements = traj -> measurements();
 
     for(auto measurementIt = trajectoryMeasurements.begin();
 	measurementIt != trajectoryMeasurements.end(); measurementIt++)
@@ -1361,7 +1372,7 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
   // traj_.onedge = std::abs(traj_.lx) < 0.55 && std::abs(traj_.ly) < 3.0;
   traj_.validhit = recHit -> getType() == TrackingRecHit::valid;
   traj_.missing  = recHit -> getType() == TrackingRecHit::missing;
-  traj_.inactive  = recHit -> getType() == TrackingRecHit::inactive;
+  traj_.inactive = recHit -> getType() == TrackingRecHit::inactive;
   
   // Distance of nearest other track
   traj_.dr_trk = 9999;
@@ -1399,8 +1410,8 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
       }
       //std::cout << " Closest Simhit = " << closest.localPosition();
       if (mindist != 999999) {
-        traj_.dx_simhit = fabs(localPosition.x() - closest.localPosition().x());
-        traj_.dy_simhit = fabs(localPosition.y() - closest.localPosition().y());
+        traj_.dx_simhit = localPosition.x() - closest.localPosition().x();
+        traj_.dy_simhit = localPosition.y() - closest.localPosition().y();
         //std::cout << ", diff(x,y) = (" << traj_.dx_simhit << ", " << traj_.dy_simhit << ")";
         //std::cout << ", |diff| = " << mindist << std::endl;
       }
@@ -1494,14 +1505,14 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
     traj_.norm_charge = traj_.clu.charge * 
       sqrt(1.0f / (1.0f / pow(tan(traj_.alpha), 2) + 1.0f / pow(tan(traj_.beta), 2) + 1.0f));
 
-    traj_.dx_cl       = std::abs(clustLocalCoordinates.x() - traj_.lx);
-    traj_.dy_cl       = std::abs(clustLocalCoordinates.y() - traj_.ly);
-    traj_.d_cl        = sqrt(traj_.dx_cl * traj_.dx_cl + traj_.dy_cl * traj_.dy_cl);
+    traj_.dx_cl       = clustLocalCoordinates.x() - traj_.lx;
+    traj_.dy_cl       = clustLocalCoordinates.y() - traj_.ly;
+    traj_.d_cl        = std::sqrt(traj_.dx_cl * traj_.dx_cl + traj_.dy_cl * traj_.dy_cl);
 
   } else traj_.clu.init();
 
   // Get closest other traj measurement
-  NtuplizerHelpers::getClosestOtherTrajMeasurementDistanceByLooping(measurement, trajTrackCollectionHandle, traj_.d_tr, traj_.dx_tr, traj_.dy_tr);
+  NtuplizerHelpers::getClosestTrajMeasDistance(measurement, track, trajTrackCollectionHandle, traj_.d_tr, traj_.dx_tr, traj_.dy_tr);
   traj_.hit_near = (traj_.d_tr < 0.5); // 5 mm
   traj_.clust_near = (traj_.d_cl != NOVAL_F && traj_.d_cl < HIT_CLUST_NEAR_CUT_VAL);
 
@@ -1550,8 +1561,7 @@ std::vector<TrajectoryMeasurement> PhaseIPixelNtuplizer::getLayer1ExtrapolatedHi
     measurementTracker_ -> geometricSearchTracker() -> pixelBarrelLayers().front();
   
   return layerMeasurements -> measurements(*pixelBarrelLayer1, trajMeasurement.updatedState(),
-					   *trackerPropagator_, *chi2MeasurementEstimator_);
-
+  					   *trackerPropagator_, *chi2MeasurementEstimator_);
 }
 
 PhaseIPixelNtuplizer::TrajectoryMeasurementEfficiencyQualification PhaseIPixelNtuplizer::getTrajMeasurementEfficiencyQualification(const TrajectoryMeasurement& t_measurement)
@@ -2005,47 +2015,12 @@ void PhaseIPixelNtuplizer::getRocData(ModuleData &mod, bool online, const SiPixe
 
 }
 
-std::tuple<std::vector<TrajectoryMeasurement>::const_iterator, float>
-PhaseIPixelNtuplizer::findMatchingTrajMeasurement
-( const GlobalPoint& referencePoint, 
-  const ModuleData& referenceModInfo,
-  const std::vector<TrajectoryMeasurement>& possibleMatches)
-{
-
-  using NtuplizerHelpers::areIdenticalModules;
-  auto isMeasurementOnReferenceModule = [&] (const TrajectoryMeasurement& measurement) {
-    ModuleData mod; 
-    getModuleData(mod, 1, measurement.recHit() -> geographicalId().rawId());
-    return areIdenticalModules(mod, referenceModInfo);
-  };
-
-  auto bestMatch = std::find_if(possibleMatches.begin(), possibleMatches.end(), isMeasurementOnReferenceModule);
-  if(bestMatch == possibleMatches.end()) return std::make_tuple(bestMatch, NOVAL_F);
-
-  float closestDistanceSquared = trajMeasGlobalPointDistanceSquared(*bestMatch, referencePoint);
-  for(auto measurementsIt = bestMatch + 1; 
-      measurementsIt != possibleMatches.end(); ++measurementsIt) {
-
-    if(!isMeasurementOnReferenceModule(*measurementsIt)) continue;
-
-    float distanceSquared = trajMeasGlobalPointDistanceSquared(*measurementsIt, referencePoint);
-    if(distanceSquared < closestDistanceSquared) {
-      closestDistanceSquared = std::move(distanceSquared);
-      bestMatch = measurementsIt;
-    }
-
-  }
-
-  return std::make_tuple(bestMatch, std::sqrt(closestDistanceSquared));
-
-}
-
-float PhaseIPixelNtuplizer::trajMeasGlobalPointDistanceSquared
+float PhaseIPixelNtuplizer::trajMeasGlobalPointDistance
 (const TrajectoryMeasurement& trajMeasurement, const GlobalPoint& referencePoint)
 {
 
   const GlobalPoint measurementPosition = trajMeasurement.updatedState().globalPosition();
-  return (referencePoint - measurementPosition).mag2();
+  return std::sqrt((referencePoint - measurementPosition).mag2());
 
 }
 
@@ -2057,14 +2032,14 @@ const SiPixelCluster* PhaseIPixelNtuplizer::getClosestClusterOnDetSetToPoint
 
   const DetId detId = clustersOnDet.id();
   const SiPixelCluster* minDistanceCluster = clustersOnDet.begin();
-  float currentMinValueSquared = 
-    clusterPointDistanceSquared(detId, *minDistanceCluster, referencePoint);
+  float currentMinValue = 
+    clusterPointDistance(detId, *minDistanceCluster, referencePoint);
 
   for(const auto& cluster: clustersOnDet) {
 
-    float currentDistanceSquared = clusterPointDistanceSquared(detId, cluster, referencePoint);
-    if(currentDistanceSquared < currentMinValueSquared) {
-      currentMinValueSquared = std::move(currentDistanceSquared);
+    float currentDistance = clusterPointDistance(detId, cluster, referencePoint);
+    if(currentDistance < currentMinValue) {
+      currentMinValue = currentDistance;
       minDistanceCluster = &cluster;
     }
 
@@ -2074,7 +2049,7 @@ const SiPixelCluster* PhaseIPixelNtuplizer::getClosestClusterOnDetSetToPoint
 
 }
 
-float PhaseIPixelNtuplizer::clusterPointDistanceSquared
+float PhaseIPixelNtuplizer::clusterPointDistance
 (const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint)
 {
 
@@ -2086,7 +2061,7 @@ float PhaseIPixelNtuplizer::clusterPointDistanceSquared
   float yDist = clustLocalCoordinates.y() - referencePoint.y();
   float zDist = clustLocalCoordinates.z() - referencePoint.z();
 
-  return xDist * xDist + yDist * yDist + zDist * zDist;
+  return sqrt(xDist * xDist + yDist * yDist + zDist * zDist);
 
 }
 
@@ -2103,11 +2078,6 @@ LocalPoint PhaseIPixelNtuplizer::clusterPointDistanceVector
 		    clustLocalCoordinates.y() - referencePoint.y(),
 		    clustLocalCoordinates.z() - referencePoint.z());
 
-}
-
-float PhaseIPixelNtuplizer::clusterPointDistance
-(const DetId& detId, const SiPixelCluster& cluster, const LocalPoint& referencePoint) {
-  return std::sqrt(clusterPointDistanceSquared(detId, cluster, referencePoint));
 }
 
 void PhaseIPixelNtuplizer::printTrackCompositionInfo
@@ -2420,7 +2390,7 @@ namespace NtuplizerHelpers
 
   }
 
-  float trajMeasurementDistanceSquared
+  float trajMeasurementDistance
   (const TrajectoryMeasurement& lhs, const TrajectoryMeasurement& rhs) {
 
     std::pair<float, float> lhsLocalXY = getLocalXY(lhs);
@@ -2429,28 +2399,7 @@ namespace NtuplizerHelpers
     float dxHit = lhsLocalXY.first  - rhsLocalXY.first;
     float dyHit = lhsLocalXY.second - rhsLocalXY.second;
 
-    float distanceSquared = dxHit * dxHit + dyHit * dyHit;
-
-    return distanceSquared;
-
-  }
-
-  void trajMeasurementDistanceSquared
-  ( const TrajectoryMeasurement& lhs,
-    const TrajectoryMeasurement& rhs,
-    float& distanceSquared, float& dxSquared, float& dySquared) {
-
-    std::pair<float, float> lhsLocalXY = getLocalXY(lhs);
-    std::pair<float, float> rhsLocalXY = getLocalXY(rhs);
-
-    float dxHit = lhsLocalXY.first  - rhsLocalXY.first;
-    float dyHit = lhsLocalXY.second - rhsLocalXY.second;
-
-    dxSquared = dxHit * dxHit;
-    dySquared = dyHit * dyHit;
-
-    distanceSquared = dxSquared + dySquared;
-
+    return std::sqrt(dxHit * dxHit + dyHit * dyHit);
   }
 
   void trajMeasurementDistance
@@ -2458,59 +2407,55 @@ namespace NtuplizerHelpers
     const TrajectoryMeasurement& rhs,
     float& distance, float& dx, float& dy) {
 
-    trajMeasurementDistanceSquared(lhs, rhs, distance, dx, dy);
+    std::pair<float, float> lhsLocalXY = getLocalXY(lhs);
+    std::pair<float, float> rhsLocalXY = getLocalXY(rhs);
 
-    distance = sqrt(distance);
-    dx       = sqrt(dx);
-    dy       = sqrt(dy);
-
-    if((dx == NOVAL_F) || (dy == NOVAL_F)) distance = NOVAL_F;
-
+    dx = lhsLocalXY.first  - rhsLocalXY.first;
+    dy = lhsLocalXY.second - rhsLocalXY.second;
+    distance = std::sqrt(dx*dx + dy*dy);
   }
 
-  void getClosestOtherTrajMeasurementDistanceByLooping(const TrajectoryMeasurement& measurement,
-   const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle,
-   float& distance, float& dx, float& dy) {
+  bool sameTrack(const reco::TrackRef& one, const reco::TrackRef& two) {
+    return (std::abs(one->px() - two->px()) < 1e-2 &&
+            std::abs(one->py() - two->py()) < 1e-2 &&
+            std::abs(one->pz() - two->pz()) < 1e-2 &&
+            std::abs(one->vx() - two->vx()) < 1e-2 &&
+            std::abs(one->vy() - two->vy()) < 1e-2 &&
+          std::abs(one->vz() - two->vz()) < 1e-2);
+  }
 
-    dx = NOVAL_F;
-    dy = NOVAL_F;
+  void getClosestTrajMeasDistance(const TrajectoryMeasurement& measurement,
+                              const reco::TrackRef& track,
+                              const edm::Handle<TrajTrackAssociationCollection>& trajTrackCollectionHandle,
+                              float& distance, float& dx, float& dy) {
+
+    dx = -NOVAL_F;
+    dy = -NOVAL_F;
+    distance = -NOVAL_F;
 
     DetId detId = measurement.recHit() -> geographicalId();
+    double closestDistance = 9999;
+    for(const auto& otherTrajTrackPair: *trajTrackCollectionHandle) {
 
-    std::vector<TrajectoryMeasurement>::const_iterator closestMeasurementIt =
-      trajTrackCollectionHandle -> begin() -> key -> measurements().begin();
+      const reco::TrackRef& otherTrack = otherTrajTrackPair.val;
+      if (sameTrack(track, otherTrack)) continue;
 
-    if(&*closestMeasurementIt == &measurement) ++closestMeasurementIt;
+      const edm::Ref<std::vector<Trajectory>> otherTraj = otherTrajTrackPair.key;
 
-    double closestTrajMeasurementDistanceSquared =
-      trajMeasurementDistanceSquared(measurement, *closestMeasurementIt);
-
-    for(const auto& otherTrackKeypair: *trajTrackCollectionHandle) 
-    {
-      const edm::Ref<std::vector<Trajectory>> otherTraj = otherTrackKeypair.key;
       for(auto otherTrajMeasurementIt = otherTraj -> measurements().begin();
 	  otherTrajMeasurementIt != otherTraj -> measurements().end(); ++otherTrajMeasurementIt) {
 
 	if(otherTrajMeasurementIt -> recHit() -> geographicalId() != detId) continue;
 
-	if(&*otherTrajMeasurementIt == &measurement) continue;
-
-	float distanceSquared = 
-	  trajMeasurementDistanceSquared(measurement, *otherTrajMeasurementIt);
-
-	if(distanceSquared < closestTrajMeasurementDistanceSquared) {
-	  closestMeasurementIt = otherTrajMeasurementIt;
-	  closestTrajMeasurementDistanceSquared = distanceSquared;
-	}
-
+	float otherDistance =  trajMeasurementDistance(measurement, *otherTrajMeasurementIt);
+	if (otherDistance < closestDistance) {
+          closestDistance = otherDistance;
+          trajMeasurementDistance(measurement, *otherTrajMeasurementIt, distance, dx, dy);
+        }
       }
-
     }
-
-    trajMeasurementDistance(measurement, *closestMeasurementIt, distance, dx, dy);
-
   }
-
+  
 } // NtuplizerHelpers
 
 
