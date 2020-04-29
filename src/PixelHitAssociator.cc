@@ -18,7 +18,11 @@
 #include <iostream>
 
 // For hit->pixel matching
+#if CMSSW_VERSION > 110
+#include "Geometry/CommonTopologies/interface/PixelGeomDetUnit.h"
+#else
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+#endif
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 
 

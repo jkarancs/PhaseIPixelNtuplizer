@@ -441,8 +441,17 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   iSetup.get<TkPixelCPERecord>().get("PixelCPEGeneric", pixelClusterParameterEstimatorHandle);
   pixelClusterParameterEstimator_ = pixelClusterParameterEstimatorHandle.product();
 
+
+#if CMSSW_VERSION > 110
+  // Get CablingMap (used for ROC number)
+  edm::ESHandle<SiPixelFedCablingMap> cablingMapHandle;
+  iSetup.get<SiPixelFedCablingMapRcd>().get(cablingMapHandle);
+
   // Initialize the object used to calculate module geometric informations
+  coord_.init(trackerTopology_, trackerGeometry_, cablingMapHandle.product());
+#else
   coord_.init(iSetup);
+#endif
   //std::cout << "Event summary informations: " << std::endl;
   //std::cout << "Vertices: " << (vertexCollectionHandle.isValid() ? std::to_string(vertexCollectionHandle -> size()) : "invalid") << " ";
   //if(saveDigiTree_) std::cout << "Digis: " << (digiCollectionHandle.isValid()) 

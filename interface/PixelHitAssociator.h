@@ -15,6 +15,10 @@
  *
  ************************************************************/
 
+#ifndef CMSSW_VERSION
+#define CMSSW_VERSION 111
+#endif
+
 //#include <vector>
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -45,6 +49,12 @@
 //#include "DataFormats/TrackerRecHit2D/interface/SiTrackerGSMatchedRecHit2D.h"
 
 #include "SimDataFormats/CrossingFrame/interface/MixCollection.h"
+
+#if CMSSW_VERSION > 110
+#include "Geometry/CommonTopologies/interface/PixelGeomDetUnit.h"
+#else
+#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
+#endif
 
 #include <string>
 #include <vector>
