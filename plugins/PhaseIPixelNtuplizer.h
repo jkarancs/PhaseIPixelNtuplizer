@@ -4,7 +4,7 @@
 #define ADD_SIM_INFO 1
 #define ADD_NEW_MUON_SELECTORS 1 // Works in 9_4_X, 10_6_X or later
 
-#define VERSION 111
+#define CMSSW_VERSION 110
 
 /*
 #define ADD_SIM_INFO 1
@@ -31,8 +31,10 @@
 #include "FWCore/Common/interface/TriggerNames.h"
 //#include "DataFormats/TrackReco/interface/Track.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
-#if VERSION > 110
+#if CMSSW_VERSION > 110
 #include "Geometry/CommonTopologies/interface/PixelGeomDetUnit.h"
+#elif CMSSW_VERSION > 106
+#include "Geometry/CommonDetUnit/interface/PixelGeomDetUnit.h"
 #else
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #endif

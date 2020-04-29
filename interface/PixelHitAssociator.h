@@ -52,6 +52,8 @@
 
 #if CMSSW_VERSION > 110
 #include "Geometry/CommonTopologies/interface/PixelGeomDetUnit.h"
+#elif CMSSW_VERSION > 106
+#include "Geometry/CommonDetUnit/interface/PixelGeomDetUnit.h"
 #else
 #include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
 #endif
