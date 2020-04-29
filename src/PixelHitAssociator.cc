@@ -1,6 +1,6 @@
 // File: PixelHitAssociator.cc
 // Modified for pixel only direct simhits (no crossing frame) d.k. 2/14
- 
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -18,11 +18,6 @@
 #include <iostream>
 
 // For hit->pixel matching
-#if CMSSW_VERSION > 110
-#include "Geometry/CommonTopologies/interface/PixelGeomDetUnit.h"
-#else
-#include "Geometry/TrackerGeometryBuilder/interface/PixelGeomDetUnit.h"
-#endif
 #include "Geometry/CommonTopologies/interface/PixelTopology.h"
 
 
