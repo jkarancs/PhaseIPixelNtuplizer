@@ -23,7 +23,8 @@ process.source = cms.Source("PoolSource",
     #fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/t/tvami/public/PixelALCARECOs/forPR/CMSSW_11_0_0_pre9/src/SiPixelCalSingleMuon_SingleThread_4kEvent.root'),
     #fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/t/tvami/public/HSCP/HSCP/CMSSW_10_6_1_patch1/src/0RECOChain/HSCPSingalDY/3HSCP_DY_Mass800_RAWtoRECO_TrackingOnly_SignalOnly.root'),
     #fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/t/tvami/public/PixelALCARECOs/forPR/CMSSW_11_1_X_2019-12-09-2300/src/SiPixelCalSingleMuon_100evt.root'),
-    fileNames = cms.untracked.vstring('file:Run320500.root'),
+    #fileNames = cms.untracked.vstring('file:Run320500.root'),
+    fileNames = cms.untracked.vstring('file:1E924619-4911-B64A-A37D-F75909DFCF46.root'),
     #fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/t/tvami/public/PixelALCARECOs/forPR/CMSSW_11_0_0_pre9/src/SiPixelCalSingleMuon_noInclusiveClust.root'),
     #fileNames = cms.untracked.vstring('file:/eos/user/t/tvami/SingleMuon_2018_data_RECO.root'),
     secondaryFileNames = cms.untracked.vstring(),
@@ -57,8 +58,8 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     outputFileName = cms.untracked.string('Efficiency_ALCARECO.root'),
     # Global muon collection
     muonCollection                 = cms.InputTag("muons"),
-    keepAllGlobalMuons             = cms.untracked.bool(False),
-    keepAllTrackerMuons            = cms.untracked.bool(False),
+    keepAllGlobalMuons             = cms.untracked.bool(True),
+    keepAllTrackerMuons            = cms.untracked.bool(True),
     # Save everything
     ##  clusterSaveDownscaleFactor     = cms.untracked.int32(1),
     ##  trackSaveDownscaleFactor       = cms.untracked.int32(1),
@@ -66,8 +67,8 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     ##  saveTrackTree                  = cms.untracked.bool(True),
     ##  saveNonPropagatedExtraTrajTree = cms.untracked.bool(True),
     # Do not save everything and downscale clusters
-    clusterSaveDownscaleFactor     = cms.untracked.int32(10), # don't save clusters
-    trackSaveDownscaleFactor       = cms.untracked.int32(10), # Save only muon tracks
+    clusterSaveDownscaleFactor     = cms.untracked.int32(1), # don't save clusters
+    trackSaveDownscaleFactor       = cms.untracked.int32(1), # Save only muon tracks
     saveDigiTree                   = cms.untracked.bool(False),
     saveTrackTree                  = cms.untracked.bool(True),
     saveNonPropagatedExtraTrajTree = cms.untracked.bool(False),

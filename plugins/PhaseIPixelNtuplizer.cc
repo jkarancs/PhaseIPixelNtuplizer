@@ -54,7 +54,8 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
     (edm::InputTag("offlinePrimaryVertices"));
   triggerResultsToken_ = consumes<edm::TriggerResults>(triggerTag_);
   pileupSummaryToken_ = consumes<std::vector<PileupSummaryInfo>>(edm::InputTag("addPileupInfo"));
-  clustersToken_ = consumes<edmNew::DetSetVector<SiPixelCluster>>(edm::InputTag("siPixelClusters"));
+  clustersToken_ = consumes<edmNew::DetSetVector<SiPixelCluster>>
+    (iConfig.getParameter<edm::InputTag>("clusterCollection"));
   trajTrackCollectionToken_ = consumes<TrajTrackAssociationCollection>
     (iConfig.getParameter<edm::InputTag>("trajectoryInput"));
   trajTrackCollectionToken_ = consumes<TrajTrackAssociationCollection>
@@ -440,7 +441,6 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   edm::ESHandle<PixelClusterParameterEstimator> pixelClusterParameterEstimatorHandle;
   iSetup.get<TkPixelCPERecord>().get("PixelCPEGeneric", pixelClusterParameterEstimatorHandle);
   pixelClusterParameterEstimator_ = pixelClusterParameterEstimatorHandle.product();
-
 
 #if CMSSW_VERSION > 110
   // Get CablingMap (used for ROC number)
