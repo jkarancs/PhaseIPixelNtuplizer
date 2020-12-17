@@ -1,10 +1,10 @@
 #ifndef PHASEIPIXELNTUPLIZER_H
 #define PHASEIPIXELNTUPLIZER_H
 
-#define ADD_SIM_INFO 1
+#define ADD_SIM_INFO 0
 #define ADD_NEW_MUON_SELECTORS 1 // Works in 9_4_X, 10_6_X or later
 
-#define CMSSW_VERSION 110
+#define CMSSW_VERSION 106
 
 /*
 #define ADD_SIM_INFO 1
@@ -89,7 +89,7 @@
 // Datastructures - Keep all this in one file
 // This has to be a versioned file
 // It cannot go into separate files included from everywhere
-#include "../interface/DataStructures_v8.h" // 2019 October 07, CMSSW_10_6_X
+#include "../interface/DataStructures_v9.h" // 2020 December 12, CMSSW_10_6_X and up
 
 // SiPixelCoordinates: new class for plotting Phase 0/1 Geometry
 #include "DQM/SiPixelPhase1Common/interface/SiPixelCoordinates.h"
@@ -369,6 +369,9 @@ private:
 				 const reco::TrackRef&,
 				 const edm::Handle<edmNew::DetSetVector<SiPixelCluster>>,
 				 const edm::Handle<reco::VertexCollection>&);
+
+  void findClosestClusters(const edm::Handle<edmNew::DetSetVector<SiPixelCluster> >&,
+			   uint32_t, float, float, float*, float*);
 };
 
 namespace NtuplizerHelpers 

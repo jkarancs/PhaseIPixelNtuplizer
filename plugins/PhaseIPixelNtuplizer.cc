@@ -373,9 +373,11 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
 
   // SimTracks
   edm::Handle<edm::SimTrackContainer> simTracksHandle;
+#if ADD_SIM_INFO > 0
   if (isEventFromMc_) {
     iEvent.getByToken(simTrackToken_, simTracksHandle);
   }
+#endif
   
   // Get vertices
   edm::Handle<reco::VertexCollection>      vertexCollectionHandle;
@@ -1514,9 +1516,26 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
     traj_.norm_charge = traj_.clu.charge * 
       sqrt(1.0f / (1.0f / pow(tan(traj_.alpha), 2) + 1.0f / pow(tan(traj_.beta), 2) + 1.0f));
 
-    traj_.dx_cl       = clustLocalCoordinates.x() - traj_.lx;
-    traj_.dy_cl       = clustLocalCoordinates.y() - traj_.ly;
-    traj_.d_cl        = std::sqrt(traj_.dx_cl * traj_.dx_cl + traj_.dy_cl * traj_.dy_cl);
+    //traj_.dx_cl       = clustLocalCoordinates.x() - traj_.lx;
+    //traj_.dy_cl       = clustLocalCoordinates.y() - traj_.ly;
+    //traj_.d_cl        = std::sqrt(traj_.dx_cl * traj_.dx_cl + traj_.dy_cl * traj_.dy_cl);
+
+    // Implement 2nd cluster distance same way as in TimingStudy
+    float dx_cl[2] = {NOVAL_F, NOVAL_F};
+    float dy_cl[2] = {NOVAL_F, NOVAL_F};
+    float d_cl[2]  = {NOVAL_F, NOVAL_F};
+    findClosestClusters(clusterCollectionHandle, recHit->geographicalId().rawId(),
+			traj_.lx, traj_.ly, dx_cl, dy_cl);
+    for (size_t i=0; i<2; i++)
+      if (dx_cl[i]!=NOVAL_F)
+	d_cl[i]=sqrt(dx_cl[i]*dx_cl[i]+dy_cl[i]*dy_cl[i]);
+
+    traj_.dx_cl  = dx_cl[0];
+    traj_.dy_cl  = dy_cl[0];
+    traj_.d_cl   = d_cl[0];
+    traj_.dx_cl2 = dx_cl[1];
+    traj_.dy_cl2 = dy_cl[1];
+    traj_.d_cl2  = d_cl[1];
 
   } else traj_.clu.init();
 
@@ -2228,6 +2247,73 @@ void PhaseIPixelNtuplizer::printTrackCompositionInfo
   std::cout << " --- End track informations --- " << std::endl;
 
 }
+
+void PhaseIPixelNtuplizer::findClosestClusters(const edm::Handle<edmNew::DetSetVector<SiPixelCluster> >& clusterCollectionHandle,
+					       uint32_t rawId, float lx, float ly, float* dx_cl, float* dy_cl) {
+  
+  for (size_t i=0; i<2; i++) dx_cl[i]=dy_cl[i]=NOVAL_F;
+
+  if (!clusterCollectionHandle.isValid()) return;
+
+  const edmNew::DetSetVector<SiPixelCluster>& clusterCollection=*clusterCollectionHandle;
+  edmNew::DetSetVector<SiPixelCluster>::const_iterator itClusterSet= clusterCollection.begin();
+
+  float minD[2];
+  minD[0]=minD[1]=10000.;
+
+  for ( ; itClusterSet!=clusterCollection.end(); itClusterSet++) {
+    
+    DetId detId(itClusterSet->id());
+    
+    if (detId.rawId()!=rawId) continue;
+
+    unsigned int subDetId=detId.subdetId();
+    if (subDetId!=PixelSubdetector::PixelBarrel &&
+	subDetId!=PixelSubdetector::PixelEndcap) {
+      std::cout << "ERROR: not a pixel cluster!!!" << std::endl; // should not happen
+      continue;
+    }
+
+    const PixelGeomDetUnit *pixdet = (const PixelGeomDetUnit*) trackerGeometry_->idToDetUnit(detId);
+
+    edmNew::DetSet<SiPixelCluster>::const_iterator itCluster=itClusterSet->begin();  
+    for(; itCluster!=itClusterSet->end(); ++itCluster) {
+      //const Surface* surface;
+      //surface = &(tracker->idToDet(detId)->surface());
+      //GlobalPoint gp;
+      LocalPoint lp(itCluster->x(), itCluster->y(), 0.);
+      PixelClusterParameterEstimator::ReturnType params=pixelClusterParameterEstimator_->getParameters(*itCluster,*pixdet);
+      lp = std::get<0>(params);
+      //else {
+      //  LocalPoint lp(itCluster->x(), itCluster->y(), 0.);
+      //  gp = surface->toGlobal(lp);
+      //}
+      //floatD=sqrt((gp.x()-glx)*(gp.x()-glx)+(gp.y()-gly)*(gp.y()-gly)+(gp.z()-glz)*(gp.z()-glz));
+      float D = sqrt((lp.x()-lx)*(lp.x()-lx)+(lp.y()-ly)*(lp.y()-ly));
+      if (D<minD[0]) {
+	minD[1]=minD[0];
+	dx_cl[1]=dx_cl[0];
+	dy_cl[1]=dy_cl[0];
+	minD[0]=D;
+	dx_cl[0]=lp.x();
+	dy_cl[0]=lp.y();
+      } else if (D<minD[1]) {
+	minD[1]=D;
+	dx_cl[1]=lp.x();
+	dy_cl[1]=lp.y();
+      }
+    } // loop on cluster sets
+  }
+
+  for (size_t i=0; i<2; i++) {
+    if (minD[i]<9999.) {
+      dx_cl[i]=fabs(dx_cl[i]-lx);
+      dy_cl[i]=fabs(dy_cl[i]-ly);
+    }
+  }
+
+}
+
 
 namespace NtuplizerHelpers
 {
