@@ -241,8 +241,7 @@ process.PhaseINtuplizerPlugin = cms.EDAnalyzer("PhaseIPixelNtuplizer",
     eventSaveDownscaleFactor       = cms.untracked.int32(opt.prescale),
     # Do not save everything and downscale clusters
     clusterSaveDownscaleFactor     = cms.untracked.int32(500),
-    #trackSaveDownscaleFactor       = cms.untracked.int32(999999),
-    trackSaveDownscaleFactor       = cms.untracked.int32(1),
+    trackSaveDownscaleFactor       = cms.untracked.int32(999999),
     saveDigiTree                   = cms.untracked.bool(False),
     saveTrackTree                  = cms.untracked.bool(True),
     saveNonPropagatedExtraTrajTree = cms.untracked.bool(False),
@@ -261,6 +260,7 @@ if opt.dataTier == 'ALCARECO':
     process.PhaseINtuplizerPlugin.clusterCollection = cms.InputTag("ALCARECOSiPixelCalSingleMuon")
     process.PhaseINtuplizerPlugin.keepAllGlobalMuons  = False
     process.PhaseINtuplizerPlugin.keepAllTrackerMuons = False
+    process.PhaseINtuplizerPlugin.trackSaveDownscaleFactor = 1
 
 # myAnalyzer Path
 process.TrackRefitter_step = cms.Path(process.offlineBeamSpot*process.MeasurementTrackerEvent*process.TrackRefitter)
