@@ -4,9 +4,9 @@
 ### &#x1F539; Base recipe:
 
 ```bash
-export SCRAM_ARCH=slc6_amd64_gcc530
-cmsrel CMSSW_9_0_0_pre6
-cd CMSSW_9_0_0_pre6/src
+export SCRAM_ARCH=slc7_amd64_gcc700
+cmsrel CMSSW_10_6_8_patch1
+cd CMSSW_10_6_8_patch1/src
 cmsenv
 # git cms-init #optional, use this, if you want to check out CMSSW packages later
 git clone https://github.com/jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
