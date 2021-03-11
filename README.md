@@ -11,12 +11,11 @@ cmsenv
 # git cms-init #optional, use this, if you want to check out CMSSW packages later
 git clone git@github.com:jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
 cd DPGAnalysis/PhaseIPixelNtuplizer
-scram b -j 20
+scram b -j 8
 mkdir Example
 cd Example
-cp DPGAnalysis/PhaseIPixelNtuplizer/test/Recipes_CMSSW_9_0_0_pre6/PhaseI_TTbar_13TeV_NoPu_RECO_cfg.py Example/
-cp DPGAnalysis/PhaseIPixelNtuplizer/test/Recipes_CMSSW_9_0_0_pre6/RECO_to_Ntuple_cfg Example/
-cd Example
+cp $CMSSW_BASE/src/DPGAnalysis/PhaseIPixelNtuplizer/test/Recipes_CMSSW_9_0_0_pre6/PhaseI_TTbar_13TeV_NoPu_RECO_cfg.py .
+cp $CMSSW_BASE/src/DPGAnalysis/PhaseIPixelNtuplizer/test/Recipes_CMSSW_9_0_0_pre6/RECO_to_Ntuple_cfg.py .
 cmsRun PhaseI_TTbar_13TeV_NoPu_RECO_cfg.py
 cmsRun RECO_to_Ntuple_cfg.py
 ```
