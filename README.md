@@ -4,19 +4,18 @@
 ### &#x1F539; Base recipe:
 
 ```bash
-export SCRAM_ARCH=slc6_amd64_gcc530
-cmsrel CMSSW_9_0_0_pre6
-cd CMSSW_9_0_0_pre6/src
+export SCRAM_ARCH=slc7_amd64_gcc700
+cmsrel CMSSW_10_6_8_patch1
+cd CMSSW_10_6_8_patch1/src
 cmsenv
 # git cms-init #optional, use this, if you want to check out CMSSW packages later
-git clone git@github.com:jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
+git clone https://github.com/jkarancs/PhaseIPixelNtuplizer.git DPGAnalysis/PhaseIPixelNtuplizer
 cd DPGAnalysis/PhaseIPixelNtuplizer
-scram b -j 20
+scram b -j 8
 mkdir Example
 cd Example
-cp DPGAnalysis/PhaseIPixelNtuplizer/test/Recipes_CMSSW_9_0_0_pre6/PhaseI_TTbar_13TeV_NoPu_RECO_cfg.py Example/
-cp DPGAnalysis/PhaseIPixelNtuplizer/test/Recipes_CMSSW_9_0_0_pre6/RECO_to_Ntuple_cfg Example/
-cd Example
+cp $CMSSW_BASE/src/DPGAnalysis/PhaseIPixelNtuplizer/test/Recipes_CMSSW_9_0_0_pre6/PhaseI_TTbar_13TeV_NoPu_RECO_cfg.py .
+cp $CMSSW_BASE/src/DPGAnalysis/PhaseIPixelNtuplizer/test/Recipes_CMSSW_9_0_0_pre6/RECO_to_Ntuple_cfg.py .
 cmsRun PhaseI_TTbar_13TeV_NoPu_RECO_cfg.py
 cmsRun RECO_to_Ntuple_cfg.py
 ```
