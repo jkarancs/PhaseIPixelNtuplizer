@@ -22,6 +22,7 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
   ntupleOutputFilename_(iConfig.getUntrackedParameter<std::string>
 			("outputFileName", "Ntuple.root")),
   isEventFromMc_(iConfig.getUntrackedParameter<bool>("MC", false)),
+  isALCARECO_(iConfig.getUntrackedParameter<bool>("ALCARECO", false)),
   isCosmicTracking_(iConfig.getUntrackedParameter<bool>("cosmics", false)),
   clusterSaveDownscaling_(iConfig.getUntrackedParameter<int>("clusterSaveDownscaleFactor",100)),
   trackSaveDownscaling_(iConfig.getUntrackedParameter<int>("trackSaveDownscaleFactor",1)),
@@ -80,6 +81,11 @@ PhaseIPixelNtuplizer::PhaseIPixelNtuplizer(edm::ParameterSet const& iConfig) :
     simTrackToken_ = consumes<edm::SimTrackContainer>(edm::InputTag("g4SimHits"));
   }
 #endif
+
+  if (isALCARECO_) {
+    distanceToken_ = consumes<edm::ValueMap<std::vector<float>>>(edm::InputTag("trackDistances"));
+    muonTracksToken_ = consumes<edm::View<reco::Track>>(edm::InputTag("ALCARECOSiPixelCalSingleMuonTight"));
+  }
 
   muonCollectionToken_ = consumes<reco::MuonCollection>(iConfig.getParameter<edm::InputTag>("muonCollection"));
 }
@@ -336,8 +342,7 @@ void PhaseIPixelNtuplizer::endLuminosityBlock(edm::LuminosityBlock const& iLumi,
 }
 
 void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
-{
-  
+{  
   if (++nEvent_ % eventSaveDownscaling_ != 0) return;
 
   // std::cout << "Analysis: " << std::endl;
@@ -443,6 +448,15 @@ void PhaseIPixelNtuplizer::analyze(const edm::Event& iEvent, const edm::EventSet
   edm::ESHandle<PixelClusterParameterEstimator> pixelClusterParameterEstimatorHandle;
   iSetup.get<TkPixelCPERecord>().get("PixelCPEGeneric", pixelClusterParameterEstimatorHandle);
   pixelClusterParameterEstimator_ = pixelClusterParameterEstimatorHandle.product();
+
+  // Track distance to muons
+  if (isALCARECO_) {
+    // get the muon track collection
+    iEvent.getByToken(muonTracksToken_, muonTrackCollectionHandle_);
+    
+    // get the track distances
+    iEvent.getByToken(distanceToken_, distancesToTrack_);    
+  }
 
 #if CMSSW_VERSION > 110
   // Get CablingMap (used for ROC number)
@@ -948,7 +962,7 @@ PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& v
 
   nTrackSave_ = nTrack_;
   for(const auto& currentTrackKeypair: *trajTrackCollectionHandle) {
-
+    
     const edm::Ref<std::vector<Trajectory>> traj  = currentTrackKeypair.key;
     const reco::TrackRef                    track = currentTrackKeypair.val;
 
@@ -957,7 +971,7 @@ PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& v
     reco::Muon muon;
     for (const reco::Muon& mu : *muonCollectionHandle) {
       if ((keepAllTrackerMuons_&&mu.isTrackerMuon()) || (keepAllGlobalMuons_&&mu.isGlobalMuon())) {
-	if (NtuplizerHelpers::sameTrack(track, mu.innerTrack())) {
+	if (std::abs(track->pt()-mu.pt())<0.01&&std::abs(track->eta()-mu.eta())<0.01) {
 	  saveMuon = true;
 	  muon = mu;
 	}
@@ -1046,8 +1060,10 @@ PhaseIPixelNtuplizer::getTrackData( const edm::Handle<reco::VertexCollection>& v
 #endif
         // IP - Taken from PAT and apply it to the closest vertex
         // PV2D
-        double dz  = std::abs(muon.muonBestTrack()->dz(closestVtx->position()));
-        double dxy  = std::abs(muon.muonBestTrack()->dxy(closestVtx->position()));
+        //double dz  = std::abs(muon.muonBestTrack()->dz(closestVtx->position()));
+        double dz  = std::abs(track->dz(closestVtx->position()));
+        //double dxy  = std::abs(muon.muonBestTrack()->dxy(closestVtx->position()));
+        double dxy  = std::abs(track->dxy(closestVtx->position()));
         newTrackData.muon_ip_2d         = ((dz<0.5) && (dxy<0.2)) + ((dz<0.1) && (dxy<0.05));
         // This thing won't compile no matter what I try
         //reco::TransientTrack tt = trackBuilderHandle->build(track);
@@ -1195,7 +1211,8 @@ PhaseIPixelNtuplizer::getTrajTrackData( const edm::Handle<reco::VertexCollection
     bool saveMuon = false;
     for (const reco::Muon& mu : *muonCollectionHandle) {
       if ((keepAllTrackerMuons_&&mu.isTrackerMuon()) || (keepAllGlobalMuons_&&mu.isGlobalMuon())) {
-	if (NtuplizerHelpers::sameTrack(track, mu.innerTrack())) saveMuon = true;
+	//if (NtuplizerHelpers::sameTrack(track, mu.innerTrack())) saveMuon = true;
+        if (std::abs(track->pt()-mu.pt())<0.01&&std::abs(track->eta()-mu.eta())<0.01) saveMuon = true;
       }
     }
     if (++nTrack % trackSaveDownscaling_ != 0 && !saveMuon) continue;
@@ -1251,10 +1268,11 @@ PhaseIPixelNtuplizer::getTrajTrackData( const edm::Handle<reco::VertexCollection
     
     // Save first hit along trajectory
     //std::cout<<"Nmeas="<<extrapolatedHitsOnLayer1.size()<<std::endl;
-    if (!extrapolatedHitsOnLayer1.empty()) 
+    if (!extrapolatedHitsOnLayer1.empty()) {
       checkAndSaveTrajMeasurementData(extrapolatedHitsOnLayer1.front(), clusterCollectionHandle,
                                       trajTrackCollectionHandle, track,
                                       simTracksHandle, trajTree_);
+    }
   } // end loop on trajectories
 }
 
@@ -1316,7 +1334,8 @@ PhaseIPixelNtuplizer::getTrajTrackDataCosmics(const edm::Handle<reco::VertexColl
     bool saveMuon = false;
     for (const reco::Muon& mu : *muonCollectionHandle) {
       if ((keepAllTrackerMuons_&&mu.isTrackerMuon()) || (keepAllGlobalMuons_&&mu.isGlobalMuon())) {
-	if (NtuplizerHelpers::sameTrack(track, mu.innerTrack())) saveMuon = true;
+	//if (NtuplizerHelpers::sameTrack(track, mu.innerTrack())) saveMuon = true;
+        if (std::abs(track->pt()-mu.pt())<0.01&&std::abs(track->eta()-mu.eta())<0.01) saveMuon = true;
       }
     }
     if (++nTrack % trackSaveDownscaling_ != 0 && !saveMuon) continue;
@@ -1387,14 +1406,34 @@ void PhaseIPixelNtuplizer::checkAndSaveTrajMeasurementData
   
   // Distance of nearest other track
   traj_.dr_trk = 9999;
-  for(const auto& pair : *trajTrackCollectionHandle) {
-    const reco::TrackRef track2 = pair.val;
-    if (track!=track2) {
-      double deta = track2->eta()-track->eta();
-      double dphi = std::abs(track2->phi()-track->phi());
-      dphi = dphi<3.141592654 ? dphi : 6.283185307 - dphi;
-      double dr = std::sqrt(deta*deta+dphi*dphi);
-      if (dr<traj_.dr_trk) traj_.dr_trk = dr;
+  if (isALCARECO_) {
+    // Track distance to muons
+    auto const& muonTracks = *muonTrackCollectionHandle_;
+    unsigned int nMuons = muonTracks.size();
+    // match muon to track
+    int iMatch = -1;
+    for (unsigned int i = 0; i < nMuons; i++) {
+      auto muon = muonTrackCollectionHandle_->ptrAt(i);
+      if (std::abs(track->pt()-muon->pt())<0.01 && std::abs(track->eta()-muon->eta())<0.01)
+        iMatch = i;
+    }
+    if (iMatch != -1) {
+      edm::RefToBase<reco::Track> trackRef = muonTrackCollectionHandle_->refAt(iMatch);
+      for (const auto& distance : (*distancesToTrack_)[trackRef]) {
+        float dist = std::sqrt(distance);
+        if (dist < traj_.dr_trk && dist > 0) traj_.dr_trk = dist;
+      }
+    }
+  } else {
+    for(const auto& pair : *trajTrackCollectionHandle) {
+      const reco::TrackRef track2 = pair.val;
+      if (track!=track2) {
+        double deta = track2->eta()-track->eta();
+        double dphi = std::abs(track2->phi()-track->phi());
+        dphi = dphi<3.141592654 ? dphi : 6.283185307 - dphi;
+        double dr = std::sqrt(deta*deta+dphi*dphi);
+        if (dr<traj_.dr_trk) traj_.dr_trk = dr;
+      }
     }
   }
 

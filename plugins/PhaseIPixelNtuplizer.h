@@ -4,7 +4,7 @@
 #define ADD_SIM_INFO 0
 #define ADD_NEW_MUON_SELECTORS 1 // Works in 9_4_X, 10_6_X or later
 
-#define CMSSW_VERSION 106
+#define CMSSW_VERSION 113
 
 /*
 #define ADD_SIM_INFO 1
@@ -45,8 +45,13 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
+#if CMSSW_VERSION >= 110
+#include "DataFormats/SiPixelDetId/interface/PixelBarrelNameUpgrade.h"
+#include "DataFormats/SiPixelDetId/interface/PixelEndcapNameUpgrade.h"
+#else
 #include "DataFormats/SiPixelDetId/interface/PixelBarrelName.h"
 #include "DataFormats/SiPixelDetId/interface/PixelEndcapName.h"
+#endif
 #include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
 #include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
@@ -153,6 +158,7 @@ private:
 
   // States
   int isEventFromMc_;
+  int isALCARECO_;
 
   // Options
   int isCosmicTracking_;
@@ -217,6 +223,12 @@ private:
 #endif
   edm::EDGetTokenT<reco::MuonCollection>                    muonCollectionToken_;
   edm::EDGetTokenT<edm::ConditionsInRunBlock>               conditionsInRunBlockToken_;
+  edm::EDGetTokenT<edm::ValueMap<std::vector<float>>>       distanceToken_;
+  edm::EDGetTokenT<edm::View<reco::Track>>                  muonTracksToken_;
+
+  // Handles
+  edm::Handle<edm::View<reco::Track>> muonTrackCollectionHandle_;
+  edm::Handle<edm::ValueMap<std::vector<float>>> distancesToTrack_;
 
   // Tools
   SiPixelCoordinates coord_;
